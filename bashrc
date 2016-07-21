@@ -125,7 +125,9 @@ else
 	if [ -r $POWERLINE_DIR/powerline/bindings/bash/powerline.sh ]; then
 		POWERLINE_BASH_CONTINUATION=1
 		POWERLINE_BASH_SELECT=1
-		POWERLINE_COMMAND=$POWERLINE_DIR/bin/powerline
+		if [ -x $POWERLINE_DIR/bin/powerline ]; then
+			POWERLINE_COMMAND=$POWERLINE_DIR/bin/powerline
+		fi
 		. $POWERLINE_DIR/powerline/bindings/bash/powerline.sh
 	fi
 fi

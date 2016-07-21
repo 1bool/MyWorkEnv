@@ -6,7 +6,10 @@ PLUGINRC = $(VIMDIR)/pluginrc.vim
 ifeq ($(shell uname -s),Darwin)
 DIST = mac
 else
-DIST = $(shell . /etc/os-release && echo $$ID)
+DIST = $(shell . /etc/os-release 2> /dev/null && echo $$ID)
+endif
+ifeq ($(DIST),)
+DIST = $(shell cat /etc/system-release | cut -d' ' -f1 | tr '[:upper:]' '[:lower:]')
 endif
 PKGS = coreutils tmux
 LOCALDIR = $(HOME)/.local/share
@@ -57,7 +60,7 @@ $(VIMDIR):
 	mkdir -p $(VIMDIR)
 
 $(PKGTARGETS):
-	sudo apt-get install $(TARGETPKGS)
+	sudo apt-get -y install $(TARGETPKGS)
 
 $(PKGPLUGINTARGETS): $(VIMDIR) $(PKGTARGETS)
 	vam install $@
@@ -93,7 +96,7 @@ endif
 ifeq ($(shell echo 'import sys; print [x for x in sys.path if "psutil" in x][0]' | python 2> /dev/null),)
 POWERLINE += psutil
 endif
-ifeq ($(shell command -v easy_install),)
+ifeq ($(shell which easy_install 2> /dev/null),)
 EZINSTALL = python-setuptools
 endif
 
@@ -116,27 +119,30 @@ update:
 	vim +PlugUpgrade +PlugUpdate +qall
 
 ifeq ($(DIST),mac)
+BREW = $(shell which brew &> /dev/null || echo brew)
 PKGS += macvim the_silver_searcher
 PKGTARGETS = $(filter-out $(shell brew list),$(PKGS))
 
 $(EZINSTALL):
 	xcode-select --install
 
-/usr/local/.git/description:
+$(BREW):
 	-xcode-select --install
 	/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 	brew update
 
-$(PKGTARGETS): /usr/local/.git/description
+$(PKGTARGETS): $(BREW)
 	@if [ $@ = macvim ]; then \
 		brew install $@ --with-lua --with-override-system-vim; \
 		brew linkapps; \
 	else \
 		brew install $@; fi
+
+.PHONY: $(BREW)
 endif
 
 ifneq ($(filter $(DIST),fedora centos redhat),)
-PKGS += $(EZINSTALL) \
+PKGS += vim-enhanced \
 	vim-X11 \
 	automake \
 	gcc \
@@ -146,15 +152,21 @@ PKGS += $(EZINSTALL) \
 	python3-devel \
 	wqy-bitmap-fonts \
 	wqy-unibit-fonts \
-	wqy-zenhei-fonts
+	wqy-zenhei-fonts \
+	#python-argparse
 TARGETPKGS = $(filter-out $(shell rpm -qa --qf '%{NAME} '),$(PKGS))
 ifneq ($(TARGETPKGS),)
 PKGTARGETS=pkgtargets
 endif
-DNF = $(shell command -v dnf || echo yum)
+DNF = $(shell which dnf 2> /dev/null || echo yum)
+
+$(EZINSTALL):
+	sudo $(DNF) -y install $@
+
+$(POWERLINE): $(EZINSTALL) $(PKGTARGETS)
 
 $(PKGTARGETS):
-	sudo $(DNF) install $(TARGETPKGS)
+	sudo $(DNF) -y install $(TARGETPKGS)
 endif
 
 install: $(DESTFILES) $(PKGTARGETS) $(POWERLINE) $(PLUGINRC) $(PLUGGED)
