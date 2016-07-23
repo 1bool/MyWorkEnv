@@ -91,12 +91,6 @@ else
 PLUGGED = $(VIMDIR)/plugged
 PRCFILE = plugrc.vim
 PKGS += ctags cmake ack
-ifeq ($(shell echo 'import sys; print [x for x in sys.path if "powerline_status" in x][0]' | python 2> /dev/null),)
-POWERLINE = powerline-status
-endif
-ifeq ($(shell echo 'import sys; print [x for x in sys.path if "psutil" in x][0]' | python 2> /dev/null),)
-POWERLINE += psutil
-endif
 ifeq ($(shell which easy_install 2> /dev/null),)
 EZINSTALL = python-setuptools
 endif
@@ -108,14 +102,6 @@ $(PLUGGED): $(AUTOLOADDIR)/plug.vim $(PLUGINRC)
 	vim +PlugInstall +qall
 	@touch $(PLUGGED)
 
-$(POWERLINE): $(EZINSTALL)
-	easy_install --user $@
-
-$(LOCALDIR)/$(PLCONF): $(POWERLINE)
-	mkdir -p $(dir $@)
-	ln -sf `echo 'import sys; print [x for x in sys.path if "powerline_status" in x][0]' \
-		| python`/$(PLCONF) $@
-
 update:
 	vim +PlugUpgrade +PlugUpdate +qall
 
@@ -123,9 +109,6 @@ ifeq ($(DIST),mac)
 BREW = $(shell which brew &> /dev/null || echo brew)
 PKGS += macvim the_silver_searcher
 PKGTARGETS = $(filter-out $(shell brew list),$(PKGS))
-ifeq ($(shell echo 'import sys; print [x for x in sys.path if "pylint" in x][0]' | python 2> /dev/null),)
-PYLINT = pylint
-endif
 
 $(EZINSTALL):
 	xcode-select --install
@@ -157,10 +140,11 @@ PKGS += vim-enhanced \
 	kernel-devel \
 	python-devel \
 	python3-devel \
+	python-psutil \
+	pylint \
 	wqy-bitmap-fonts \
 	wqy-unibit-fonts \
-	wqy-zenhei-fonts \
-	pylint
+	wqy-zenhei-fonts
 TARGETPKGS = $(filter-out $(shell rpm -qa --qf '%{NAME} '),$(PKGS))
 ifneq ($(TARGETPKGS),)
 PKGTARGETS=pkgtargets
@@ -170,14 +154,36 @@ DNF = $(shell which dnf 2> /dev/null || echo yum)
 $(EZINSTALL):
 	sudo $(DNF) -y install $@
 
-$(POWERLINE): $(EZINSTALL) $(PKGTARGETS)
-
 $(PKGTARGETS):
 	sudo $(DNF) -y install $(TARGETPKGS)
 endif
 
-install: $(DESTFILES) $(PKGTARGETS) $(POWERLINE) $(PLUGINRC) $(PLUGGED)
-.PHONY: $(POWERLINE) $(EZINSTALL)
+ifeq ($(filter powerline,$(PKGS)),)
+ifeq ($(shell echo 'import sys; print [x for x in sys.path if "powerline_status" in x][0]' | python 2> /dev/null),)
+PYMS += powerline-status
+endif
+endif
+ifeq ($(filter psutil,$(PKGS)),)
+ifeq ($(shell echo 'import sys; print [x for x in sys.path if "psutil" in x][0]' | python 2> /dev/null),)
+PYMS += psutil
+endif
+endif
+ifeq ($(filter pylint,$(PKGS)),)
+ifeq ($(shell echo 'import sys; print [x for x in sys.path if "pylint" in x][0]' | python 2> /dev/null),)
+PYMS += pylint
+endif
+endif
+
+$(PYMS): $(EZINSTALL) $(PKGTARGETS)
+	easy_install --user $@
+
+$(LOCALDIR)/$(PLCONF): $(PYMS)
+	mkdir -p $(dir $@)
+	ln -sf `echo 'import sys; print [x for x in sys.path if "powerline_status" in x][0]' \
+		| python`/$(PLCONF) $@
+
+install: $(DESTFILES) $(PKGTARGETS) $(PYMS) $(PLUGINRC) $(PLUGGED)
+.PHONY: $(PYMS) $(EZINSTALL)
 endif
 
 
