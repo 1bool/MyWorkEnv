@@ -28,7 +28,8 @@ PKGS += exuberant-ctags\
 	vim-addon-manager \
 	vim-scripts \
 	fonts-wqy-zenhei \
-	silversearcher-ag
+	silversearcher-ag \
+	pylint
 GITPLUGINS = $(shell grep '^[[:blank:]]*Plug ' plugrc.vim | cut -d\' -f2) pathogen
 GITTOPKG = $(shell echo $(subst nerdcommenter,nerd-commenter,\
 		   $(basename $(notdir $(subst a.vim,alternate.vim,$(GITPLUGINS))))) \
@@ -122,21 +123,27 @@ ifeq ($(DIST),mac)
 BREW = $(shell which brew &> /dev/null || echo brew)
 PKGS += macvim the_silver_searcher
 PKGTARGETS = $(filter-out $(shell brew list),$(PKGS))
+ifeq ($(shell echo 'import sys; print [x for x in sys.path if "pylint" in x][0]' | python 2> /dev/null),)
+PYLINT = pylint
+endif
 
 $(EZINSTALL):
 	xcode-select --install
 
 $(BREW):
 	-xcode-select --install
-	/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+	/usr/bin/ruby -e "`curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install`"
 	brew update
 
 $(PKGTARGETS): $(BREW)
 	@if [ $@ = macvim ]; then \
 		brew install $@ --with-lua --with-override-system-vim; \
-		brew linkapps; \
+		brew linkapps macvim; \
 	else \
 		brew install $@; fi
+
+$(PYLINT): $(EZINSTALL)
+	easy_install --user $@
 
 .PHONY: $(BREW)
 endif
@@ -153,7 +160,7 @@ PKGS += vim-enhanced \
 	wqy-bitmap-fonts \
 	wqy-unibit-fonts \
 	wqy-zenhei-fonts \
-	#python-argparse
+	pylint
 TARGETPKGS = $(filter-out $(shell rpm -qa --qf '%{NAME} '),$(PKGS))
 ifneq ($(TARGETPKGS),)
 PKGTARGETS=pkgtargets
