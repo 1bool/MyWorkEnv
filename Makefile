@@ -163,7 +163,7 @@ ifeq ($(shell echo 'import sys; print [x for x in sys.path if "powerline_status"
 PYMS += powerline-status
 endif
 endif
-ifeq ($(filter psutil,$(PKGS)),)
+ifeq ($(filter python-psutil,$(PKGS)),)
 ifeq ($(shell echo 'import sys; print [x for x in sys.path if "psutil" in x][0]' | python 2> /dev/null),)
 PYMS += psutil
 endif
