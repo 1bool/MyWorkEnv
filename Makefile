@@ -74,7 +74,7 @@ $(LOCALDIR)/$(PLCONF):
 	mkdir -p $(dir $@)
 	ln -sf /usr/share/$(PLCONF) $@
 
-update:
+update: install
 	sudo apt-get -y update
 	sudo apt-get -y upgrade $(PKGS)
 	@for dir in $(GITTARGETS); do \
@@ -101,7 +101,7 @@ $(PLUGGED): $(AUTOLOADDIR)/plug.vim $(PLUGINRC)
 	vim +PlugInstall +qall
 	@touch $(PLUGGED)
 
-update: $(PKGUPDATE)
+update: install $(PKGUPDATE)
 	vim +PlugUpgrade +PlugUpdate +qall
 
 ifeq ($(DIST),mac)
