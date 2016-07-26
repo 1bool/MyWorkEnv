@@ -18,7 +18,6 @@ PLCONF = powerline/bindings/tmux/powerline.conf
 all: install
 
 
-
 ifneq ($(filter $(DIST),ubuntu debian),)
 BUNDLE = $(VIMDIR)/bundle
 PRCFILE = pathogenrc.vim
@@ -182,20 +181,27 @@ $(LOCALDIR)/$(PLCONF): $(PYMS)
 	ln -sf `echo 'import sys; print [x for x in sys.path if "powerline_status" in x][0]' \
 		| python`/$(PLCONF) $@
 
-install: $(DESTFILES) $(PKGTARGETS) $(PYMS) $(PLUGINRC) $(PLUGGED)
+install: $(DESTFILES) $(PKGTARGETS) $(PYMS) $(PLUGINRC) $(PLUGGED) .pl_fonts_installed
 .PHONY: $(PYMS) $(EZINSTALL)
 endif
 
 
 
 $(HOME)/.%: %
-	ln -nfv $(abspath $<) $@ || cp -fv $(abspath $<) $@
+	ln -nfv $(abspath $<) $@ || cp -fv  $< $@
 
 $(PLUGINRC): $(PRCFILE)
 	mkdir -p $(dir $(PLUGINRC))
-	ln -nfv $(abspath $(PRCFILE)) $@ || cp -fv $(abspath $(PRCFILE)) $@
+	ln -nfv $(abspath $(PRCFILE)) $@ || cp -fv $(PRCFILE) $@
+
+powerline-fonts/:
+	git clone https://github.com/powerline/fonts.git $@
+
+.pl_fonts_installed: powerline-fonts/
+	powerline-fonts/install.sh && touch $@
 
 uninstall:
-	-rm -fr $(DESTFILES) $(GITTARGETS) $(PLUGINRC) $(AUTOLOADDIR)/plug.vim
+	-rm -fr $(DESTFILES) $(GITTARGETS) $(PLUGINRC) $(PLUGGED) $(BUNDLE) $(AUTOLOADDIR)/plug.vim \
+		powerline-fonts .pl_fonts_installed
 
 .PHONY: all install uninstall update $(PKGTARGETS)
