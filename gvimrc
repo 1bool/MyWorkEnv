@@ -4,7 +4,7 @@ set bg=light
 if has("gui_gtk2")
 	set guifont=文泉驿等宽正黑\ 11
 elseif has("gui_macvim")
-	set guifont=Consolas:h13
+	set guifont=Consolas:h14
 elseif has("gui_win32")
 	set guifont=Consolas:h11:cANSI
 endif
