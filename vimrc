@@ -80,6 +80,7 @@ nmap <C-N><C-N> :setlocal invnumber<CR>
 
 if has("autocmd")
 	autocmd BufEnter,BufWrite,FileType c,cpp,python,sh,java,javascript,perl,ruby,php,make,vim setlocal number
+	autocmd BufEnter,BufWrite,FileType c,cpp,python,sh,java,javascript,perl,ruby,php,make,vim setlocal cursorline
 	autocmd VimEnter,FileType c,cpp,python,sh,java,javascript,perl,ruby,php,make,vim call TAGBAR()
 	autocmd VimEnter,FileType * call NERDTREE()
 	autocmd VimEnter,FileType * call GREPPER()
