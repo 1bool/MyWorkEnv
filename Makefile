@@ -101,9 +101,6 @@ $(PLUGGED): $(AUTOLOADDIR)/plug.vim $(PLUGINRC)
 	vim +PlugInstall +qall
 	@touch $(PLUGGED)
 
-update: install $(PKGUPDATE)
-	vim +PlugUpgrade +PlugUpdate +qall
-
 ifeq ($(DIST),mac)
 BREW = $(shell which brew &> /dev/null || echo brew)
 PKGS += macvim the_silver_searcher
@@ -189,6 +186,9 @@ $(LOCALDIR)/$(PLCONF): $(PYMS)
 	mkdir -p $(dir $@)
 	ln -sf `echo 'import sys; print [x for x in sys.path if "powerline_status" in x][0]' \
 		| python`/$(PLCONF) $@
+
+update: install $(PKGUPDATE)
+	vim +PlugUpgrade +PlugUpdate +qall
 
 install: $(DESTFILES) $(PKGTARGETS) $(PYMS) $(PLUGINRC) $(PLUGGED) .pl_fonts_installed
 .PHONY: $(PYMS) $(EZINSTALL) $(PKGUPDATE)
