@@ -75,8 +75,8 @@ $(LOCALDIR)/$(PLCONF):
 	ln -sf /usr/share/$(PLCONF) $@
 
 update:
-	sudo apt-get update
-	sudo apt-get upgrade $(PKGS)
+	sudo apt-get -y update
+	sudo apt-get -y upgrade $(PKGS)
 	@for dir in $(GITTARGETS); do \
 		echo Updating $$dir; git -C $$dir pull; done
 
@@ -101,13 +101,14 @@ $(PLUGGED): $(AUTOLOADDIR)/plug.vim $(PLUGINRC)
 	vim +PlugInstall +qall
 	@touch $(PLUGGED)
 
-update:
+update: $(PKGUPDATE)
 	vim +PlugUpgrade +PlugUpdate +qall
 
 ifeq ($(DIST),mac)
 BREW = $(shell which brew &> /dev/null || echo brew)
 PKGS += macvim the_silver_searcher
 PKGTARGETS = $(filter-out $(shell brew list),$(PKGS))
+PKGUPDATE = brew-update
 
 $(EZINSTALL):
 	xcode-select --install
@@ -127,7 +128,11 @@ $(PKGTARGETS): $(BREW)
 $(PYLINT): $(EZINSTALL)
 	easy_install --user $@
 
-.PHONY: $(BREW)
+brew-update:
+	brew update
+	-brew upgrade
+
+.PHONY: $(BREW) brew-update
 endif
 
 ifneq ($(filter $(DIST),fedora centos redhat),)
@@ -149,12 +154,16 @@ ifneq ($(TARGETPKGS),)
 PKGTARGETS=pkgtargets
 endif
 DNF = $(shell which dnf 2> /dev/null || echo yum)
+PKGUPDATE = dnf-update
 
 $(EZINSTALL):
 	sudo $(DNF) -y install $@
 
 $(PKGTARGETS):
 	sudo $(DNF) -y install $(TARGETPKGS)
+
+dnf-update:
+	sudo $(DNF) -y upgrade $(PKGS)
 endif
 
 ifeq ($(filter powerline,$(PKGS)),)
@@ -182,7 +191,7 @@ $(LOCALDIR)/$(PLCONF): $(PYMS)
 		| python`/$(PLCONF) $@
 
 install: $(DESTFILES) $(PKGTARGETS) $(PYMS) $(PLUGINRC) $(PLUGGED) .pl_fonts_installed
-.PHONY: $(PYMS) $(EZINSTALL)
+.PHONY: $(PYMS) $(EZINSTALL) $(PKGUPDATE)
 endif
 
 
