@@ -1,5 +1,8 @@
 runtime! pluginrc.vim
 
+" remap \ to ,
+let mapleader = ","
+
 " If using a dark background within the editing area and syntax highlighting
 " turn on this option as well
 set background=dark
@@ -78,8 +81,8 @@ set showmode
 " Toggle line number
 nmap <C-N><C-N> :setlocal invnumber<CR>
 
-" remap \ to ,
-let mapleader = ","
+" Toggle background
+map <Leader>bg :let &background = ( &background == "dark"? "light" : "dark" )<CR>
 
 if has("autocmd")
 	autocmd BufEnter,BufWrite,FileType c,cpp,python,sh,java,javascript,perl,ruby,php,make,vim
@@ -196,6 +199,9 @@ let g:ctrlp_cmd = 'CtrlPMRU'
 " python-syntax
 let python_highlight_all = 1
 
-colorscheme vividchalk
-" Toggle background
-map <Leader>bg :let &background = ( &background == "dark"? "light" : "dark" )<CR>
+try
+	colorscheme vividchalk
+catch /^Vim\%((\a\+)\)\=:E185/
+	" Fallback to desert
+	colorscheme desert
+endtry
