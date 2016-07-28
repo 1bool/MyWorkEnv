@@ -80,7 +80,7 @@ update: install
 	@for dir in $(GITTARGETS); do \
 		echo Updating $$dir; git -C $$dir pull; done
 
-install: $(DESTFILES) $(PKGTARGETS) $(PKGPLUGINTARGETS) $(GITTARGETS) $(PLUGINRC)
+install: $(DESTFILES) $(PKGTARGETS) $(PKGPLUGINTARGETS) $(GITTARGETS) $(PLUGINRC) .pl_fonts_installed
 
 .PHONY: $(PKGPLUGINS) $(PKGPLUGINTARGETS)
 else
