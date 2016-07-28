@@ -27,4 +27,5 @@ Plug 'reedes/vim-colors-pencil'
 Plug 'altercation/vim-colors-solarized'
 Plug 'tpope/vim-vividchalk'
 Plug 'itchyny/landscape.vim'
+Plug 'vim-hybrid-material'
 call plug#end()
