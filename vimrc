@@ -194,4 +194,4 @@ let g:rooter_silent_chdir = 1
 " MRU file list as ctrlp default
 let g:ctrlp_cmd = 'CtrlPMRU'
 
-colorscheme desert
+colorscheme vividchalk
