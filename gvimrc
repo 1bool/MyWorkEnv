@@ -1,6 +1,5 @@
 set background=light
 colorscheme PaperColor
-let g:airline_theme = 'PaperColor'
 
 " For airline
 if !exists('g:airline_symbols')
@@ -42,5 +41,3 @@ elseif has("gui_macvim")
 elseif has("gui_win32")
 	set guifont=Consolas:h11:cANSI
 endif
-
-"autocmd! GUIEnter,FileType python,c,cpp,java,javascript,sh,ruby,perl,php call IDE()|1wincmd w
