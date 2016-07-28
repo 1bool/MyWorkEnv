@@ -3,7 +3,7 @@ call plug#begin()
 Plug 'scrooloose/nerdtree', { 'on': 'NERDTreeToggle' }
 Plug 'scrooloose/nerdcommenter'
 Plug 'scrooloose/syntastic'
-Plug 'flazz/vim-colorschemes'
+"Plug 'flazz/vim-colorschemes'
 Plug 'vim-scripts/taglist.vim'
 Plug 'vim-scripts/a.vim', { 'for': ['c', 'h', 'cpp', 'hpp'] }
 Plug 'jlanzarotta/bufexplorer'
@@ -21,4 +21,10 @@ Plug 'nathanaelkane/vim-indent-guides'
 "Plug 'Raimondi/delimitMate'
 Plug 'majutsushi/tagbar'
 Plug 'NLKNguyen/papercolor-theme'
+Plug 'morhetz/gruvbox'
+Plug 'w0ng/vim-hybrid'
+Plug 'junegunn/seoul256.vim'
+Plug 'jnurmine/Zenburn'
+Plug 'reedes/vim-colors-pencil'
+Plug 'tpope/vim-vividchalk'
 call plug#end()
