@@ -196,6 +196,6 @@ let g:ctrlp_cmd = 'CtrlPMRU'
 " python-syntax
 let python_highlight_all = 1
 
-colorscheme landscape
+colorscheme vividchalk
 " Toggle background
 map <Leader>bg :let &background = ( &background == "dark"? "light" : "dark" )<CR>
