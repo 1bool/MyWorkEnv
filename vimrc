@@ -88,7 +88,6 @@ if has("autocmd")
 				\ | TagbarOpen
 	autocmd VimEnter,FileType * call PlugInSetup()
 	"autocmd! VIMEnter,FileType python,c,cpp,java,javascript,sh,ruby,perl,php call IDE()
-	autocmd FileType python let python_highlight_all = 1
 endif
 
 function! PlugInSetup()
@@ -194,4 +193,9 @@ let g:rooter_silent_chdir = 1
 " MRU file list as ctrlp default
 let g:ctrlp_cmd = 'CtrlPMRU'
 
-colorscheme vividchalk
+" python-syntax
+let python_highlight_all = 1
+
+colorscheme landscape
+" Toggle background
+map <Leader>bg :let &background = ( &background == "dark"? "light" : "dark" )<CR>

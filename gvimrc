@@ -1,5 +1,6 @@
+set background=light
 colorscheme PaperColor
-"set bg=light
+let g:airline_theme = 'PaperColor'
 
 " For airline
 if !exists('g:airline_symbols')
@@ -34,9 +35,9 @@ let g:airline_symbols.readonly = ''
 let g:airline_symbols.linenr = ''
 
 if has("gui_gtk2")
-	set guifont=Hack\ 10
+	set guifont=Cousine\ for\ Powerline\ 10
 elseif has("gui_macvim")
-	set guifont=Hack:h12
+	set guifont=Cousine\ for\ Powerline:h12
 	set fileencodings=utf-8,cp936,gb18030,big5
 elseif has("gui_win32")
 	set guifont=Consolas:h11:cANSI
