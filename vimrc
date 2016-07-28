@@ -78,6 +78,9 @@ set showmode
 " Toggle line number
 nmap <C-N><C-N> :setlocal invnumber<CR>
 
+" remap \ to ,
+let mapleader = ","
+
 if has("autocmd")
 	autocmd BufEnter,BufWrite,FileType c,cpp,python,sh,java,javascript,perl,ruby,php,make,vim
 				\ setlocal number
