@@ -200,7 +200,7 @@ let g:ctrlp_cmd = 'CtrlPMRU'
 let python_highlight_all = 1
 
 try
-	colorscheme vividchalk
+	colorscheme landscape
 catch /^Vim\%((\a\+)\)\=:E185/
 	" Fallback to desert
 	colorscheme desert
