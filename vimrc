@@ -86,43 +86,25 @@ map <Leader>bg :let &background = ( &background == "dark"? "light" : "dark" )<CR
 
 if has("autocmd")
 	autocmd BufEnter,BufWrite,FileType c,cpp,python,sh,java,javascript,perl,ruby,php,make,vim
-				\ setlocal number
-				\ | setlocal cursorline
-				\ | TagbarOpen
-	autocmd VimEnter,FileType * call PlugInSetup()
-	"autocmd! VIMEnter,FileType python,c,cpp,java,javascript,sh,ruby,perl,php call IDE()
+				\ setlocal number | setlocal cursorline
+	autocmd VimEnter,FileType * call PluginSetup()
 endif
 
-function! PlugInSetup()
+function! PluginSetup()
 	if exists(":TagbarToggle")
 		let g:Tagbar_title = "[Tagbar]"
 		let g:tagbar_width = 36
 		let g:tagbar_zoomwidth = 0
 		nnoremap <silent> <F7> :TagbarToggle<CR>
-		" For call by winmanager
-		function! Tagbar_Start()  
-			q
-			exec 'Tagbar'  
-		endfunction
-		function! Tagbar_IsValid()  
-			return 1  
-		endfunction
+		autocmd BufEnter,BufWrite,FileType c,cpp,python,sh,java,javascript,perl,ruby,php,make,vim nested TagbarOpen
+		autocmd FilterWritePre * nested if &diff | TagbarClose
 	endif
 	if exists(":NERDTreeToggle")
 		let g:NERDTree_title="[NERDTree]"
-		"设置 NERDTree 子窗口宽度
-		let NERDTreeWinSize=36
-		"设置 NERDTree 子窗口位置
-		let NERDTreeWinPos="left"
+		let NERDTreeWinSize=36 "设置 NERDTree 子窗口宽度
+		let NERDTreeWinPos="left" "设置 NERDTree 子窗口位置
 		let NERDTreeShowBookmarks = 1
 		nnoremap <silent> <F6> :NERDTreeToggle<CR>
-		" For call by winmanager
-		function! NERDTree_Start()  
-			exec 'NERDTree'  
-		endfunction
-		function! NERDTree_IsValid()  
-			return 1  
-		endfunction
 	endif
 	if exists(":Grepper")
 		" When search with git, search from top level of the repository
@@ -142,30 +124,10 @@ function! PlugInSetup()
 		nnoremap <Leader>d :YcmCompleter GetDoc<CR>
 		nnoremap <F5> :YcmForceCompileAndDiagnostics<CR>
 	endif
-	if exists(":WMToggle")
-		let g:winManagerWidth = 40
-		let g:winManagerWindowLayout="NERDTree|Tagbar,BufExplorer"
-		function! IDE()
-			let g:tagbar_vertical_save = g:tagbar_vertical
-			let g:tagbar_vertical = 30
-			if IsWinManagerVisible()
-				WMToggle
-			else
-				WMToggle
-				q
-				1wincmd w
-			endif
-			let g:tagbar_vertical = g:tagbar_vertical_save
-		endfunction
-		nnoremap <silent> <F4> :call IDE()<CR>
-	endif
 	if exists(":IndentGuidesToggle")
-		" 随 vim 自启动
-		"let g:indent_guides_enable_on_vim_startup=1
-		" 从第二层开始可视化显示缩进
-		let g:indent_guides_start_level=2
-		" 色块宽度
-		let g:indent_guides_guide_size=1
+		"let g:indent_guides_enable_on_vim_startup=1 " 随 vim 自启动
+		let g:indent_guides_start_level=2 "从第二层开始可视化显示缩进
+		let g:indent_guides_guide_size=1 " 色块宽度
 		" 快捷键 i 开/关缩进可视化
 		nmap <silent> <Leader>i <Plug>IndentGuidesToggle
 	endif
@@ -176,8 +138,8 @@ let g:airline_powerline_fonts = 1
 "let g:Powerline_symbols = 'fancy'
 let g:airline#extensions#tabline#enabled = 1
 
-" fugitive status
-"set statusline=%{fugitive#statusline()}
+"set statusline=%{fugitive#statusline()} " fugitive status
+command! Gtdiff tabedit %|Gdiff " git diff in tab
 
 " syntastic
 set statusline+=%#warningmsg#
@@ -193,11 +155,9 @@ let g:rooter_change_directory_for_non_project_files = 'current'
 let g:rooter_use_lcd = 1
 let g:rooter_silent_chdir = 1
 
-" MRU file list as ctrlp default
-let g:ctrlp_cmd = 'CtrlPMRU'
+let g:ctrlp_cmd = 'CtrlPMRU' " MRU file list as ctrlp default
 
-" python-syntax
-let python_highlight_all = 1
+let python_highlight_all = 1 " python-syntax
 
 try
 	colorscheme landscape
