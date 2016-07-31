@@ -55,12 +55,12 @@ noremap <C-H> <C-W>h
 noremap <C-L> <C-W>l
 
 " Easier to switch buffer
-set switchbuf=usetab
+set switchbuf=usetab,newtab
 map gn :bn<cr>
 map gp :bp<cr>
 map gd :bd<cr>
-nnoremap <C-TAB> :bnext<CR>
-nnoremap <C-S-TAB> :bprevious<CR>
+nnoremap <C-TAB> :sbnext<CR>
+nnoremap <C-S-TAB> :sbprevious<CR>
 
 " Open file explorer
 map ge :Explore<CR>
@@ -82,7 +82,7 @@ set showmode
 nmap <C-N><C-N> :setlocal invnumber<CR>
 
 " Toggle background
-map <Leader>bg :let &background = ( &background == "dark"? "light" : "dark" )<CR>
+map <Leader>b :let &background = ( &background == "dark"? "light" : "dark" )<CR>
 
 if has("autocmd")
 	autocmd BufEnter,BufWrite,FileType c,cpp,python,sh,java,javascript,perl,ruby,php,make,vim
