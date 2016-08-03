@@ -14,21 +14,29 @@ endif
 PKGS = coreutils tmux
 LOCALDIR = $(HOME)/.local/share
 PLCONF = powerline/bindings/tmux/powerline.conf
+ifeq ($(shell which easy_install 2> /dev/null),)
+EZINSTALL = python-setuptools
+endif
 
 all: install
 
 
 ifneq ($(filter $(DIST),ubuntu debian),)
+VER = $(shell . /etc/os-release 2> /dev/null && echo $$VERSION_ID)
 BUNDLE = $(VIMDIR)/bundle
 PRCFILE = pathogenrc.vim
 PKGS += exuberant-ctags \
-	powerline \
 	vim-gnome \
 	vim-addon-manager \
 	vim-scripts \
 	fonts-wqy-zenhei \
 	silversearcher-ag \
-	pylint
+	pylint \
+	fontconfig \
+	python-psutil
+ifeq ($(VER),16.04)
+PKGS += powerline
+endif
 GITPLUGINS = $(shell grep '^[[:blank:]]*Plug ' plugrc.vim | cut -d\' -f2) pathogen
 GITTOPKG = $(shell echo $(subst nerdcommenter,nerd-commenter,\
 		   $(basename $(notdir $(subst a.vim,alternate.vim,$(GITPLUGINS))))) \
@@ -43,7 +51,7 @@ PKGPLUGINS = $(filter $(GITTOPKG:vim-%=%),$(VAMLIST))
 PKGS += $(PLUGINPKGS)
 TARGETPKGS = $(filter-out $(shell dpkg --get-selections \
 			 | grep -v deinstall | cut -f1),$(PKGS))
-PKGPLUGINTARGETS = $(filter-out $(shell vam -q status $(PKGPLUGINS) | \
+PKGPLUGINTARGETS = $(filter-out $(shell vam -q status $(PKGPLUGINS) 2> /dev/null | \
 				   grep installed | cut -f1),$(PKGPLUGINS))
 PKGTOGIT = $(subst youcompleteme,YouCompleteMe,\
 		   $(subst nerd-commenter,nerdcommenter,\
@@ -74,13 +82,14 @@ $(LOCALDIR)/$(PLCONF):
 	mkdir -p $(dir $@)
 	ln -sf /usr/share/$(PLCONF) $@
 
+$(EZINSTALL):
+	sudo apt-get -y install $@
+
 update: install
 	sudo apt-get -y update
 	sudo apt-get -y upgrade $(PKGS)
 	@for dir in $(GITTARGETS); do \
 		echo Updating $$dir; git -C $$dir pull; done
-
-install: $(DESTFILES) $(PKGTARGETS) $(PKGPLUGINTARGETS) $(GITTARGETS) $(PLUGINRC) .pl_fonts_installed
 
 .PHONY: $(PKGPLUGINS) $(PKGPLUGINTARGETS)
 else
@@ -90,9 +99,6 @@ else
 PLUGGED = $(VIMDIR)/plugged
 PRCFILE = plugrc.vim
 PKGS += ctags cmake ack
-ifeq ($(shell which easy_install 2> /dev/null),)
-EZINSTALL = python-setuptools
-endif
 
 $(AUTOLOADDIR)/plug.vim:
 	curl -fLo $@ --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
@@ -163,6 +169,19 @@ dnf-update:
 	sudo $(DNF) -y upgrade $(PKGS)
 endif
 
+$(LOCALDIR)/$(PLCONF): $(PYMS)
+	mkdir -p $(dir $@)
+	ln -sf `echo 'import sys; print [x for x in sys.path if "powerline_status" in x][0]' \
+		| python`/$(PLCONF) $@
+
+update: install $(PKGUPDATE)
+	vim +PlugUpgrade +PlugUpdate +qall
+
+.PHONY: $(EZINSTALL) $(PKGUPDATE)
+endif
+
+
+
 ifeq ($(filter powerline,$(PKGS)),)
 ifeq ($(shell echo 'import sys; print [x for x in sys.path if "powerline_status" in x][0]' | python 2> /dev/null),)
 PYMS += powerline-status
@@ -182,20 +201,6 @@ endif
 $(PYMS): $(EZINSTALL) $(PKGTARGETS)
 	easy_install --user $@
 
-$(LOCALDIR)/$(PLCONF): $(PYMS)
-	mkdir -p $(dir $@)
-	ln -sf `echo 'import sys; print [x for x in sys.path if "powerline_status" in x][0]' \
-		| python`/$(PLCONF) $@
-
-update: install $(PKGUPDATE)
-	vim +PlugUpgrade +PlugUpdate +qall
-
-install: $(DESTFILES) $(PKGTARGETS) $(PYMS) $(PLUGINRC) $(PLUGGED) .pl_fonts_installed
-.PHONY: $(PYMS) $(EZINSTALL) $(PKGUPDATE)
-endif
-
-
-
 $(HOME)/.%: %
 	ln -nfv $(abspath $<) $@ || cp -fv  $< $@
 
@@ -209,8 +214,10 @@ powerline-fonts/:
 .pl_fonts_installed: powerline-fonts/
 	powerline-fonts/install.sh && touch $@
 
+install: $(DESTFILES) $(PKGTARGETS) $(PKGPLUGINTARGETS) $(GITTARGETS) $(PLUGINRC) $(PLUGGED) $(PYMS) .pl_fonts_installed
+
 uninstall:
 	-rm -fr $(DESTFILES) $(GITTARGETS) $(PLUGINRC) $(PLUGGED) $(BUNDLE) $(AUTOLOADDIR)/plug.vim \
 		powerline-fonts .pl_fonts_installed
 
-.PHONY: all install uninstall update $(PKGTARGETS)
+.PHONY: all install uninstall update $(PKGTARGETS) $(PYMS)
