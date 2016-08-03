@@ -34,10 +34,11 @@ PKGS += exuberant-ctags \
 	pylint \
 	fontconfig \
 	python-psutil
+GITPLUGINS = $(shell grep '^[[:blank:]]*Plug ' plugrc.vim | cut -d\' -f2)
 ifeq ($(VER),16.04)
 PKGS += powerline
+GITPLUGINS += pathogen
 endif
-GITPLUGINS = $(shell grep '^[[:blank:]]*Plug ' plugrc.vim | cut -d\' -f2) pathogen
 GITTOPKG = $(shell echo $(subst nerdcommenter,nerd-commenter,\
 		   $(basename $(notdir $(subst a.vim,alternate.vim,$(GITPLUGINS))))) \
 		   | tr [:upper:] [:lower:])
