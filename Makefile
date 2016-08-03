@@ -38,6 +38,8 @@ GITPLUGINS = $(shell grep '^[[:blank:]]*Plug ' plugrc.vim | cut -d\' -f2)
 ifeq ($(VER),16.04)
 PKGS += powerline
 GITPLUGINS += pathogen
+else
+DESTFILES += $(VIMDIR)/autoload/pathogen.vim
 endif
 GITTOPKG = $(shell echo $(subst nerdcommenter,nerd-commenter,\
 		   $(basename $(notdir $(subst a.vim,alternate.vim,$(GITPLUGINS))))) \
@@ -85,6 +87,10 @@ $(LOCALDIR)/$(PLCONF):
 
 $(EZINSTALL):
 	sudo apt-get -y install $@
+
+$(VIMDIR)/autoload/pathogen.vim:
+	mkdir -p $(dir $@)
+	curl -LSso $@ https://tpo.pe/pathogen.vim
 
 update: install
 	sudo apt-get -y update

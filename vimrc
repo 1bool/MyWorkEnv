@@ -88,6 +88,8 @@ if has("autocmd")
 	autocmd BufEnter,BufWrite,FileType c,cpp,python,sh,java,javascript,perl,ruby,php,make,vim
 				\ setlocal number | setlocal cursorline
 	autocmd VimEnter,FileType * call PluginSetup()
+	autocmd BufEnter,BufWrite,FileType c,cpp,python,sh,java,javascript,perl,ruby,php,make,vim nested TagbarOpen
+	autocmd FilterWritePre * nested if &diff | TagbarClose
 endif
 
 function! PluginSetup()
@@ -96,8 +98,6 @@ function! PluginSetup()
 		let g:tagbar_width = 36
 		let g:tagbar_zoomwidth = 0
 		nnoremap <silent> <F7> :TagbarToggle<CR>
-		autocmd BufEnter,BufWrite,FileType c,cpp,python,sh,java,javascript,perl,ruby,php,make,vim nested TagbarOpen
-		autocmd FilterWritePre * nested if &diff | TagbarClose
 	endif
 	if exists(":NERDTreeToggle")
 		let g:NERDTree_title="[NERDTree]"
