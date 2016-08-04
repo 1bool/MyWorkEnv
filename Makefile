@@ -22,7 +22,6 @@ all: install
 
 
 ifneq ($(filter $(DIST),ubuntu debian),)
-VER = $(shell . /etc/os-release 2> /dev/null && echo $$VERSION_ID)
 BUNDLE = $(VIMDIR)/bundle
 PRCFILE = pathogenrc.vim
 PKGS += exuberant-ctags \
@@ -33,14 +32,9 @@ PKGS += exuberant-ctags \
 	silversearcher-ag \
 	pylint \
 	fontconfig \
-	python-psutil
-GITPLUGINS = $(shell grep '^[[:blank:]]*Plug ' plugrc.vim | cut -d\' -f2)
-ifeq ($(VER),16.04)
-PKGS += powerline
-GITPLUGINS += pathogen
-else
-DESTFILES += $(VIMDIR)/autoload/pathogen.vim
-endif
+	python-psutil \
+	powerline
+GITPLUGINS = $(shell grep '^[[:blank:]]*Plug ' plugrc.vim | cut -d\' -f2) pathogen
 GITTOPKG = $(shell echo $(subst nerdcommenter,nerd-commenter,\
 		   $(basename $(notdir $(subst a.vim,alternate.vim,$(GITPLUGINS))))) \
 		   | tr [:upper:] [:lower:])
@@ -52,14 +46,17 @@ VAMLIST = $(basename $(shell apt-cache show vim-scripts | grep '*' \
 		  $(VIMPKGS:vim-%=%)
 PKGPLUGINS = $(filter $(GITTOPKG:vim-%=%),$(VAMLIST))
 PKGS += $(PLUGINPKGS)
-TARGETPKGS = $(filter-out $(shell dpkg --get-selections \
-			 | grep -v deinstall | cut -f1),$(PKGS))
+TARGETPKGS = $(filter $(PKGS),$(shell dpkg --get-selections | grep deinstall | cut -f1 | cut -d':' -f1))
 PKGPLUGINTARGETS = $(filter-out $(shell vam -q status $(PKGPLUGINS) 2> /dev/null | \
 				   grep installed | cut -f1),$(PKGPLUGINS))
 PKGTOGIT = $(subst youcompleteme,YouCompleteMe,\
 		   $(subst nerd-commenter,nerdcommenter,\
 		   $(subst alternate,a,\
 		   $(VAMLIST))))
+ifneq ($(filter pathogen,$(PKGTOGIT)),)
+PKGTOGIT += pathogen
+DESTFILES += $(VIMDIR)/autoload/pathogen.vim
+endif
 GITTARGETS = $(addprefix $(BUNDLE)/,$(filter-out \
 			 $(addsuffix .vim,$(PKGTOGIT)),$(filter-out \
 			 $(addprefix %,$(PKGTOGIT)),$(notdir $(GITPLUGINS)))))
@@ -184,7 +181,7 @@ $(LOCALDIR)/$(PLCONF): $(PYMS)
 update: install $(PKGUPDATE)
 	vim +PlugUpgrade +PlugUpdate +qall
 
-.PHONY: $(EZINSTALL) $(PKGUPDATE)
+.PHONY: $(PKGUPDATE)
 endif
 
 
@@ -227,4 +224,4 @@ uninstall:
 	-rm -fr $(DESTFILES) $(GITTARGETS) $(PLUGINRC) $(PLUGGED) $(BUNDLE) $(AUTOLOADDIR)/plug.vim \
 		powerline-fonts .pl_fonts_installed
 
-.PHONY: all install uninstall update $(PKGTARGETS) $(PYMS)
+.PHONY: all install uninstall update $(PKGTARGETS) $(PYMS) $(EZINSTALL)
