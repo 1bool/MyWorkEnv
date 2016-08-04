@@ -34,6 +34,7 @@ PKGS += exuberant-ctags \
 	fontconfig \
 	python-psutil \
 	powerline
+INSTALLPKGS = $(filter $(PKGS),$(shell dpkg --get-selections | cut -f1 | cut -d':' -f1))
 GITPLUGINS = $(shell grep '^[[:blank:]]*Plug ' plugrc.vim | cut -d\' -f2) pathogen
 GITTOPKG = $(shell echo $(subst nerdcommenter,nerd-commenter,\
 		   $(basename $(notdir $(subst a.vim,alternate.vim,$(GITPLUGINS))))) \
@@ -45,15 +46,15 @@ VAMLIST = $(basename $(shell apt-cache show vim-scripts | grep '*' \
 		  | grep -o '[[:alnum:]-]*\.vim' | tr '[:upper:]' '[:lower:]')) \
 		  $(VIMPKGS:vim-%=%)
 PKGPLUGINS = $(filter $(GITTOPKG:vim-%=%),$(VAMLIST))
-PKGS += $(PLUGINPKGS)
-TARGETPKGS = $(filter $(PKGS),$(shell dpkg --get-selections | grep deinstall | cut -f1 | cut -d':' -f1))
+INSTALLPKGS += $(PLUGINPKGS)
+TARGETPKGS = $(filter $(INSTALLPKGS),$(shell dpkg --get-selections | grep deinstall | cut -f1 | cut -d':' -f1))
 PKGPLUGINTARGETS = $(filter-out $(shell vam -q status $(PKGPLUGINS) 2> /dev/null | \
 				   grep installed | cut -f1),$(PKGPLUGINS))
 PKGTOGIT = $(subst youcompleteme,YouCompleteMe,\
 		   $(subst nerd-commenter,nerdcommenter,\
 		   $(subst alternate,a,\
 		   $(VAMLIST))))
-ifneq ($(filter pathogen,$(PKGTOGIT)),)
+ifeq ($(filter pathogen,$(PKGTOGIT)),)
 PKGTOGIT += pathogen
 DESTFILES += $(VIMDIR)/autoload/pathogen.vim
 endif
@@ -77,10 +78,6 @@ $(BUNDLE)/%:
 	git clone https://github.com/$(filter %/$(notdir $@),$(GITPLUGINS)).git $@
 	@if [ -d $@/doc ]; then \
 		vim +Helptags $@/doc +qall; fi
-
-$(LOCALDIR)/$(PLCONF):
-	mkdir -p $(dir $@)
-	ln -sf /usr/share/$(PLCONF) $@
 
 $(EZINSTALL):
 	sudo apt-get -y install $@
@@ -114,7 +111,8 @@ $(PLUGGED): $(AUTOLOADDIR)/plug.vim $(PLUGINRC)
 ifeq ($(DIST),mac)
 BREW = $(shell which brew &> /dev/null || echo brew)
 PKGS += macvim the_silver_searcher
-PKGTARGETS = $(filter-out $(shell brew list),$(PKGS))
+INSTALLPKGS = $(PKGS)
+PKGTARGETS = $(filter-out $(shell brew list),$(INSTALLPKGS))
 PKGUPDATE = brew-update
 
 $(EZINSTALL):
@@ -131,9 +129,6 @@ $(PKGTARGETS): $(BREW)
 		brew linkapps macvim; \
 	else \
 		brew install $@; fi
-
-$(PYLINT): $(EZINSTALL)
-	easy_install --user $@
 
 brew-update:
 	brew update
@@ -156,7 +151,8 @@ PKGS += vim-enhanced \
 	wqy-bitmap-fonts \
 	wqy-unibit-fonts \
 	wqy-zenhei-fonts
-TARGETPKGS = $(filter-out $(shell rpm -qa --qf '%{NAME} '),$(PKGS))
+INSTALLPKGS = $(PKGS)
+TARGETPKGS = $(filter-out $(shell rpm -qa --qf '%{NAME} '),$(INSTALLPKGS))
 ifneq ($(TARGETPKGS),)
 PKGTARGETS=pkgtargets
 endif
@@ -170,13 +166,8 @@ $(PKGTARGETS):
 	sudo $(DNF) -y install $(TARGETPKGS)
 
 dnf-update:
-	sudo $(DNF) -y upgrade $(PKGS)
+	sudo $(DNF) -y upgrade $(INSTALLPKGS)
 endif
-
-$(LOCALDIR)/$(PLCONF): $(PYMS)
-	mkdir -p $(dir $@)
-	ln -sf `echo 'import sys; print [x for x in sys.path if "powerline_status" in x][0]' \
-		| python`/$(PLCONF) $@
 
 update: install $(PKGUPDATE)
 	vim +PlugUpgrade +PlugUpdate +qall
@@ -186,17 +177,28 @@ endif
 
 
 
-ifeq ($(filter powerline,$(PKGS)),)
+ifeq ($(filter powerline,$(INSTALLPKGS)),)
 ifeq ($(shell echo 'import sys; print [x for x in sys.path if "powerline_status" in x][0]' | python 2> /dev/null),)
 PYMS += powerline-status
 endif
+
+$(LOCALDIR)/$(PLCONF): $(PYMS)
+	mkdir -p $(dir $@)
+	ln -sf `echo 'import sys; print [x for x in sys.path if "powerline_status" in x][0]' \
+		| python`/$(PLCONF) $@
+else
+
+$(LOCALDIR)/$(PLCONF):
+	mkdir -p $(dir $@)
+	ln -sf /usr/share/$(PLCONF) $@
+
 endif
-ifeq ($(filter python-psutil,$(PKGS)),)
+ifeq ($(filter python-psutil,$(INSTALLPKGS)),)
 ifeq ($(shell echo 'import sys; print [x for x in sys.path if "psutil" in x][0]' | python 2> /dev/null),)
 PYMS += psutil
 endif
 endif
-ifeq ($(filter pylint,$(PKGS)),)
+ifeq ($(filter pylint,$(INSTALLPKGS)),)
 ifeq ($(shell echo 'import sys; print [x for x in sys.path if "pylint" in x][0]' | python 2> /dev/null),)
 PYMS += pylint
 endif
