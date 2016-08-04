@@ -34,7 +34,7 @@ PKGS += exuberant-ctags \
 	fontconfig \
 	python-psutil \
 	powerline
-INSTALLPKGS = $(filter $(PKGS),$(shell dpkg --get-selections | cut -f1 | cut -d':' -f1))
+INSTALLPKGS = $(filter $(shell apt-cache search --names-only '.*' | cut -d' ' -f1),$(PKGS))
 GITPLUGINS = $(shell grep '^[[:blank:]]*Plug ' plugrc.vim | cut -d\' -f2) pathogen
 GITTOPKG = $(shell echo $(subst nerdcommenter,nerd-commenter,\
 		   $(basename $(notdir $(subst a.vim,alternate.vim,$(GITPLUGINS))))) \
@@ -47,7 +47,8 @@ VAMLIST = $(basename $(shell apt-cache show vim-scripts | grep '*' \
 		  $(VIMPKGS:vim-%=%)
 PKGPLUGINS = $(filter $(GITTOPKG:vim-%=%),$(VAMLIST))
 INSTALLPKGS += $(PLUGINPKGS)
-TARGETPKGS = $(filter $(INSTALLPKGS),$(shell dpkg --get-selections | grep deinstall | cut -f1 | cut -d':' -f1))
+TARGETPKGS = $(filter-out $(shell dpkg --get-selections | cut -f1 | cut -d':' -f1),\
+	$(INSTALLPKGS))
 PKGPLUGINTARGETS = $(filter-out $(shell vam -q status $(PKGPLUGINS) 2> /dev/null | \
 				   grep installed | cut -f1),$(PKGPLUGINS))
 PKGTOGIT = $(subst youcompleteme,YouCompleteMe,\
