@@ -1,8 +1,5 @@
 runtime! pluginrc.vim
 
-" remap \ to ,
-let mapleader = ","
-
 " If using a dark background within the editing area and syntax highlighting
 " turn on this option as well
 set background=dark
@@ -66,7 +63,7 @@ nnoremap <C-S-TAB> :sbprevious<CR>
 map ge :Explore<CR>
 
 " Open buffer explorer
-map gb :BufExplorer<CR>
+map gb :ToggleBufExplorer<CR>
 
 " Man
 source $VIMRUNTIME/ftplugin/man.vim
