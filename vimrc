@@ -76,7 +76,7 @@ set showmode
 nmap <C-N><C-N> :setlocal invnumber<CR>
 
 " Toggle background
-map <Leader>b :let &background = ( &background == "dark"? "light" : "dark" )<CR>
+map zb :let &background = ( &background == "dark"? "light" : "dark" )<CR>
 
 if has("autocmd")
 	autocmd BufEnter,BufWrite,FileType c,cpp,python,sh,java,javascript,perl,ruby,php,make,vim
