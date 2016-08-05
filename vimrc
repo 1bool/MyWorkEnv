@@ -36,9 +36,6 @@ set mouse=a		" Enable mouse usage (all modes)
 " By default, searching starts after you enter the string. With the option:
 set incsearch
 set hlsearch " turns on search highlighting
-"set shiftwidth=4
-"set tabstop=4
-"set sts=4
 set tags=./tags;/
 set encoding=utf-8
 set termencoding=utf-8
@@ -63,7 +60,7 @@ nnoremap <C-S-TAB> :sbprevious<CR>
 map ge :Explore<CR>
 
 " Open buffer explorer
-map gb :ToggleBufExplorer<CR>
+map gb :BufExplorer<CR>
 
 " Man
 source $VIMRUNTIME/ftplugin/man.vim
