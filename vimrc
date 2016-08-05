@@ -114,7 +114,7 @@ function! PluginSetup()
 		let g:ycm_autoclose_preview_window_after_insertion = 1
 		nnoremap zg :YcmCompleter GoTo<CR>
 		nnoremap zr :YcmCompleter GoToReferences<CR>
-		nnoremap zt :YcmCompleter GetType<CR>
+		nnoremap zy :YcmCompleter GetType<CR>
 		nnoremap zd :YcmCompleter GetDoc<CR>
 		nnoremap <F5> :YcmForceCompileAndDiagnostics<CR>
 	endif
