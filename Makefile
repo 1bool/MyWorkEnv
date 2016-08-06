@@ -5,8 +5,10 @@ AUTOLOADDIR = $(VIMDIR)/autoload
 PLUGINRC = $(VIMDIR)/pluginrc.vim
 ifeq ($(shell uname -s),Darwin)
 DIST = mac
+FONTDIR = $(HOME)/Library/Fonts
 else
 DIST = $(shell . /etc/os-release 2> /dev/null && echo $$ID)
+FONTDIR = $(HOME)/.local/share/fonts
 endif
 ifeq ($(DIST),)
 DIST = $(shell cat /etc/system-release | cut -d' ' -f1 | tr '[:upper:]' '[:lower:]')
@@ -17,6 +19,8 @@ PLCONF = powerline/bindings/tmux/powerline.conf
 ifeq ($(shell which easy_install 2> /dev/null),)
 EZINSTALL = python-setuptools
 endif
+FONTS = $(shell find fonts \( -name '*.[o,t]tf' -or -name '*.pcf.gz' \) -type f -print0)
+TARGETFONTS = $(addprefix $(FONTDIR)/,$(notdir $(FONTS)))
 
 all: install
 
@@ -215,16 +219,20 @@ $(PLUGINRC): $(PRCFILE)
 	mkdir -p $(dir $(PLUGINRC))
 	ln -nfv $(abspath $(PRCFILE)) $@ || cp -fv $(PRCFILE) $@
 
-powerline-fonts/:
+fonts/powerline-fonts/:
 	git clone https://github.com/powerline/fonts.git $@
 
-.pl_fonts_installed: powerline-fonts/
-	powerline-fonts/install.sh && touch $@
+$(FONTDIR)/%: %
+	cp "$<" $(FONTDIR)
 
-install: $(DESTFILES) $(PKGTARGETS) $(PKGPLUGINTARGETS) $(GITTARGETS) $(PLUGINRC) $(PLUGGED) $(PYMS) .pl_fonts_installed
+$(TARGETFONTS): $(PKGTARGETS)
+
+.fonts_installed: fonts/powerline-fonts/ $(TARGETFONTS)
+	fonts/powerline-fonts/install.sh && touch $@
+
+install: $(DESTFILES) $(PKGTARGETS) $(PKGPLUGINTARGETS) $(GITTARGETS) $(PLUGINRC) $(PLUGGED) $(PYMS) .fonts_installed
 
 uninstall:
-	-rm -fr $(DESTFILES) $(GITTARGETS) $(PLUGINRC) $(PLUGGED) $(BUNDLE) $(AUTOLOADDIR)/plug.vim \
-		powerline-fonts .pl_fonts_installed
+	-rm -fr $(DESTFILES) $(GITTARGETS) $(PLUGINRC) $(PLUGGED) $(BUNDLE) $(AUTOLOADDIR)/plug.vim .fonts_installed
 
 .PHONY: all install uninstall update $(PKGTARGETS) $(PYMS) $(EZINSTALL)
