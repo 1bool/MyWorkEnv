@@ -19,8 +19,9 @@ PLCONF = powerline/bindings/tmux/powerline.conf
 ifeq ($(shell which easy_install 2> /dev/null),)
 EZINSTALL = python-setuptools
 endif
-FONTS = $(shell find fonts \( -name '*.[o,t]tf' -or -name '*.pcf.gz' \) -type f -print0)
-TARGETFONTS = $(addprefix $(FONTDIR)/,$(notdir $(FONTS)))
+INPUTFONTS = $(addprefix $(FONTDIR)/,$(notdir \
+	      $(wildcard fonts/input-fonts/*.ttf)))
+TARGETFONTS = $(filter-out $(FONTDIR)/%.ttf, $(INPUTFONTS))
 
 all: install
 
@@ -222,10 +223,10 @@ $(PLUGINRC): $(PRCFILE)
 fonts/powerline-fonts/:
 	git clone https://github.com/powerline/fonts.git $@
 
-$(FONTDIR)/%: %
-	cp "$<" $(FONTDIR)
+$(FONTDIR)/%: fonts/input-fonts/%
+	cp "$^" $(FONTDIR)
 
-$(TARGETFONTS): $(PKGTARGETS)
+$(INPUTFONTS): $(PKGTARGETS)
 
 .fonts_installed: fonts/powerline-fonts/ $(TARGETFONTS)
 	fonts/powerline-fonts/install.sh && touch $@
