@@ -21,7 +21,7 @@ EZINSTALL = python-setuptools
 endif
 INPUTFONTS = $(addprefix $(FONTDIR)/,$(notdir \
 	      $(wildcard fonts/input-fonts/*.ttf)))
-TARGETFONTS = $(filter-out $(FONTDIR)/%.ttf, $(INPUTFONTS))
+TARGETFONTS = $(filter-out $(wildcard $(FONTDIR)/*.ttf), $(INPUTFONTS))
 
 all: install
 
