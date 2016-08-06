@@ -35,7 +35,7 @@ let g:airline_symbols.linenr = ''
 
 if has("gui_gtk2")
 	try
-		set guifont=Input\ 9
+		set guifont=Input\ 10
 	catch /^Vim\%((\a\+)\)\=:E185/
 		" Fallback
 		set guifont=Roboto\ Mono\ Medium\ for\ Powerline\ 9
