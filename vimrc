@@ -133,7 +133,7 @@ let g:airline_powerline_fonts = 1
 let g:airline#extensions#tabline#enabled = 1
 
 "set statusline=%{fugitive#statusline()} " fugitive status
-command! Gtdiff tabedit %|Gdiff " git diff in tab
+command! Gtdiff tabedit %|Gvdiff " git diff in tab
 
 " syntastic
 set statusline+=%#warningmsg#
