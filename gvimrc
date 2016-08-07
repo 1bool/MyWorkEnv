@@ -34,7 +34,7 @@ let g:airline_symbols.readonly = ''
 let g:airline_symbols.linenr = ''
 
 if has("gui_gtk2")
-	set guifont=Input\ 10,Roboto\ Mono\ Medium\ for\ Powerline\ 9,Monospace
+	set guifont=Input\ Mono\ Condensed\\,\ Medium\ Condensed\ 10,Roboto\ Mono\ Medium\ for\ Powerline\ 9,Monospace\ 9
 elseif has("gui_macvim")
 	set guifont=Cousine\ for\ Powerline:h12
 	set fileencodings=utf-8,cp936,gb18030,big5
