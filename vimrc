@@ -57,7 +57,7 @@ nnoremap <C-TAB> :sbnext<CR>
 nnoremap <C-S-TAB> :sbprevious<CR>
 
 " Open file explorer
-map ge :Explore<CR>
+map ge :Texplore<CR>
 
 " Open buffer explorer
 map gb :BufExplorer<CR>
