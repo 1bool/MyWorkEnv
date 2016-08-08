@@ -4,6 +4,8 @@ if [ "$(uname -s)" = Darwin ]; then
     if [ -d "$HOME/Library/Python/2.7/bin" ]; then
         PATH="$HOME/Library/Python/2.7/bin:$PATH"
     fi
+elif fgrep 'Microsoft' /proc/version &> /dev/null; then
+    export DISPLAY=:0
 fi
 
 # set PATH so it includes user's private bin if it exists
