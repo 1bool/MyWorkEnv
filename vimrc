@@ -63,7 +63,7 @@ map ge :Texplore<CR>
 map gb :BufExplorer<CR>
 
 " Man
-source $VIMRUNTIME/ftplugin/man.vim
+runtime ftplugin/man.vim
 nnoremap K :Man <cword><cr>
 
 " Some people like the visual feedback shown in the status line
