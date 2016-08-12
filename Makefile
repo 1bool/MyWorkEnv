@@ -6,7 +6,11 @@ PLUGINRC = $(VIMDIR)/pluginrc.vim
 ifeq ($(shell uname -s),Darwin)
 DIST = mac
 FONTDIR = $(HOME)/Library/Fonts
-else
+endif
+ifeq ($(shell uname -o),Msys)
+DIST = msys
+endif
+ifeq ($(DIST),)
 DIST = $(shell . /etc/os-release 2> /dev/null && echo $$ID)
 FONTDIR = $(HOME)/.local/share/fonts
 endif
@@ -146,6 +150,7 @@ brew-update:
 .PHONY: $(BREW) brew-update
 endif
 
+
 ifneq ($(filter $(DIST),fedora centos redhat),)
 PKGS += vim-enhanced \
 	vim-X11 \
@@ -182,6 +187,28 @@ update: install $(PKGUPDATE)
 	vim +PlugUpgrade +PlugUpdate +qall
 
 .PHONY: $(PKGUPDATE)
+endif
+
+ifeq ($(DIST),msys)
+PKGS += gcc
+INSTALLPKGS = $(subst ack,perl-ack,$(PKGS))
+TARGETPKGS = $(filter-out $(shell pacman -Qsq),$(INSTALLPKGS))
+ifneq ($(TARGETPKGS),)
+PKGTARGETS=pkgtargets
+endif
+
+$(EZINSTALL):
+	pacman -S --noconfirm --needed python2-setuptools
+	ln -s /usr/bin/easy_install-2.7 /usr/bin/easy_install
+
+$(PKGTARGETS):
+	pacman -S --noconfirm $(INSTALLPKGS)
+
+pacman-update:
+	pacman -Su --noconfirm
+
+update: install pacman-update
+	vim +PlugUpgrade +PlugUpdate +qall
 endif
 
 
@@ -239,4 +266,6 @@ install: $(DESTFILES) $(PKGTARGETS) $(PKGPLUGINTARGETS) $(GITTARGETS) $(PLUGINRC
 uninstall:
 	-rm -fr $(DESTFILES) $(GITTARGETS) $(PLUGINRC) $(PLUGGED) $(BUNDLE) $(AUTOLOADDIR)/plug.vim .fonts_installed
 
+test:
+	echo $(INSTALLPKGS)
 .PHONY: all install uninstall update $(PKGTARGETS) $(PYMS) $(EZINSTALL)
