@@ -2,7 +2,7 @@
 
 set -e
 
-if [ "$(uname -o)" = msys ]; then
+if [ "$(uname -o)" = Msys ]; then
 	DIST=msys
 elif [ "$(uname -s)" = Darwin ]; then
 	DIST=mac
