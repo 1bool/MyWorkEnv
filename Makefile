@@ -1,12 +1,12 @@
+DIST := $(if $(filter Darwin,$(shell uname -s)),mac,\
+	$(if $(filter Msys,$(shell uname -o)),msys,\
+	$(if $(wildcard /etc/os-release),$(shell . /etc/os-release 2> /dev/null && echo $$ID),\
+	$(shell cat /etc/system-release | cut -d' ' -f1 | tr '[:upper:]' '[:lower:]'))))
 RCFILES = vimrc gvimrc screenrc tmux.conf bashrc bash_profile pylintrc
 DESTFILES = $(addprefix $(HOME)/.,$(RCFILES)) $(LOCALDIR)/$(PLCONF)
 VIMDIR = $(HOME)/.vim
 AUTOLOADDIR = $(VIMDIR)/autoload
 PLUGINRC = $(VIMDIR)/pluginrc.vim
-DIST ?= $(shell . /etc/os-release 2> /dev/null && echo $$ID)
-DIST ?= $(shell cat /etc/system-release | cut -d' ' -f1 | tr '[:upper:]' '[:lower:]')
-DIST ?= $(filter mac,$(shell uname -s | sed -e 's/Darwin/mac'))
-DIST ?= $(filter msys,$(shell uname -o | tr '[:upper:]' '[:lower:]'))
 PKGS = coreutils tmux
 LOCALDIR = $(HOME)/.local/share
 PLCONF = powerline/bindings/tmux/powerline.conf
@@ -107,7 +107,7 @@ $(PLUGGED): $(AUTOLOADDIR)/plug.vim $(PLUGINRC)
 	vim +PlugInstall +qall
 	@touch $(PLUGGED)
 
-ifeq ($(DIST),mac)
+ifneq ($(filter $(DIST),mac),)
 FONTDIR := $(HOME)/Library/Fonts
 BREW = $(shell which brew &> /dev/null || echo brew)
 PKGS += macvim the_silver_searcher
@@ -133,6 +133,8 @@ $(PKGTARGETS): $(BREW)
 brew-update:
 	brew update
 	-brew upgrade
+
+update: brew-update
 
 .PHONY: $(BREW) brew-update
 endif
@@ -169,34 +171,34 @@ $(PKGTARGETS):
 
 dnf-update:
 	sudo $(PKGM) -y upgrade $(INSTALLPKGS)
+
+update: dnf-update
 endif
 
-update: install $(PKGUPDATE)
-	vim +PlugUpgrade +PlugUpdate +qall
-
-.PHONY: $(PKGUPDATE)
-endif
-
-ifeq ($(DIST),msys)
-PKGS += gcc
-INSTALLPKGS = $(subst ack,perl-ack,$(PKGS))
+ifneq ($(filter $(DIST),msys),)
+PKGS += gcc man-pages-posix
+INSTALLPKGS = $($(subst tmux,tmux-git,$(subst ack,perl-ack,$(PKGS))))
 TARGETPKGS = $(filter-out $(shell pacman -Qsq),$(INSTALLPKGS))
 ifneq ($(TARGETPKGS),)
 PKGTARGETS=pkgtargets
 endif
 
 $(EZINSTALL):
-	pacman -S --noconfirm --needed python2-setuptools
-	ln -s /usr/bin/easy_install-2.7 /usr/bin/easy_install
+	pacman -S --noconfirm python3-setuptools
+	#ln -s /usr/bin/easy_install-2.7 /usr/bin/easy_install
 
 $(PKGTARGETS):
-	pacman -S --noconfirm $(INSTALLPKGS)
+	pacman -S --noconfirm --needed $(TARGETPKGS)
 
 pacman-update:
 	pacman -Su --noconfirm
 
-update: install pacman-update
+update: pacman-update
+endif
+
+update: install
 	vim +PlugUpgrade +PlugUpdate +qall
+
 endif
 
 
@@ -209,13 +211,13 @@ TARGETFONTS = $(filter-out $(wildcard $(FONTDIR)/*.ttf), \
 vpath %.ttf $(FONTDIRS)
 
 ifeq ($(filter powerline,$(INSTALLPKGS)),)
-ifeq ($(shell echo 'import sys; print [x for x in sys.path if "powerline_status" in x][0]' | python 2> /dev/null),)
+ifeq ($(shell echo 'import sys; print([x for x in sys.path if "powerline_status" in x][0])' | python 2> /dev/null),)
 PYMS += powerline-status
 endif
 
 $(LOCALDIR)/$(PLCONF): $(PYMS)
 	mkdir -p $(dir $@)
-	ln -sf `echo 'import sys; print [x for x in sys.path if "powerline_status" in x][0]' \
+	ln -sf `echo 'import sys; print([x for x in sys.path if "powerline_status" in x][0])' \
 		| python`/$(PLCONF) $@
 else
 
@@ -225,12 +227,14 @@ $(LOCALDIR)/$(PLCONF):
 
 endif
 ifeq ($(filter python-psutil,$(INSTALLPKGS)),)
-ifeq ($(shell echo 'import sys; print [x for x in sys.path if "psutil" in x][0]' | python 2> /dev/null),)
+ifeq ($(shell echo 'import sys; print([x for x in sys.path if "psutil" in x][0])' | python 2> /dev/null),)
+ifeq ($(filter $(DIST),msys),)
 PYMS += psutil
 endif
 endif
+endif
 ifeq ($(filter pylint,$(INSTALLPKGS)),)
-ifeq ($(shell echo 'import sys; print [x for x in sys.path if "pylint" in x][0]' | python 2> /dev/null),)
+ifeq ($(shell echo 'import sys; print([x for x in sys.path if "pylint" in x][0])' | python 2> /dev/null),)
 PYMS += pylint
 endif
 endif
@@ -248,8 +252,11 @@ $(PLUGINRC): $(PRCFILE)
 fonts/powerline-fonts/:
 	git clone https://github.com/powerline/fonts.git $@
 
-$(FONTDIR)/%.ttf: %.ttf
-	cp $< $(FONTDIR)
+$(FONTDIR)/:
+	mkdir -p $@
+
+$(FONTDIR)/%.ttf: %.ttf $(FONTDIR)/
+	cp $< $(FONTDIR)/
 
 $(INPUTFONTS): $(PKGTARGETS)
 
@@ -262,5 +269,7 @@ uninstall:
 	-rm -fr $(DESTFILES) $(GITTARGETS) $(PLUGINRC) $(PLUGGED) $(BUNDLE) $(AUTOLOADDIR)/plug.vim .fonts_installed
 
 test:
+	echo "$(DIST)"
 	echo $(INSTALLPKGS)
+	echo $(PKGS)
 .PHONY: all install uninstall update $(PKGTARGETS) $(PYMS) $(EZINSTALL)
