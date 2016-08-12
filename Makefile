@@ -1,4 +1,4 @@
-DIST := $(if $(filter Darwin,$(shell uname -s)),mac,\
+DIST ?= $(if $(filter Darwin,$(shell uname -s)),mac,\
 	$(if $(filter Msys,$(shell uname -o)),msys,\
 	$(if $(wildcard /etc/os-release),$(shell . /etc/os-release 2> /dev/null && echo $$ID),\
 	$(shell cat /etc/system-release | cut -d' ' -f1 | tr '[:upper:]' '[:lower:]'))))
