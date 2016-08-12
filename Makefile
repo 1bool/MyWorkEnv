@@ -214,11 +214,12 @@ ifeq ($(filter powerline,$(INSTALLPKGS)),)
 ifeq ($(shell echo 'import sys; print([x for x in sys.path if "powerline_status" in x][0])' | python 2> /dev/null),)
 PYMS += powerline-status
 endif
-
 $(LOCALDIR)/$(PLCONF): $(PYMS)
+ifeq ($(filter $(DIST),msys),)
 	mkdir -p $(dir $@)
 	ln -sf `echo 'import sys; print([x for x in sys.path if "powerline_status" in x][0])' \
 		| python`/$(PLCONF) $@
+endif
 else
 
 $(LOCALDIR)/$(PLCONF):
