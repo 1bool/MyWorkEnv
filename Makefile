@@ -3,28 +3,17 @@ DESTFILES = $(addprefix $(HOME)/.,$(RCFILES)) $(LOCALDIR)/$(PLCONF)
 VIMDIR = $(HOME)/.vim
 AUTOLOADDIR = $(VIMDIR)/autoload
 PLUGINRC = $(VIMDIR)/pluginrc.vim
-ifeq ($(shell uname -s),Darwin)
-DIST = mac
-FONTDIR = $(HOME)/Library/Fonts
-else
-DIST = $(shell . /etc/os-release 2> /dev/null && echo $$ID)
-FONTDIR = $(HOME)/.local/share/fonts
-endif
-ifeq ($(DIST),)
-DIST = $(shell cat /etc/system-release | cut -d' ' -f1 | tr '[:upper:]' '[:lower:]')
-endif
+DIST ?= $(shell . /etc/os-release 2> /dev/null && echo $$ID)
+DIST ?= $(shell cat /etc/system-release | cut -d' ' -f1 | tr '[:upper:]' '[:lower:]')
+DIST ?= $(filter mac,$(shell uname -s | sed -e 's/Darwin/mac'))
+DIST ?= $(filter msys,$(shell uname -o | tr '[:upper:]' '[:lower:]'))
 PKGS = coreutils tmux
 LOCALDIR = $(HOME)/.local/share
 PLCONF = powerline/bindings/tmux/powerline.conf
 ifeq ($(shell which easy_install 2> /dev/null),)
 EZINSTALL = python-setuptools
 endif
-INPUTFONTS = $(shell find fonts/InputMono -name *.ttf -type f)
-FONTDIRS = $(dir $(INPUTFONTS))
-TARGETFONTS = $(filter-out $(wildcard $(FONTDIR)/*.ttf), \
-	      $(addprefix $(FONTDIR)/,$(notdir $(INPUTFONTS))))
-
-vpath %.ttf $(FONTDIRS)
+FONTDIR = $(HOME)/.local/share/fonts
 
 all: install
 
@@ -32,7 +21,8 @@ all: install
 ifneq ($(filter $(DIST),ubuntu debian),)
 BUNDLE = $(VIMDIR)/bundle
 PRCFILE = pathogenrc.vim
-PKGS += exuberant-ctags \
+PKGS += git \
+	exuberant-ctags \
 	vim-gnome \
 	vim-addon-manager \
 	vim-scripts \
@@ -118,6 +108,7 @@ $(PLUGGED): $(AUTOLOADDIR)/plug.vim $(PLUGINRC)
 	@touch $(PLUGGED)
 
 ifeq ($(DIST),mac)
+FONTDIR := $(HOME)/Library/Fonts
 BREW = $(shell which brew &> /dev/null || echo brew)
 PKGS += macvim the_silver_searcher
 INSTALLPKGS = $(PKGS)
@@ -147,7 +138,8 @@ brew-update:
 endif
 
 ifneq ($(filter $(DIST),fedora centos redhat),)
-PKGS += vim-enhanced \
+PKGS += git \
+	vim-enhanced \
 	vim-X11 \
 	automake \
 	gcc \
@@ -165,17 +157,17 @@ TARGETPKGS = $(filter-out $(shell rpm -qa --qf '%{NAME} '),$(INSTALLPKGS))
 ifneq ($(TARGETPKGS),)
 PKGTARGETS=pkgtargets
 endif
-DNF = $(shell which dnf 2> /dev/null || echo yum)
+PKGM ?= $(shell which dnf 2> /dev/null || echo yum)
 PKGUPDATE = dnf-update
 
 $(EZINSTALL):
-	sudo $(DNF) -y install $@
+	sudo $(PKGM) -y install $@
 
 $(PKGTARGETS):
-	sudo $(DNF) -y install $(TARGETPKGS)
+	sudo $(PKGM) -y install $(TARGETPKGS)
 
 dnf-update:
-	sudo $(DNF) -y upgrade $(INSTALLPKGS)
+	sudo $(PKGM) -y upgrade $(INSTALLPKGS)
 endif
 
 update: install $(PKGUPDATE)
@@ -185,6 +177,13 @@ update: install $(PKGUPDATE)
 endif
 
 
+
+INPUTFONTS = $(shell find fonts/InputMono -name *.ttf -type f)
+FONTDIRS = $(dir $(INPUTFONTS))
+TARGETFONTS = $(filter-out $(wildcard $(FONTDIR)/*.ttf), \
+	      $(addprefix $(FONTDIR)/,$(notdir $(INPUTFONTS))))
+
+vpath %.ttf $(FONTDIRS)
 
 ifeq ($(filter powerline,$(INSTALLPKGS)),)
 ifeq ($(shell echo 'import sys; print [x for x in sys.path if "powerline_status" in x][0]' | python 2> /dev/null),)
