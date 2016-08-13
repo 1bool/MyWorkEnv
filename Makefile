@@ -14,6 +14,7 @@ ifeq ($(shell which easy_install 2> /dev/null),)
 EZINSTALL = python-setuptools
 endif
 FONTDIR = $(HOME)/.local/share/fonts
+FONTS = .fonts_installed
 
 all: install
 
@@ -182,6 +183,7 @@ TARGETPKGS = $(filter-out $(shell pacman -Qsq),$(INSTALLPKGS))
 ifneq ($(TARGETPKGS),)
 PKGTARGETS=pkgtargets
 endif
+FONTS :=
 
 $(EZINSTALL):
 	pacman -S --noconfirm python3-setuptools
@@ -215,10 +217,12 @@ ifeq ($(shell echo 'import sys; print([x for x in sys.path if "powerline_status"
 PYMS += powerline-status
 endif
 $(LOCALDIR)/$(PLCONF): $(PYMS)
-ifeq ($(filter $(DIST),msys),)
 	mkdir -p $(dir $@)
+ifeq ($(filter $(DIST),msys),)
 	ln -sf `echo 'import sys; print([x for x in sys.path if "powerline_status" in x][0])' \
 		| python`/$(PLCONF) $@
+else
+	touch $@
 endif
 else
 
@@ -264,13 +268,9 @@ $(INPUTFONTS): $(PKGTARGETS)
 .fonts_installed: fonts/powerline-fonts/ $(TARGETFONTS)
 	fonts/powerline-fonts/install.sh && touch $@
 
-install: $(DESTFILES) $(PKGTARGETS) $(PKGPLUGINTARGETS) $(GITTARGETS) $(PLUGINRC) $(PLUGGED) $(PYMS) .fonts_installed
+install: $(DESTFILES) $(PKGTARGETS) $(PKGPLUGINTARGETS) $(GITTARGETS) $(PLUGINRC) $(PLUGGED) $(PYMS) $(FONTS)
 
 uninstall:
-	-rm -fr $(DESTFILES) $(GITTARGETS) $(PLUGINRC) $(PLUGGED) $(BUNDLE) $(AUTOLOADDIR)/plug.vim .fonts_installed
+	-rm -fr $(DESTFILES) $(GITTARGETS) $(PLUGINRC) $(PLUGGED) $(BUNDLE) $(AUTOLOADDIR)/plug.vim $(FONTS)
 
-test:
-	echo "$(DIST)"
-	echo $(INSTALLPKGS)
-	echo $(PKGS)
 .PHONY: all install uninstall update $(PKGTARGETS) $(PYMS) $(EZINSTALL)
