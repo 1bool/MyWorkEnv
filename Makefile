@@ -177,6 +177,7 @@ update: dnf-update
 endif
 
 ifneq ($(filter $(DIST),msys),)
+DESTFILES += $(HOME)/.minttyrc
 PKGS += gcc man-pages-posix
 INSTALLPKGS = $($(subst tmux,tmux-git,$(subst ack,perl-ack,$(PKGS))))
 TARGETPKGS = $(filter-out $(shell pacman -Qsq),$(INSTALLPKGS))
