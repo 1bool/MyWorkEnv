@@ -80,7 +80,7 @@ set showmode
 nmap <C-N><C-N> :setlocal invnumber<CR>
 
 " Toggle background
-map zb :let &background = ( &background == "dark"? "light" : "dark" )<CR>
+map <Leader>b :let &background = ( &background == "dark"? "light" : "dark" )<CR>
 
 if has("autocmd")
 	autocmd BufEnter,BufWrite,FileType c,cpp,python,sh,java,javascript,perl,ruby,php,make,vim
@@ -128,7 +128,7 @@ function! PluginSetup()
 		let g:indent_guides_start_level=2 "从第二层开始可视化显示缩进
 		let g:indent_guides_guide_size=1 " 色块宽度
 		" 快捷键 i 开/关缩进可视化
-		nmap <silent> zi <Plug>IndentGuidesToggle
+		nmap <silent> <Leader>i <Plug>IndentGuidesToggle
 	endif
 endfunction
 
