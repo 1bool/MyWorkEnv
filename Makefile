@@ -177,7 +177,7 @@ update: dnf-update
 endif
 
 ifneq ($(filter $(DIST),msys),)
-DESTFILES += $(HOME)/.minttyrc
+DESTFILES += $(HOME)/.minttyrc /usr/bin/vi
 PKGS += gcc man-pages-posix
 INSTALLPKGS = $($(subst tmux,tmux-git,$(subst ack,perl-ack,$(PKGS))))
 TARGETPKGS = $(filter-out $(shell pacman -Qsq),$(INSTALLPKGS))
@@ -192,6 +192,9 @@ $(EZINSTALL):
 
 $(PKGTARGETS):
 	pacman -S --noconfirm --needed $(TARGETPKGS)
+
+/usr/bin/vi:
+	ln -s vim $@
 
 pacman-update:
 	pacman -Su --noconfirm
