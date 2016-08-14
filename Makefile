@@ -61,17 +61,14 @@ endif
 GITTARGETS = $(addprefix $(BUNDLE)/,$(filter-out \
 			 $(addsuffix .vim,$(PKGTOGIT)),$(filter-out \
 			 $(addprefix %,$(PKGTOGIT)),$(notdir $(GITPLUGINS)))))
-ifneq ($(TARGETPKGS),)
-PKGTARGETS=pkgtargets
-endif
 
 $(VIMDIR):
 	mkdir -p $(VIMDIR)
 
-$(PKGTARGETS):
+pkgtargets:
 	sudo apt-get -y install $(TARGETPKGS)
 
-$(PKGPLUGINTARGETS): $(VIMDIR) $(PKGTARGETS)
+$(PKGPLUGINTARGETS): $(VIMDIR) $(TARGETPKGS)
 	vam install $@
 
 $(BUNDLE)/%:
@@ -113,7 +110,7 @@ FONTDIR := $(HOME)/Library/Fonts
 BREW = $(shell which brew &> /dev/null || echo brew)
 PKGS += macvim the_silver_searcher
 INSTALLPKGS = $(PKGS)
-PKGTARGETS = $(filter-out $(shell brew list),$(INSTALLPKGS))
+TARGETPKGS = $(filter-out $(shell brew list),$(INSTALLPKGS))
 PKGUPDATE = brew-update
 
 $(EZINSTALL):
@@ -124,7 +121,7 @@ $(BREW):
 	/usr/bin/ruby -e "`curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install`"
 	brew update
 
-$(PKGTARGETS): $(BREW)
+$(TARGETPKGS): $(BREW)
 	@if [ $@ = macvim ]; then \
 		brew install $@ --with-lua --with-override-system-vim; \
 		brew linkapps macvim; \
@@ -158,16 +155,13 @@ PKGS += git \
 	wqy-zenhei-fonts
 INSTALLPKGS = $(PKGS)
 TARGETPKGS = $(filter-out $(shell rpm -qa --qf '%{NAME} '),$(INSTALLPKGS))
-ifneq ($(TARGETPKGS),)
-PKGTARGETS=pkgtargets
-endif
 PKGM ?= $(shell which dnf 2> /dev/null || echo yum)
 PKGUPDATE = dnf-update
 
 $(EZINSTALL):
 	sudo $(PKGM) -y install $@
 
-$(PKGTARGETS):
+pkgtargets:
 	sudo $(PKGM) -y install $(TARGETPKGS)
 
 dnf-update:
@@ -178,26 +172,33 @@ endif
 
 ifneq ($(filter $(DIST),msys),)
 DESTFILES += $(HOME)/.minttyrc /usr/bin/vi
-PKGS += gcc man-pages-posix
-INSTALLPKGS = $($(subst tmux,tmux-git,$(subst ack,perl-ack,$(PKGS))))
+PKGS += gcc man-pages-posix unzip diffutils
+INSTALLPKGS = $(subst tmux,tmux-git,$(subst ack,perl-ack,$(PKGS)))
 TARGETPKGS = $(filter-out $(shell pacman -Qsq),$(INSTALLPKGS))
-ifneq ($(TARGETPKGS),)
-PKGTARGETS=pkgtargets
-endif
 FONTS :=
+ifeq ($(MSYSTEM_CARCH),x86_64)
+YCMURL = https://bitbucket.org/Alexander-Shukaev/vim-youcompleteme-for-windows/downloads/vim-ycm-733de48-windows-x64.zip
+else
+YCMURL = https://bitbucket.org/Alexander-Shukaev/vim-youcompleteme-for-windows/downloads/vim-ycm-733de48-windows-x86.zip
+endif
 
 $(EZINSTALL):
 	pacman -S --noconfirm python3-setuptools
-	#ln -s /usr/bin/easy_install-2.7 /usr/bin/easy_install
 
-$(PKGTARGETS):
+pkgtargets:
 	pacman -S --noconfirm --needed $(TARGETPKGS)
 
 /usr/bin/vi:
 	ln -s vim $@
 
+$(VIMDIR)/plugged/vim-ycm-windows:
+	mkdir -p $@
+	curl -LSo /tmp/ycm.zip $(YCMURL)
+	unzip -d $@ /tmp/ycm.zip
+	rm /tmp/ycm.zip
+
 pacman-update:
-	pacman -Su --noconfirm
+	pacman -Su --noconfirm --needed $(INSTALLPKGS)
 
 update: pacman-update
 endif
@@ -248,7 +249,7 @@ PYMS += pylint
 endif
 endif
 
-$(PYMS): $(EZINSTALL) $(PKGTARGETS)
+$(PYMS): $(EZINSTALL) $(TARGETPKGS)
 	easy_install --user $@
 
 $(HOME)/.%: %
@@ -267,14 +268,21 @@ $(FONTDIR)/:
 $(FONTDIR)/%.ttf: %.ttf $(FONTDIR)/
 	cp $< $(FONTDIR)/
 
-$(INPUTFONTS): $(PKGTARGETS)
+$(TARGETPKGS): pkgtargets
+
+$(TARGETFONTS): $(TARGETPKGS)
 
 .fonts_installed: fonts/powerline-fonts/ $(TARGETFONTS)
 	fonts/powerline-fonts/install.sh && touch $@
 
-install: $(DESTFILES) $(PKGTARGETS) $(PKGPLUGINTARGETS) $(GITTARGETS) $(PLUGINRC) $(PLUGGED) $(PYMS) $(FONTS)
+install: $(DESTFILES) $(TARGETPKGS) $(PKGPLUGINTARGETS) $(GITTARGETS) $(PLUGINRC) $(PLUGGED) $(PYMS) $(FONTS)
 
 uninstall:
 	-rm -fr $(DESTFILES) $(GITTARGETS) $(PLUGINRC) $(PLUGGED) $(BUNDLE) $(AUTOLOADDIR)/plug.vim $(FONTS)
 
-.PHONY: all install uninstall update $(PKGTARGETS) $(PYMS) $(EZINSTALL)
+test:
+	echo $(PKGS)
+	echo $(INSTALLPKGS)
+	echo $(TARGETPKGS)
+
+.PHONY: all install uninstall update pkgtargets $(TARGETPKGS) $(PYMS) $(EZINSTALL)
