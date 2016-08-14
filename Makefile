@@ -7,7 +7,7 @@ DESTFILES = $(addprefix $(HOME)/.,$(RCFILES)) $(LOCALDIR)/$(PLCONF)
 VIMDIR = $(HOME)/.vim
 AUTOLOADDIR = $(VIMDIR)/autoload
 PLUGINRC = $(VIMDIR)/pluginrc.vim
-PKGS = coreutils tmux
+PKGS := coreutils tmux
 LOCALDIR = $(HOME)/.local/share
 PLCONF = powerline/bindings/tmux/powerline.conf
 ifeq ($(shell which easy_install 2> /dev/null),)
@@ -34,7 +34,7 @@ PKGS += git \
 	python-psutil \
 	powerline
 INSTALLPKGS = $(filter $(shell apt-cache search --names-only '.*' | cut -d' ' -f1),$(PKGS))
-GITPLUGINS = $(shell grep '^[[:blank:]]*Plug ' plugrc.vim | cut -d\' -f2) pathogen
+GITPLUGINS = $(filter-out %/vim-ycm-windows,$(shell grep '^[[:blank:]]*Plug ' plugrc.vim | cut -d\' -f2)) pathogen
 GITTOPKG = $(shell echo $(subst nerdcommenter,nerd-commenter,\
 		   $(basename $(notdir $(subst a.vim,alternate.vim,$(GITPLUGINS))))) \
 		   | tr [:upper:] [:lower:])

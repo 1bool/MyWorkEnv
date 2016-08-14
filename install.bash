@@ -14,6 +14,7 @@ elif [ -r /etc/system-release ]; then
 fi
 export DIST
 
+PKGS="make git curl"
 case "$DIST" in
 	fedora|centos|redhat)
 		if command -v yum; then
@@ -22,22 +23,22 @@ case "$DIST" in
 			PKGM=dnf
 		fi
 		export PKGM
-		sudo $PKGM -y install make git
+		sudo $PKGM -y install $PKGS
 		;;
 	ubuntu|debian)
-		sudo apt-get -y install make git
+		sudo apt-get -y install $PKGS grep
 		;;
 	msys)
 		pacman -Sy --noconfirm pacman
 		pacman -Sy --noconfirm
 		pacman -Syu --noconfirm
-		pacman -S --noconfirm make git
+		pacman -S --noconfirm $PKGS
 		;;
 	mac)
 		xcode-select --install
 		/usr/bin/ruby -e "`curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install`"
 		brew update
-		brew install make git
+		brew install $PKGS
 		;;
 esac
 
