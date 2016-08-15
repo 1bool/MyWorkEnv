@@ -29,10 +29,10 @@ case "$DIST" in
 		sudo apt-get -y install $PKGS grep
 		;;
 	msys)
-		pacman -Sy --noconfirm pacman
-		pacman -Sy --noconfirm
-		pacman -Syu --noconfirm
-		pacman -S --noconfirm $PKGS
+		pacman -Sy --noconfirm --needed pacman
+		pacman -Sy --noconfirm --needed
+		pacman -Syu --noconfirm --needed
+		pacman -S --noconfirm --needed $PKGS
 		;;
 	mac)
 		xcode-select --install

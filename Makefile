@@ -172,7 +172,7 @@ endif
 
 ifneq ($(filter $(DIST),msys),)
 DESTFILES += $(HOME)/.minttyrc /usr/bin/vi
-PKGS += gcc man-pages-posix unzip diffutils
+PKGS += man-pages-posix unzip diffutils
 INSTALLPKGS = $(subst tmux,tmux-git,$(subst ack,perl-ack,$(PKGS)))
 TARGETPKGS = $(filter-out $(shell pacman -Qsq),$(INSTALLPKGS))
 FONTS :=
@@ -191,21 +191,21 @@ pkgtargets:
 /usr/bin/vi:
 	ln -s vim $@
 
-$(VIMDIR)/plugged/vim-ycm-windows:
-	mkdir -p $@
-	curl -LSo /tmp/ycm.zip $(YCMURL)
-	unzip -d $@ /tmp/ycm.zip
-	rm /tmp/ycm.zip
+$(VIMDIR)/plugged/vim-ycm-windows/:
+	curl -LSo /tmp/$(notdir $(YCMURL)) $(YCMURL)
+	unzip -q -d $@ /tmp/$(notdir $(YCMURL))
+	rm /tmp/$(notdir $(YCMURL))
 
 pacman-update:
 	pacman -Su --noconfirm --needed $(INSTALLPKGS)
 
 update: pacman-update
+
+install: $(VIMDIR)/plugged/vim-ycm-windows/
 endif
 
 update: install
 	vim +PlugUpgrade +PlugUpdate +qall
-
 endif
 
 
@@ -279,10 +279,5 @@ install: $(DESTFILES) $(TARGETPKGS) $(PKGPLUGINTARGETS) $(GITTARGETS) $(PLUGINRC
 
 uninstall:
 	-rm -fr $(DESTFILES) $(GITTARGETS) $(PLUGINRC) $(PLUGGED) $(BUNDLE) $(AUTOLOADDIR)/plug.vim $(FONTS)
-
-test:
-	echo $(PKGS)
-	echo $(INSTALLPKGS)
-	echo $(TARGETPKGS)
 
 .PHONY: all install uninstall update pkgtargets $(TARGETPKGS) $(PYMS) $(EZINSTALL)
