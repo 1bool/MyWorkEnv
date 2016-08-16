@@ -1,19 +1,18 @@
 BoldAsFont=yes
 Font=Inconsolata for Powerline
-FontHeight=12
+FontHeight=11
 FontIsBold=no
 Term=xterm-256color
 BellSound=yes
 CursorType=block
 Transparency=off
-Rows=70
+Rows=75
 FontSmoothing=default
 Locale=C
 Charset=UTF-8
 CursorBlinks=yes
 BoldAsColour=no
 AllowBlinking=yes
-
 ForegroundColour=197,200,198
 BackgroundColour=29,31,33
 CursorColour=197,200,198
@@ -33,3 +32,4 @@ Cyan=57,113,237
 BoldCyan=57,113,237
 White=197,200,198
 BoldWhite=255,255,255
+FontWeight=500
