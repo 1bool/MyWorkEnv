@@ -1,6 +1,5 @@
 let g:plug_window = "vertical botright new"
 call plug#begin()
-Plug '~/.vim/plugged/vim-ycm-windows'
 Plug 'scrooloose/nerdtree', { 'on': 'NERDTreeToggle' }
 Plug 'scrooloose/nerdcommenter'
 Plug 'scrooloose/syntastic'
@@ -11,7 +10,9 @@ Plug 'vim-airline/vim-airline'
 Plug 'tpope/vim-fugitive'
 Plug 'mhinz/vim-grepper'
 Plug 'mhinz/vim-startify'
-if !has('win32') && !has('win64')
+if has('win32') || has('win64')
+	Plug '~/.vim/plugged/vim-ycm-windows'
+else
 	Plug 'Valloric/YouCompleteMe', { 'do': './install.py --clang-completer' }
 endif
 Plug 'rdnetto/YCM-Generator', { 'branch': 'stable', 'on': [ 'YcmGenerateConfig', 'CCGenerateConfig' ]}
