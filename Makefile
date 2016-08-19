@@ -191,8 +191,9 @@ pkgtargets:
 /usr/bin/vi:
 	ln -s vim $@
 
-$(VIMDIR)/plugged/vim-ycm-windows/:
+$(VIMDIR)/plugged/vim-ycm-windows/: $(TARGETPKGS)
 	curl -LSo /tmp/$(notdir $(YCMURL)) $(YCMURL)
+	mkdir -p $@
 	unzip -q -d $@ /tmp/$(notdir $(YCMURL))
 	rm /tmp/$(notdir $(YCMURL))
 
