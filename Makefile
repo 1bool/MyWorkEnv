@@ -81,7 +81,7 @@ $(EZINSTALL):
 
 $(VIMDIR)/autoload/pathogen.vim:
 	mkdir -p $(dir $@)
-	curl -LSso $@ https://tpo.pe/pathogen.vim
+	curl -LSso $@ https://raw.githubusercontent.com/tpope/vim-pathogen/master/autoload/pathogen.vim
 
 update: install
 	sudo apt-get -y update
