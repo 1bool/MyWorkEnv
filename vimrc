@@ -1,6 +1,6 @@
 if has('win32') || has('win64')
-    " Make windows use ~/.vim too, I don't want to use _vimfiles
-    set runtimepath^=~/.vim
+	" Make windows use ~/.vim too, I don't want to use _vimfiles
+	set runtimepath^=~/.vim
 endif
 runtime! pluginrc.vim
 

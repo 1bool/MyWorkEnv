@@ -193,8 +193,8 @@ pkgtargets:
 
 $(VIMDIR)/plugged/vim-ycm-windows/: $(TARGETPKGS)
 	curl -LSo /tmp/$(notdir $(YCMURL)) $(YCMURL)
-	mkdir -p $@
-	unzip -q -d $@ /tmp/$(notdir $(YCMURL))
+	cd /tmp; unzip -q /tmp/$(notdir $(YCMURL))
+	mv /tmp/$(basename $(notdir $(YCMURL))) $@
 	rm /tmp/$(notdir $(YCMURL))
 
 pacman-update:
