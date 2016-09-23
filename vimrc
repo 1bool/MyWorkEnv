@@ -98,10 +98,11 @@ function! PluginSetup()
 		nnoremap <silent> <F7> :TagbarToggle<CR>
 	endif
 	if exists(":NERDTreeToggle")
-		let g:NERDTree_title="[NERDTree]"
-		let NERDTreeWinSize=36 "设置 NERDTree 子窗口宽度
-		let NERDTreeWinPos="left" "设置 NERDTree 子窗口位置
-		let NERDTreeShowBookmarks = 1
+		let g:NERDTreeWinSize=36 "设置 NERDTree 子窗口宽度
+		let g:NERDTreeWinPos="left" "设置 NERDTree 子窗口位置
+		let g:NERDTreeShowBookmarks = 1
+		let g:NERDTreeQuitOnOpen = 1
+		let g:NERDTreeMouseMode = 2
 		nnoremap <silent> <F6> :NERDTreeToggle<CR>
 	endif
 	if exists(":Grepper")
@@ -131,6 +132,8 @@ function! PluginSetup()
 		nmap <silent> <Leader>i <Plug>IndentGuidesToggle
 	endif
 endfunction
+
+" nerdtree
 
 " air-line
 let g:airline_powerline_fonts = 1
