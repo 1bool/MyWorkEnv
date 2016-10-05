@@ -128,6 +128,9 @@ else
 		if [ -x $POWERLINE_DIR/bin/powerline ]; then
 			POWERLINE_COMMAND=$POWERLINE_DIR/bin/powerline
 		fi
+		if [ -x $POWERLINE_DIR/EGG-INFO/scripts/powerline-config ]; then
+			POWERLINE_CONFIG_COMMAND=$POWERLINE_DIR/EGG-INFO/scripts/powerline-config
+		fi
 		. $POWERLINE_DIR/powerline/bindings/bash/powerline.sh
 	fi
 fi
