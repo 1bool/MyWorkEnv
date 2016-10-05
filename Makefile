@@ -85,7 +85,7 @@ $(VIMDIR)/autoload/pathogen.vim:
 
 update: install
 	sudo apt-get -y update
-	sudo apt-get -y upgrade $(PKGS)
+	sudo apt-get -y upgrade $(TARGETPKGS)
 	@for dir in $(GITTARGETS); do \
 		echo Updating $$dir; git -C $$dir pull; done
 
