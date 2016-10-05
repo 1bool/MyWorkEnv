@@ -263,11 +263,8 @@ $(PLUGINRC): $(PRCFILE)
 fonts/powerline-fonts/:
 	git clone https://github.com/powerline/fonts.git $@
 
-$(FONTDIR)/:
-	mkdir -p $@
-
-$(FONTDIR)/%.ttf: %.ttf $(FONTDIR)/
-	cp $< $(FONTDIR)/
+$(FONTDIR)/%.ttf: %.ttf
+	install -D $< $@
 
 $(TARGETPKGS): pkgtargets
 
