@@ -172,7 +172,7 @@ endif
 
 ifneq ($(filter $(DIST),msys),)
 DESTFILES += $(HOME)/.minttyrc /usr/bin/vi
-PKGS += man-pages-posix unzip diffutils
+PKGS += man-pages-posix unzip diffutils gcc
 INSTALLPKGS = $(subst tmux,tmux-git,$(subst ack,perl-ack,$(PKGS)))
 TARGETPKGS = $(filter-out $(shell pacman -Qsq),$(INSTALLPKGS))
 FONTS :=
@@ -194,6 +194,7 @@ pkgtargets:
 $(VIMDIR)/plugged/vim-ycm-windows/: $(TARGETPKGS)
 	curl -LSo /tmp/$(notdir $(YCMURL)) $(YCMURL)
 	cd /tmp; unzip -q /tmp/$(notdir $(YCMURL))
+	mkdir -p $(PLUGGED)
 	mv /tmp/$(basename $(notdir $(YCMURL))) $@
 	rm /tmp/$(notdir $(YCMURL))
 
