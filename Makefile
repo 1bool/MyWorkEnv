@@ -76,8 +76,11 @@ $(BUNDLE)/%:
 	@if [ -d $@/doc ]; then \
 		vim +Helptags $@/doc +qall; fi
 
-$(EZINSTALL):
+$(EZINSTALL): .apt-update
 	sudo apt-get -y install $@
+
+.apt-update:
+	sudo apt-get update && touch .apt-update
 
 $(VIMDIR)/autoload/pathogen.vim:
 	mkdir -p $(dir $@)
