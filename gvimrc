@@ -37,11 +37,9 @@ if has("gui_gtk2")
 	set guifont=Input\ Mono\ Condensed\\,\ Medium\ Condensed\ 10,Roboto\ Mono\ Medium\ for\ Powerline\ 9,Monospace\ 9
 elseif has("gui_macvim")
 	set guifont=Cousine\ for\ Powerline:h12
-	set fileencodings=utf-8,cp936,gb18030,big5
 elseif has("gui_win32")
 	set guifont=InputMonoCondensed:h10:cANSI
 	set formatoptions+=mM
-	set fileencodings=utf-8,cp936,gb18030,big5
 	language messages zh_CN.utf-8
 	set langmenu=zh_CN.utf-8
 	runtime! delmenu.vim

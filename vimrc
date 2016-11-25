@@ -167,3 +167,4 @@ catch /^Vim\%((\a\+)\)\=:E185/
 	" Fallback to desert
 	colorscheme desert
 endtry
+set fileencodings=utf-8,cp936,gb18030,big5
