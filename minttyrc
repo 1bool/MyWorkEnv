@@ -1,12 +1,12 @@
 BoldAsFont=yes
-Font=Inconsolata-dz for Powerline
-FontHeight=10
+Font=Inconsolata for Powerline
+FontHeight=12
 FontIsBold=no
 Term=xterm-256color
 BellSound=yes
 CursorType=block
 Transparency=off
-Rows=75
+Rows=70
 FontSmoothing=default
 Locale=C
 Charset=UTF-8
