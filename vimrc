@@ -43,6 +43,7 @@ set hlsearch " turns on search highlighting
 set tags=./tags;/
 set encoding=utf-8
 set termencoding=utf-8
+set fileencodings=utf-8,cp936,gb18030,big5
 set t_Co=256
 set laststatus=2 " For powerline always show
 
@@ -117,11 +118,11 @@ function! PluginSetup()
 		let g:ycm_seed_identifiers_with_syntax = 1 " Completion for programming language's keyword
 		let g:ycm_autoclose_preview_window_after_completion = 1
 		let g:ycm_autoclose_preview_window_after_insertion = 1
-		nnoremap <Leader>g :YcmCompleter GoTo<CR>
-		nnoremap <Leader>] :YcmCompleter GoToDefinition<CR>
-		nnoremap <Leader>r :YcmCompleter GoToReferences<CR>
-		nnoremap <Leader>y :YcmCompleter GetType<CR>
-		nnoremap <Leader>d :YcmCompleter GetDoc<CR>
+		nnoremap <C-g> :YcmCompleter GoTo<CR>
+		nnoremap <M-]> :YcmCompleter GoToDefinition<CR>
+		nnoremap <M-r> :YcmCompleter GoToReferences<CR>
+		nnoremap <M-t> :YcmCompleter GetType<CR>
+		nnoremap <M-d> :YcmCompleter GetDoc<CR>
 		nnoremap <F5> :YcmForceCompileAndDiagnostics<CR>
 	endif
 	if exists(":IndentGuidesToggle")
@@ -157,6 +158,11 @@ let g:rooter_change_directory_for_non_project_files = 'current'
 let g:rooter_use_lcd = 1
 let g:rooter_silent_chdir = 1
 
+" ycm for win
+if system('uname -o') =~ "Msys" && !has("gui_running")
+	let g:ycm_server_python_interpreter = '/c/Program Files/Python35/python.exe'
+endif
+
 let g:ctrlp_cmd = 'CtrlPMRU' " MRU file list as ctrlp default
 
 let python_highlight_all = 1 " python-syntax
@@ -167,4 +173,3 @@ catch /^Vim\%((\a\+)\)\=:E185/
 	" Fallback to desert
 	colorscheme desert
 endtry
-set fileencodings=utf-8,cp936,gb18030,big5

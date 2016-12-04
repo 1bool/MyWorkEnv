@@ -10,11 +10,7 @@ Plug 'vim-airline/vim-airline'
 Plug 'tpope/vim-fugitive'
 Plug 'mhinz/vim-grepper'
 Plug 'mhinz/vim-startify'
-if has('win32') || has('win64')
-	Plug '~/.vim/plugged/vim-ycm-windows'
-else
-	Plug 'Valloric/YouCompleteMe', { 'do': './install.py --clang-completer' }
-endif
+Plug 'Valloric/YouCompleteMe', { 'do': './install.py --clang-completer' }
 Plug 'rdnetto/YCM-Generator', { 'branch': 'stable', 'on': [ 'YcmGenerateConfig', 'CCGenerateConfig' ]}
 Plug 'airblade/vim-rooter'
 Plug 'ctrlpvim/ctrlp.vim'

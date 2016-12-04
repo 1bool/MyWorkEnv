@@ -7,12 +7,9 @@ DESTFILES = $(addprefix $(HOME)/.,$(RCFILES)) $(LOCALDIR)/$(PLCONF)
 VIMDIR = $(HOME)/.vim
 AUTOLOADDIR = $(VIMDIR)/autoload
 PLUGINRC = $(VIMDIR)/pluginrc.vim
-PKGS := coreutils tmux
+PKGS := coreutils tmux curl python-setuptools
 LOCALDIR = $(HOME)/.local/share
 PLCONF = powerline/bindings/tmux/powerline.conf
-ifeq ($(shell which easy_install 2> /dev/null),)
-EZINSTALL = python-setuptools
-endif
 FONTDIR = $(HOME)/.local/share/fonts
 FONTS = .fonts_installed
 
@@ -20,6 +17,7 @@ all: install
 
 
 ifneq ($(filter $(DIST),ubuntu debian),)
+APT_STAMP = '/var/lib/apt/periodic/update-success-stamp'
 BUNDLE = $(VIMDIR)/bundle
 PRCFILE = pathogenrc.vim
 PKGS += git \
@@ -65,8 +63,13 @@ GITTARGETS = $(addprefix $(BUNDLE)/,$(filter-out \
 $(VIMDIR):
 	mkdir -p $(VIMDIR)
 
-pkgtargets:
+$(INSTALLPKGS): $(APT_STAMP)
+	sudo apt-get -y install $@
+
+install-pkgs: $(APT_STAMP)
+ifneq ($(TARGETPKGS),)
 	sudo apt-get -y install $(TARGETPKGS)
+endif
 
 $(PKGPLUGINTARGETS): $(VIMDIR) $(TARGETPKGS)
 	vam install $@
@@ -76,11 +79,8 @@ $(BUNDLE)/%:
 	@if [ -d $@/doc ]; then \
 		vim +Helptags $@/doc +qall; fi
 
-$(EZINSTALL): .apt-update
-	sudo apt-get -y install $@
-
-.apt-update:
-	sudo apt-get update && touch .apt-update
+$(APT_STAMP):
+	sudo apt-get update
 
 $(VIMDIR)/autoload/pathogen.vim:
 	mkdir -p $(dir $@)
@@ -88,7 +88,7 @@ $(VIMDIR)/autoload/pathogen.vim:
 
 update: install
 	sudo apt-get -y update
-	sudo apt-get -y upgrade $(TARGETPKGS)
+	sudo apt-get -y upgrade $(INSTALLPKGS)
 	@for dir in $(GITTARGETS); do \
 		echo Updating $$dir; git -C $$dir pull; done
 
@@ -112,6 +112,7 @@ ifneq ($(filter $(DIST),mac),)
 FONTDIR := $(HOME)/Library/Fonts
 BREW = $(shell which brew &> /dev/null || echo brew)
 PKGS += macvim the_silver_searcher
+PKGS = $(filter-out python-setuptools,$(PKGS))
 INSTALLPKGS = $(PKGS)
 TARGETPKGS = $(filter-out $(shell brew list),$(INSTALLPKGS))
 PKGUPDATE = brew-update
@@ -124,12 +125,17 @@ $(BREW):
 	/usr/bin/ruby -e "`curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install`"
 	brew update
 
-$(TARGETPKGS): $(BREW)
-	@if [ $@ = macvim ]; then \
-		brew install $@ --with-lua --with-override-system-vim; \
-		brew linkapps macvim; \
-	else \
-		brew install $@; fi
+$(INSTALLPKGS): $(BREW)
+	brew install $@
+
+macvim: $(BREW)
+	brew install $@ --with-lua --with-override-system-vim; \
+	brew linkapps macvim
+
+install-pkgs:
+	brew install macvim --with-lua --with-override-system-vim; \
+	brew linkapps macvim
+	brew install $(filter-out macvim,$(TARGETPKGS))
 
 brew-update:
 	brew update
@@ -161,11 +167,13 @@ TARGETPKGS = $(filter-out $(shell rpm -qa --qf '%{NAME} '),$(INSTALLPKGS))
 PKGM ?= $(shell which dnf 2> /dev/null || echo yum)
 PKGUPDATE = dnf-update
 
-$(EZINSTALL):
+$(INSTALLPKGS):
 	sudo $(PKGM) -y install $@
 
-pkgtargets:
+install-pkgs:
+ifneq ($(TARGETPKGS),)
 	sudo $(PKGM) -y install $(TARGETPKGS)
+endif
 
 dnf-update:
 	sudo $(PKGM) -y upgrade $(INSTALLPKGS)
@@ -175,38 +183,47 @@ endif
 
 ifneq ($(filter $(DIST),msys),)
 DESTFILES += $(HOME)/.minttyrc /usr/bin/vi
-PKGS += man-pages-posix unzip diffutils gcc
-INSTALLPKGS = $(subst tmux,tmux-git,$(subst ack,perl-ack,$(PKGS)))
+PKGS += man-pages-posix unzip diffutils gcc unrar
+INSTALLPKGS = $(subst tmux,tmux-git, \
+	      $(subst ack,perl-ack, \
+	      $(subst python-setuptools,python3-setuptools,$(PKGS))))
 TARGETPKGS = $(filter-out $(shell pacman -Qsq),$(INSTALLPKGS))
 FONTS :=
 ifeq ($(MSYSTEM_CARCH),x86_64)
-YCMURL = https://bitbucket.org/Alexander-Shukaev/vim-youcompleteme-for-windows/downloads/vim-ycm-733de48-windows-x64.zip
+YCMURL = ftp://w1ball.f3322.net:2102/YouCompleteMe-w64-2016-9-23.rar
+UNPAK = unrar x -idq
 else
 YCMURL = https://bitbucket.org/Alexander-Shukaev/vim-youcompleteme-for-windows/downloads/vim-ycm-733de48-windows-x86.zip
+UNPAK = unzip -q
 endif
 
-$(EZINSTALL):
-	pacman -S --noconfirm python3-setuptools
+$(INSTALLPKGS):
+	pacman -S --noconfirm --needed $@
 
-pkgtargets:
+ifneq ($(TARGETPKGS),)
+install-pkgs:
 	pacman -S --noconfirm --needed $(TARGETPKGS)
+endif
 
 /usr/bin/vi:
 	ln -s vim $@
 
-$(VIMDIR)/plugged/vim-ycm-windows/: $(TARGETPKGS)
-	curl -LSo /tmp/$(notdir $(YCMURL)) $(YCMURL)
-	cd /tmp; unzip -q /tmp/$(notdir $(YCMURL))
+$(VIMDIR)/plugged/YouCompleteMe/: $(TARGETPKGS) /tmp/$(notdir $(YCMURL))
 	mkdir -p $(PLUGGED)
-	mv /tmp/$(basename $(notdir $(YCMURL))) $@
-	rm /tmp/$(notdir $(YCMURL))
+	cd $(PLUGGED); $(UNPAK) /tmp/$(notdir $(YCMURL))
+	@if [ ! -e $@ ]; then mv $(basename $@)/vim-ycm-windows $@; fi
+	touch $@
+
+/tmp/$(notdir $(YCMURL)):
+	curl -C - -LSo /tmp/$(notdir $(YCMURL)).part $(YCMURL)
+	mv $(notdir $(YCMURL)).part $@
 
 pacman-update:
 	pacman -Su --noconfirm --needed $(INSTALLPKGS)
 
 update: pacman-update
 
-install: $(VIMDIR)/plugged/vim-ycm-windows/
+install: $(VIMDIR)/plugged/YouCompleteMe/
 endif
 
 update: install
@@ -270,16 +287,16 @@ fonts/powerline-fonts/:
 $(FONTDIR)/%.ttf: %.ttf
 	install -D $< $@
 
-$(TARGETPKGS): pkgtargets
-
 $(TARGETFONTS): $(TARGETPKGS)
 
 .fonts_installed: fonts/powerline-fonts/ $(TARGETFONTS)
 	fonts/powerline-fonts/install.sh && touch $@
+
+$(TARGETPKGS): install-pkgs
 
 install: $(DESTFILES) $(TARGETPKGS) $(PKGPLUGINTARGETS) $(GITTARGETS) $(PLUGINRC) $(PLUGGED) $(PYMS) $(FONTS)
 
 uninstall:
 	-rm -fr $(DESTFILES) $(GITTARGETS) $(PLUGINRC) $(PLUGGED) $(BUNDLE) $(AUTOLOADDIR)/plug.vim $(FONTS)
 
-.PHONY: all install uninstall update pkgtargets $(TARGETPKGS) $(PYMS) $(EZINSTALL)
+.PHONY: all install install-pkgs uninstall update $(TARGETPKGS) $(PYMS) $(EZINSTALL)
