@@ -41,9 +41,6 @@ set mouse=a		" Enable mouse usage (all modes)
 set incsearch
 set hlsearch " turns on search highlighting
 set tags=./tags;/
-set encoding=utf-8
-set termencoding=utf-8
-set fileencodings=utf-8,cp936,gb18030,big5
 set t_Co=256
 set laststatus=2 " For powerline always show
 
@@ -173,3 +170,5 @@ catch /^Vim\%((\a\+)\)\=:E185/
 	" Fallback to desert
 	colorscheme desert
 endtry
+
+source $HOME/.vimrc.local

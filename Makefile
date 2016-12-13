@@ -2,7 +2,7 @@ DIST ?= $(if $(filter Darwin,$(shell uname -s)),mac,\
 	$(if $(filter Msys,$(shell uname -o)),msys,\
 	$(if $(wildcard /etc/os-release),$(shell . /etc/os-release 2> /dev/null && echo $$ID),\
 	$(shell cat /etc/system-release | cut -d' ' -f1 | tr '[:upper:]' '[:lower:]'))))
-RCFILES = vimrc gvimrc screenrc tmux.conf bashrc bash_profile pylintrc
+RCFILES = vimrc vimrc.local gvimrc gvimrc.local screenrc tmux.conf bashrc bash_profile pylintrc
 DESTFILES = $(addprefix $(HOME)/.,$(RCFILES)) $(LOCALDIR)/$(PLCONF)
 VIMDIR = $(HOME)/.vim
 AUTOLOADDIR = $(VIMDIR)/autoload
@@ -216,7 +216,7 @@ $(VIMDIR)/plugged/YouCompleteMe/: $(TARGETPKGS) /tmp/$(notdir $(YCMURL))
 
 /tmp/$(notdir $(YCMURL)):
 	curl -C - -LSo /tmp/$(notdir $(YCMURL)).part $(YCMURL)
-	mv $(notdir $(YCMURL)).part $@
+	mv /tmp/$(notdir $(YCMURL)).part $@
 
 pacman-update:
 	pacman -Su --noconfirm --needed $(INSTALLPKGS)
