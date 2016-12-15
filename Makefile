@@ -274,6 +274,9 @@ endif
 $(PYMS): $(EZINSTALL) $(TARGETPKGS)
 	easy_install --user $@
 
+$(HOME)/%vimrc.local:
+	touch $@
+
 $(HOME)/.%: %
 	ln -nfv $(abspath $<) $@ || cp -fv  $< $@
 

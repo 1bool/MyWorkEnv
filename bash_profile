@@ -25,6 +25,10 @@ if which powerline-daemon &> /dev/null; then
     powerline-daemon -q
 fi
 
-if [ -f "$HOME/.bashrc" ]; then
+if [ -r "$HOME/.bashrc" ]; then
     . "$HOME/.bashrc"
+fi
+
+if [ -r "$HOME/.path" ]; then
+    . "$HOME/.path"
 fi
