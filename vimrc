@@ -123,6 +123,7 @@ function! PluginSetup()
 		nnoremap <M-r> :YcmCompleter GoToReferences<CR>
 		nnoremap <M-t> :YcmCompleter GetType<CR>
 		nnoremap <M-d> :YcmCompleter GetDoc<CR>
+		nnoremap <Leader>f  :YcmCompleter FixIt<CR>
 		nnoremap <F5> :YcmForceCompileAndDiagnostics<CR>
 	endif
 	if exists(":IndentGuidesToggle")
