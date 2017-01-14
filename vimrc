@@ -84,7 +84,7 @@ if has("autocmd")
 	autocmd BufEnter,BufWrite,FileType c,cpp,python,sh,java,javascript,perl,ruby,php,make,vim
 				\ setlocal number | setlocal cursorline
 	autocmd VimEnter,FileType * call PluginSetup()
-	autocmd BufEnter,BufWrite,FileType c,cpp,python,sh,java,javascript,perl,ruby,php,make,vim nested TagbarOpen
+	autocmd BufEnter,FileType c,cpp,python,sh,java,javascript,perl,ruby,php,make,vim nested TagbarOpen
 	autocmd FilterWritePre * nested if &diff | TagbarClose
 endif
 
