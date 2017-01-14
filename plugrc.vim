@@ -7,6 +7,7 @@ Plug 'vim-scripts/a.vim', { 'for': ['c', 'h', 'cpp', 'hpp'] }
 Plug 'jlanzarotta/bufexplorer'
 "Plug 'vim-scripts/winmanager'
 Plug 'vim-airline/vim-airline'
+Plug 'vim-airline/vim-airline-themes'
 Plug 'tpope/vim-fugitive'
 Plug 'mhinz/vim-grepper'
 Plug 'mhinz/vim-startify'
@@ -30,4 +31,5 @@ Plug 'altercation/vim-colors-solarized'
 Plug 'tpope/vim-vividchalk'
 Plug 'itchyny/landscape.vim'
 Plug 'kristijanhusak/vim-hybrid-material'
+Plug 'nanotech/jellybeans.vim'
 call plug#end()

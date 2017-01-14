@@ -2,6 +2,7 @@ set background=light
 colorscheme PaperColor
 
 " For airline
+let g:airline_theme=papercolor
 if !exists('g:airline_symbols')
 	let g:airline_symbols = {}
 endif
