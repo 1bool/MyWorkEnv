@@ -115,7 +115,8 @@ function! PluginSetup()
 		let g:ycm_seed_identifiers_with_syntax = 1 " Completion for programming language's keyword
 		let g:ycm_autoclose_preview_window_after_completion = 1
 		let g:ycm_autoclose_preview_window_after_insertion = 1
-		nnoremap <M-]> :YcmCompleter GoTo<CR>
+		nnoremap <M-.> :YcmCompleter GoTo<CR>
+		nnoremap <M-,> <C-o>
 		nnoremap <Leader>g :YcmCompleter GoToDefinition<CR>
 		nnoremap <Leader>r :YcmCompleter GoToReferences<CR>
 		nnoremap <Leader>t :YcmCompleter GetType<CR>
