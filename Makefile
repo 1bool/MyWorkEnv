@@ -57,8 +57,9 @@ PKGTOGIT += pathogen
 DESTFILES += $(VIMDIR)/autoload/pathogen.vim
 endif
 GITTARGETS = $(addprefix $(BUNDLE)/,$(filter-out \
-			 $(addsuffix .vim,$(PKGTOGIT)),$(filter-out \
-			 $(addprefix %,$(PKGTOGIT)),$(notdir $(GITPLUGINS)))))
+	     $(PKGTOGIT), $(filter-out \
+	     $(addsuffix .vim,$(PKGTOGIT)),$(filter-out \
+	     $(addprefix vim-,$(PKGTOGIT)),$(notdir $(GITPLUGINS))))))
 
 $(VIMDIR):
 	mkdir -p $(VIMDIR)
