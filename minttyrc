@@ -1,6 +1,6 @@
 BoldAsFont=yes
 Font=Hack
-FontHeight=11
+FontHeight=10
 FontIsBold=no
 Term=xterm-256color
 BellSound=yes
