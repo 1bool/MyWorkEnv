@@ -84,7 +84,7 @@ if has("autocmd")
 	autocmd BufEnter,BufWrite,FileType c,cpp,python,sh,java,javascript,perl,ruby,php,make,vim
 				\ setlocal number | setlocal cursorline
 	autocmd VimEnter,FileType * call PluginSetup()
-	autocmd BufEnter,BufWrite,FileType c,cpp,python,sh,java,javascript,perl,ruby,php,make,vim nested TagbarOpen
+	autocmd BufEnter,FileType c,cpp,python,sh,java,javascript,perl,ruby,php,make,vim nested TagbarOpen
 	autocmd FilterWritePre * nested if &diff | TagbarClose
 endif
 
@@ -115,8 +115,9 @@ function! PluginSetup()
 		let g:ycm_seed_identifiers_with_syntax = 1 " Completion for programming language's keyword
 		let g:ycm_autoclose_preview_window_after_completion = 1
 		let g:ycm_autoclose_preview_window_after_insertion = 1
-		nnoremap <C-g> :YcmCompleter GoTo<CR>
-		nnoremap <M-]> :YcmCompleter GoToDefinition<CR>
+		nnoremap <M-.> :YcmCompleter GoTo<CR>
+		nnoremap <M-,> <C-o>
+		nnoremap <Leader>g :YcmCompleter GoToDefinition<CR>
 		nnoremap <Leader>r :YcmCompleter GoToReferences<CR>
 		nnoremap <Leader>t :YcmCompleter GetType<CR>
 		nnoremap <Leader>d :YcmCompleter GetDoc<CR>
