@@ -38,6 +38,8 @@ if has("gui_gtk2")
 	set guifont=Input\ Mono\ Condensed\\,\ Medium\ Condensed\ 10,Roboto\ Mono\ Medium\ for\ Powerline\ 9,Monospace\ 9
 elseif has("gui_macvim")
 	set guifont=Cousine\ for\ Powerline:h12
+elseif has("gui_win32")
+	set guifont=InputMonoCondensed:h11:cANSI
 endif
 
 source $HOME/.gvimrc.local
