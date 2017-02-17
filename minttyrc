@@ -1,6 +1,6 @@
 BoldAsFont=yes
 Font=Hack
-FontHeight=10
+FontHeight=11
 FontIsBold=no
 Term=xterm-256color
 BellSound=yes
@@ -33,3 +33,4 @@ BoldCyan=57,113,237
 White=197,200,198
 BoldWhite=255,255,255
 FontWeight=400
+Columns=132
