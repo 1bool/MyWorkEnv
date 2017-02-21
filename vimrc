@@ -157,11 +157,6 @@ let g:rooter_change_directory_for_non_project_files = 'current'
 let g:rooter_use_lcd = 1
 let g:rooter_silent_chdir = 1
 
-" ycm for win
-if system('uname -o') =~ "Msys" && !has("gui_running")
-	let g:ycm_server_python_interpreter = '/c/Program Files/Python35/python.exe'
-endif
-
 let g:ctrlp_cmd = 'CtrlPMRU' " MRU file list as ctrlp default
 
 let python_highlight_all = 1 " python-syntax

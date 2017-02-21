@@ -206,6 +206,10 @@ install-pkgs:
 	pacman -S --noconfirm --needed $(TARGETPKGS)
 endif
 
+$(HOME)/.vimrc: msys.vimrc vimrc
+	@if [ "$$(stat -c %h -- $@)" -gt 1 ] || [ -h $@ ]; then rm -f $@; fi
+	cat $^ > $@
+
 /usr/bin/vi:
 	ln -s vim $@
 
@@ -280,6 +284,10 @@ $(HOME)/%vimrc.local:
 
 $(HOME)/.%: %
 	ln -nfv $(abspath $<) $@ || cp -fv  $< $@
+
+$(HOME)/.bash_profile: bash_profile $(if $(shell fgrep 'Microsoft@Microsoft.com' /proc/version),win.bash_profile,$(wildcard $(DIST).bash_profile))
+	@if [ "$$(stat -c %h -- $@)" -gt 1 ] || [ -h $@ ]; then rm -f $@; fi
+	cat $^ > $@
 
 $(PLUGINRC): $(PRCFILE)
 	mkdir -p $(dir $(PLUGINRC))
