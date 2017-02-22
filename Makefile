@@ -30,7 +30,8 @@ PKGS += git \
 	pylint \
 	fontconfig \
 	python-psutil \
-	powerline
+	powerline \
+	language-pack-zh-hans
 INSTALLPKGS = $(filter $(shell apt-cache search --names-only '.*' | cut -d' ' -f1),$(PKGS))
 GITPLUGINS = $(filter-out %/vim-ycm-windows,$(shell grep '^[[:blank:]]*Plug ' plugrc.vim | cut -d\' -f2)) pathogen
 GITTOPKG = $(shell echo $(subst nerdcommenter,nerd-commenter,\
