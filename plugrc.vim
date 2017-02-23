@@ -34,4 +34,5 @@ Plug 'tpope/vim-vividchalk'
 Plug 'itchyny/landscape.vim'
 Plug 'kristijanhusak/vim-hybrid-material'
 Plug 'nanotech/jellybeans.vim'
+Plug 'joshdick/onedark.vim'
 call plug#end()
