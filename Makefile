@@ -158,12 +158,14 @@ PKGS += git \
 	gcc-c++ \
 	kernel-devel \
 	python-devel \
-	python3-devel \
 	python-psutil \
 	pylint \
-	wqy-bitmap-fonts \
-	wqy-unibit-fonts \
 	wqy-zenhei-fonts
+PKGS += $(if $(shell fgrep ' 6.' /etc/redhat-release),\
+	python34-devel,\
+	python3-devel \
+	wqy-bitmap-fonts \
+	wqy-unibit-fonts)
 INSTALLPKGS = $(PKGS)
 TARGETPKGS = $(filter-out $(shell rpm -qa --qf '%{NAME} '),$(INSTALLPKGS))
 PKGM ?= $(shell which dnf 2> /dev/null || echo yum)
@@ -272,7 +274,7 @@ PYMS += $(if $(filter pylint,$(INSTALLPKGS)),,pylint)
 endif
 
 $(PYMS): $(EZINSTALL) $(TARGETPKGS)
-	easy_install $(if $(shell python --version | grep '2\.6\.'),--prefix ~/.local/lib,--user) $@
+	easy_install $(if $(shell easy_install --help | fgrep '\--user'),--user,--prefix ~/.local) $@
 
 $(HOME)/%vimrc.local:
 	touch $@
