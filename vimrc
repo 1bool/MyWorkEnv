@@ -133,7 +133,6 @@ function! PluginSetup()
 	endif
 endfunction
 
-" nerdtree
 
 " air-line
 let g:airline_powerline_fonts = 1
@@ -156,6 +155,15 @@ let g:syntastic_check_on_wq = 0
 let g:rooter_change_directory_for_non_project_files = 'current'
 let g:rooter_use_lcd = 1
 let g:rooter_silent_chdir = 1
+
+" Add spaces after comment delimiters by default
+let g:NERDSpaceDelims = 1
+" Align line-wise comment delimiters flush left instead of following code indentation
+let g:NERDDefaultAlign = 'left'
+" Set a language to use its alternate delimiters by default
+let g:NERDAltDelims_c = 1
+" Enable trimming of trailing whitespace when uncommenting
+let g:NERDTrimTrailingWhitespace = 1
 
 let g:ctrlp_cmd = 'CtrlPMRU' " MRU file list as ctrlp default
 

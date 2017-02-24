@@ -36,4 +36,5 @@ Plug 'kristijanhusak/vim-hybrid-material'
 Plug 'nanotech/jellybeans.vim'
 Plug 'sickill/vim-monokai'
 Plug 'tomasr/molokai'
+Plug 'joshdick/onedark.vim'
 call plug#end()
