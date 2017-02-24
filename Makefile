@@ -262,23 +262,17 @@ else
 $(LOCALDIR)/$(PLCONF):
 	mkdir -p $(dir $@)
 	ln -sf /usr/share/$(PLCONF) $@
+endif
 
-endif
-ifeq ($(filter python-psutil,$(INSTALLPKGS)),)
 ifeq ($(shell echo 'import sys; print([x for x in sys.path if "psutil" in x][0])' | python 2> /dev/null),)
-ifeq ($(filter $(DIST),msys),)
-PYMS += psutil
+PYMS += $(if $(filter python-psutil,$(INSTALLPKGS)),,$(if $(filter $(DIST),msys),,psutil))
 endif
-endif
-endif
-ifeq ($(filter pylint,$(INSTALLPKGS)),)
 ifeq ($(shell echo 'import sys; print([x for x in sys.path if "pylint" in x][0])' | python 2> /dev/null),)
-PYMS += pylint
-endif
+PYMS += $(if $(filter pylint,$(INSTALLPKGS)),,pylint)
 endif
 
 $(PYMS): $(EZINSTALL) $(TARGETPKGS)
-	easy_install --user $@
+	easy_install $(if $(shell python --version | grep '2\.6\.'),--prefix ~/.local/lib,--user) $@
 
 $(HOME)/%vimrc.local:
 	touch $@
