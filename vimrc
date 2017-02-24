@@ -161,11 +161,13 @@ let g:ctrlp_cmd = 'CtrlPMRU' " MRU file list as ctrlp default
 
 let python_highlight_all = 1 " python-syntax
 
-try
-	colorscheme landscape
-catch /^Vim\%((\a\+)\)\=:E185/
-	" Fallback to desert
-	colorscheme desert
-endtry
+if !has("gui_running")
+	try
+		colorscheme landscape
+	catch /^Vim\%((\a\+)\)\=:E185/
+		" Fallback to desert
+		colorscheme desert
+	endtry
+endif
 
 source $HOME/.vimrc.local
