@@ -30,7 +30,8 @@ PKGS += git \
 	pylint \
 	fontconfig \
 	python-psutil \
-	powerline
+	powerline \
+	language-pack-zh-hans
 INSTALLPKGS = $(filter $(shell apt-cache search --names-only '.*' | cut -d' ' -f1),$(PKGS))
 GITPLUGINS = $(filter-out %/vim-ycm-windows,$(shell grep '^[[:blank:]]*Plug ' plugrc.vim | cut -d\' -f2)) pathogen
 GITTOPKG = $(shell echo $(subst nerdcommenter,nerd-commenter,\
@@ -157,12 +158,14 @@ PKGS += git \
 	gcc-c++ \
 	kernel-devel \
 	python-devel \
-	python3-devel \
 	python-psutil \
 	pylint \
-	wqy-bitmap-fonts \
-	wqy-unibit-fonts \
 	wqy-zenhei-fonts
+PKGS += $(if $(shell fgrep ' 6.' /etc/redhat-release),\
+	python34-devel,\
+	python3-devel \
+	wqy-bitmap-fonts \
+	wqy-unibit-fonts)
 INSTALLPKGS = $(PKGS)
 TARGETPKGS = $(filter-out $(shell rpm -qa --qf '%{NAME} '),$(INSTALLPKGS))
 PKGM ?= $(shell which dnf 2> /dev/null || echo yum)
@@ -261,23 +264,17 @@ else
 $(LOCALDIR)/$(PLCONF):
 	mkdir -p $(dir $@)
 	ln -sf /usr/share/$(PLCONF) $@
+endif
 
-endif
-ifeq ($(filter python-psutil,$(INSTALLPKGS)),)
 ifeq ($(shell echo 'import sys; print([x for x in sys.path if "psutil" in x][0])' | python 2> /dev/null),)
-ifeq ($(filter $(DIST),msys),)
-PYMS += psutil
+PYMS += $(if $(filter python-psutil,$(INSTALLPKGS)),,$(if $(filter $(DIST),msys),,psutil))
 endif
-endif
-endif
-ifeq ($(filter pylint,$(INSTALLPKGS)),)
 ifeq ($(shell echo 'import sys; print([x for x in sys.path if "pylint" in x][0])' | python 2> /dev/null),)
-PYMS += pylint
-endif
+PYMS += $(if $(filter pylint,$(INSTALLPKGS)),,pylint)
 endif
 
 $(PYMS): $(EZINSTALL) $(TARGETPKGS)
-	easy_install --user $@
+	easy_install $(if $(shell easy_install --help | fgrep '\--user'),--user,--prefix ~/.local) $@
 
 $(HOME)/%vimrc.local:
 	touch $@

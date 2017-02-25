@@ -171,11 +171,13 @@ let g:python_highlight_all = 1 " python-syntax
 
 let g:ycm_confirm_extra_conf = 0
 
-try
-	colorscheme landscape
-catch /^Vim\%((\a\+)\)\=:E185/
-	" Fallback to desert
-	colorscheme desert
-endtry
+if !has("gui_running")
+	try
+		colorscheme landscape
+	catch /^Vim\%((\a\+)\)\=:E185/
+		" Fallback to desert
+		colorscheme desert
+	endtry
+endif
 
 source $HOME/.vimrc.local

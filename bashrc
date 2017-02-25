@@ -122,6 +122,7 @@ if [ -r /usr/share/powerline/bindings/bash/powerline.sh ]; then
 	. /usr/share/powerline/bindings/bash/powerline.sh
 else
 	POWERLINE_DIR="$(echo 'import sys; print([x for x in sys.path if "powerline_status" in x][0])' | python 2> /dev/null)"
+	[ -z "$POWERLINE_DIR" ] && POWERLINE_DIR='.local/lib/python2.6/site-packages'
 	if [ -r $POWERLINE_DIR/powerline/bindings/bash/powerline.sh ]; then
 		POWERLINE_BASH_CONTINUATION=1
 		POWERLINE_BASH_SELECT=1
