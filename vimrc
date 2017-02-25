@@ -37,12 +37,21 @@ set autowrite		" Automatically save before commands like :next and :make
 set hidden		" Hide buffers when they are abandoned
 set mouse=a		" Enable mouse usage (all modes)
 
-" By default, searching starts after you enter the string. With the option:
-set incsearch
 set hlsearch " turns on search highlighting
 set tags=./tags;/
 set t_Co=256
 set laststatus=2 " For powerline always show
+set wildmenu
+set autoindent
+set smarttab
+
+if !&scrolloff
+  set scrolloff=1
+endif
+if !&sidescrolloff
+  set sidescrolloff=5
+endif
+set display+=lastline
 
 " Easier to switch window
 noremap <C-J> <C-W>j
