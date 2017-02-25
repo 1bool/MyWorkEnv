@@ -1,7 +1,7 @@
-DIST ?= $(if $(filter Darwin,$(shell uname -s)),mac,\
+DIST ?= $(strip $(if $(filter Darwin,$(shell uname -s)),mac,\
 	$(if $(filter Msys,$(shell uname -o)),msys,\
 	$(if $(wildcard /etc/os-release),$(shell . /etc/os-release 2> /dev/null && echo $$ID),\
-	$(shell cat /etc/system-release | cut -d' ' -f1 | tr '[:upper:]' '[:lower:]'))))
+	$(shell cat /etc/system-release | cut -d' ' -f1 | tr '[:upper:]' '[:lower:]')))))
 RCFILES = vimrc vimrc.local gvimrc gvimrc.local screenrc tmux.conf bashrc bash_profile pylintrc
 DESTFILES = $(addprefix $(HOME)/.,$(RCFILES)) $(LOCALDIR)/$(PLCONF)
 VIMDIR = $(HOME)/.vim
@@ -17,6 +17,7 @@ all: install
 
 
 ifneq ($(filter $(DIST),ubuntu debian),)
+DIST = $(if $(shell fgrep 'Microsoft@Microsoft.com' /proc/version),win,$(DIST))
 APT_STAMP = '/var/lib/apt/periodic/update-success-stamp'
 BUNDLE = $(VIMDIR)/bundle
 PRCFILE = pathogenrc.vim
@@ -110,7 +111,7 @@ $(PLUGGED): $(AUTOLOADDIR)/plug.vim $(PLUGINRC)
 	vim +PlugInstall +qall
 	@touch $(PLUGGED)
 
-ifneq ($(filter $(DIST),mac),)
+ifeq ($(DIST),mac)
 FONTDIR := $(HOME)/Library/Fonts
 BREW = $(shell which brew &> /dev/null || echo brew)
 PKGS += macvim the_silver_searcher
@@ -185,7 +186,7 @@ dnf-update:
 update: dnf-update
 endif
 
-ifneq ($(filter $(DIST),msys),)
+ifeq ($(DIST),msys)
 DESTFILES += $(HOME)/.minttyrc /usr/bin/vi
 PKGS += man-pages-posix unzip diffutils gcc unrar
 INSTALLPKGS = $(subst tmux,tmux-git, \
@@ -208,10 +209,6 @@ ifneq ($(TARGETPKGS),)
 install-pkgs:
 	pacman -S --noconfirm --needed $(TARGETPKGS)
 endif
-
-$(HOME)/.vimrc: msys.vimrc vimrc
-	@if [ "$$(stat -c %h -- $@)" -gt 1 ] || [ -h $@ ]; then rm -f $@; fi
-	cat $^ > $@
 
 /usr/bin/vi:
 	ln -s vim $@
@@ -253,7 +250,7 @@ PYMS += powerline-status
 endif
 $(LOCALDIR)/$(PLCONF): $(PYMS)
 	mkdir -p $(dir $@)
-ifeq ($(filter $(DIST),msys),)
+ifeq ($(DIST),msys)
 	ln -sf `echo 'import sys; print([x for x in sys.path if "powerline_status" in x][0])' \
 		| python`/$(PLCONF) $@
 else
@@ -279,11 +276,9 @@ $(PYMS): $(EZINSTALL) $(TARGETPKGS)
 $(HOME)/%vimrc.local:
 	touch $@
 
-$(HOME)/.%: %
-	ln -nfv $(abspath $<) $@ || cp -fv  $< $@
-
-$(HOME)/.bash_profile: bash_profile $(if $(shell fgrep 'Microsoft@Microsoft.com' /proc/version),win.bash_profile,$(wildcard $(DIST).bash_profile))
-	@if [ "$$(stat -c %h -- $@)" -gt 1 ] || [ -h $@ ]; then rm -f $@; fi
+.SECONDEXPANSION:
+$(HOME)/.%: $$(wildcard include/$$(DIST)$$(@F)) %
+	@if [ -h $@ ] || [[ -f $@ && "$$(stat -c %h -- $@ 2> /dev/null)" -gt 1 ]]; then rm -f $@; fi
 	cat $^ > $@
 
 $(PLUGINRC): $(PRCFILE)
