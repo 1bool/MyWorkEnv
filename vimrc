@@ -167,7 +167,9 @@ let g:NERDTrimTrailingWhitespace = 1
 
 let g:ctrlp_cmd = 'CtrlPMRU' " MRU file list as ctrlp default
 
-let python_highlight_all = 1 " python-syntax
+let g:python_highlight_all = 1 " python-syntax
+
+let g:ycm_confirm_extra_conf = 0
 
 try
 	colorscheme landscape
