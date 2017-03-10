@@ -1,3 +1,4 @@
+SHELL := /bin/bash
 DIST ?= $(strip $(if $(filter Darwin,$(shell uname -s)),mac,\
 	$(if $(filter Msys,$(shell uname -o)),msys,\
 	$(if $(wildcard /etc/os-release),$(shell . /etc/os-release 2> /dev/null && echo $$ID),\
