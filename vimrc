@@ -53,6 +53,8 @@ if !&sidescrolloff
 endif
 set display+=lastline
 
+set fencs=utf-8,gb18030,cp936,big5,euc-jp,euc-kr,latin1
+
 " Easier to switch window
 noremap <C-J> <C-W>j
 noremap <C-K> <C-W>k
