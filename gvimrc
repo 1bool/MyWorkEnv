@@ -1,8 +1,8 @@
 set background=light
-colorscheme hybrid_material
+colorscheme PaperColor
 
 " For airline
-" let g:airline_theme = 'papercolor'
+let g:airline_theme = 'papercolor'
 if !exists('g:airline_symbols')
 	let g:airline_symbols = {}
 endif
