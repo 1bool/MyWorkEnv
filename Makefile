@@ -18,7 +18,9 @@ all: install
 
 
 ifneq ($(filter $(DIST),ubuntu debian),)
-DIST = $(if $(shell fgrep 'Microsoft@Microsoft.com' /proc/version),win,$(DIST))
+ifneq ($(shell fgrep 'Microsoft@Microsoft.com' /proc/version),,)
+DIST = win
+endif
 APT_STAMP = '/var/lib/apt/periodic/update-success-stamp'
 BUNDLE = $(VIMDIR)/bundle
 PRCFILE = pathogenrc.vim
