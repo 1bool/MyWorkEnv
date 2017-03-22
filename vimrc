@@ -45,6 +45,10 @@ set wildmenu
 set autoindent
 set smarttab
 
+if (has("termguicolors"))
+	set termguicolors
+endif
+
 if !&scrolloff
   set scrolloff=1
 endif
