@@ -136,9 +136,9 @@ function! PluginSetup()
 		nnoremap <C-I> :YcmCompleter GoTo<CR>
 		nnoremap <Leader>g :YcmCompleter GoToDefinition<CR>
 		nnoremap <Leader>r :YcmCompleter GoToReferences<CR>
-		nnoremap <Leader>i :YcmCompleter GoToInclude<CR>
+		nnoremap <Leader>h :YcmCompleter GoToInclude<CR>
 		nnoremap <Leader>t :YcmCompleter GetType<CR>
-		nnoremap <Leader>h :YcmCompleter GetDoc<CR>
+		nnoremap <Leader>m :YcmCompleter GetDoc<CR>
 		nnoremap <Leader>f  :YcmCompleter FixIt<CR>
 		nnoremap <F5> :YcmForceCompileAndDiagnostics<CR>
 	endif
