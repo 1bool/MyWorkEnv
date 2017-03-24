@@ -59,6 +59,8 @@ set display+=lastline
 
 set fencs=utf-8,gb18030,cp936,big5,euc-jp,euc-kr,latin1
 
+let mapleader = "\<Space>"
+
 " Easier to switch window
 noremap <C-J> <C-W>j
 noremap <C-K> <C-W>k
@@ -130,12 +132,13 @@ function! PluginSetup()
 		let g:ycm_seed_identifiers_with_syntax = 1 " Completion for programming language's keyword
 		let g:ycm_autoclose_preview_window_after_completion = 1
 		let g:ycm_autoclose_preview_window_after_insertion = 1
+		let g:ycm_key_invoke_completion = '<C-Tab>'
 		nnoremap <C-I> :YcmCompleter GoTo<CR>
 		nnoremap <Leader>g :YcmCompleter GoToDefinition<CR>
 		nnoremap <Leader>r :YcmCompleter GoToReferences<CR>
 		nnoremap <Leader>i :YcmCompleter GoToInclude<CR>
 		nnoremap <Leader>t :YcmCompleter GetType<CR>
-		nnoremap <Leader>d :YcmCompleter GetDoc<CR>
+		nnoremap <Leader>h :YcmCompleter GetDoc<CR>
 		nnoremap <Leader>f  :YcmCompleter FixIt<CR>
 		nnoremap <F5> :YcmForceCompileAndDiagnostics<CR>
 	endif
