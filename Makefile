@@ -21,6 +21,7 @@ ifneq ($(filter $(DIST),ubuntu debian),)
 ifneq ($(shell fgrep 'Microsoft@Microsoft.com' /proc/version),,)
 DIST = win
 endif
+UBUNTU_VER = $(shell . /etc/os-release && echo $$VERSION_ID)
 APT_STAMP = '/var/lib/apt/periodic/update-success-stamp'
 BUNDLE = $(VIMDIR)/bundle
 PRCFILE = pathogenrc.vim
@@ -41,7 +42,13 @@ GITPLUGINS = $(filter-out %/vim-ycm-windows,$(shell grep '^[[:blank:]]*Plug ' pl
 GITTOPKG = $(shell echo $(subst nerdcommenter,nerd-commenter,\
 		   $(basename $(notdir $(subst a.vim,alternate.vim,$(GITPLUGINS))))) \
 		   | tr [:upper:] [:lower:])
+ifeq ($(UBUNTU_VER),16.04)
+# vim-youcompleteme doesn't work in 16.04
+VIMPKGS = $(filter-out vim-youcompleteme,$(shell apt-cache search --names-only '^vim-' | cut -d' ' -f1))
+INSTALLPKGS += cmake python-dev python3-dev
+else
 VIMPKGS = $(shell apt-cache search --names-only '^vim-' | cut -d' ' -f1)
+endif
 PLUGINPKGS = $(filter $(addprefix %,$(GITTOPKG)),$(VIMPKGS))
 VAMLIST = $(basename $(shell apt-cache show vim-scripts | grep '*' \
 		  | sed -e 's/_/-/g' -e 's/a.vim/alternate.vim/' \
@@ -82,6 +89,13 @@ $(PKGPLUGINTARGETS): $(VIMDIR) $(TARGETPKGS)
 
 $(BUNDLE)/%:
 	git clone https://github.com/$(filter %/$(notdir $@),$(GITPLUGINS)).git $@
+	@if [ -d $@/doc ]; then \
+		vim +Helptags $@/doc +qall; fi
+
+$(BUNDLE)/YouCompleteMe: $(TARGETPKGS)
+	git clone https://github.com/$(filter %/$(notdir $@),$(GITPLUGINS)).git $@
+	cd $@ && git submodule update --init --recursive
+	cd $@ && ./install.py --clang-completer
 	@if [ -d $@/doc ]; then \
 		vim +Helptags $@/doc +qall; fi
 
