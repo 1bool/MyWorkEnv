@@ -145,7 +145,7 @@ $(BREW):
 	/usr/bin/ruby -e "`curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install`"
 	brew update
 
-$(INSTALLPKGS): $(BREW)
+$(filter-out macvim,$(INSTALLPKGS)): $(BREW)
 	brew install $@
 
 macvim: $(BREW)
