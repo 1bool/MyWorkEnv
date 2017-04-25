@@ -132,8 +132,7 @@ ifeq ($(DIST),mac)
 FONTDIR := $(HOME)/Library/Fonts
 BREW = $(shell which brew &> /dev/null || echo brew)
 PKGS += macvim the_silver_searcher
-PKGS = $(filter-out python-setuptools,$(PKGS))
-INSTALLPKGS = $(PKGS)
+INSTALLPKGS = $(filter-out python-setuptools,$(PKGS))
 TARGETPKGS = $(filter-out $(shell brew list),$(INSTALLPKGS))
 PKGUPDATE = brew-update
 
@@ -142,6 +141,7 @@ $(EZINSTALL):
 
 $(BREW):
 	-xcode-select --install
+	sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
 	/usr/bin/ruby -e "`curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install`"
 	brew update
 
@@ -288,7 +288,7 @@ PYMS += $(if $(filter pylint,$(INSTALLPKGS)),,pylint)
 endif
 
 $(PYMS): $(EZINSTALL) $(TARGETPKGS)
-	easy_install $(if $(shell easy_install --help | fgrep '\--user'),--user,--prefix ~/.local) $@
+	easy_install $(if $(shell easy_install --help | fgrep -e '--user'),--user,--prefix ~/.local) $@
 
 $(HOME)/%vimrc.local:
 	touch $@
@@ -305,8 +305,11 @@ $(PLUGINRC): $(PRCFILE)
 fonts/powerline-fonts/:
 	git clone https://github.com/powerline/fonts.git $@
 
-$(FONTDIR)/%.ttf: %.ttf
-	install -D $< $@
+$(FONTDIR)/:
+	mkdir -p $@
+
+$(FONTDIR)/%.ttf: %.ttf $(FONTDIR)/
+	install $< $@
 
 $(TARGETFONTS): $(TARGETPKGS)
 
