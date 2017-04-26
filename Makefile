@@ -18,7 +18,7 @@ all: install
 
 
 ifneq ($(filter $(DIST),ubuntu debian),)
-ifneq ($(shell fgrep 'Microsoft@Microsoft.com' /proc/version),,)
+ifneq ($(shell fgrep 'Microsoft@Microsoft.com' /proc/version),)
 DIST = win
 endif
 UBUNTU_VER = $(shell . /etc/os-release && echo $$VERSION_ID)
