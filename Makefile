@@ -3,7 +3,7 @@ DIST ?= $(strip $(if $(filter Darwin,$(shell uname -s)),mac,\
 	$(if $(filter Msys,$(shell uname -o)),msys,\
 	$(if $(wildcard /etc/os-release),$(shell . /etc/os-release 2> /dev/null && echo $$ID),\
 	$(shell cat /etc/system-release | cut -d' ' -f1 | tr '[:upper:]' '[:lower:]')))))
-RCFILES = vimrc vimrc.local gvimrc gvimrc.local screenrc tmux.conf bashrc bash_profile pylintrc
+RCFILES = vimrc vimrc.local gvimrc gvimrc.local screenrc tmux.conf bashrc profile pylintrc
 DESTFILES = $(addprefix $(HOME)/.,$(RCFILES)) $(LOCALDIR)/$(PLCONF)
 VIMDIR = $(HOME)/.vim
 AUTOLOADDIR = $(VIMDIR)/autoload
@@ -18,7 +18,7 @@ all: install
 
 
 ifneq ($(filter $(DIST),ubuntu debian),)
-ifneq ($(shell fgrep 'Microsoft@Microsoft.com' /proc/version),,)
+ifneq ($(shell fgrep 'Microsoft@Microsoft.com' /proc/version),)
 DIST = win
 endif
 UBUNTU_VER = $(shell . /etc/os-release && echo $$VERSION_ID)
