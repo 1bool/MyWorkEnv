@@ -42,4 +42,9 @@ case "$DIST" in
 		;;
 esac
 
+set +e
+pushd ${HOME}
+rm -i .profile .bashrc .vimrc .gvimrc
+popd
+
 make install
