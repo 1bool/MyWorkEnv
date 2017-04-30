@@ -45,7 +45,7 @@ GITTOPKG = $(shell echo $(subst nerdcommenter,nerd-commenter,\
 ifeq ($(UBUNTU_VER),16.04)
 # vim-youcompleteme doesn't work in 16.04
 VIMPKGS = $(filter-out vim-youcompleteme,$(shell apt-cache search --names-only '^vim-' | cut -d' ' -f1))
-INSTALLPKGS += cmake python-dev python3-dev
+INSTALLPKGS += cmake python-dev python3-dev g++ gcc
 else
 VIMPKGS = $(shell apt-cache search --names-only '^vim-' | cut -d' ' -f1)
 endif
