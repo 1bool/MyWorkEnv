@@ -35,16 +35,11 @@ case "$DIST" in
 		pacman -S --noconfirm --needed $PKGS
 		;;
 	mac)
-		xcode-select --install
+		xcode-select --install || :
 		/usr/bin/ruby -e "`curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install`"
 		brew update
 		brew install $PKGS
 		;;
 esac
-
-set +e
-pushd ${HOME}
-rm -i .profile .bashrc .vimrc .gvimrc
-popd
 
 make install

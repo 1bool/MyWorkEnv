@@ -316,9 +316,16 @@ $(TARGETFONTS): $(TARGETPKGS)
 
 $(TARGETPKGS): install-pkgs
 
+ifneq ($(wildcard $(HOME)/.bash_profile),)
+DESTFILES += del-bash_profile
+endif
+
+del-bash_profile:
+	mv -iv $(HOME)/.bash_profile $(HOME)/.bash_profile.old
+
 install: $(DESTFILES) $(TARGETPKGS) $(PKGPLUGINTARGETS) $(GITTARGETS) $(PLUGINRC) $(PLUGGED) $(PYMS) $(FONTS)
 
 uninstall:
 	-rm -fr $(DESTFILES) $(GITTARGETS) $(PLUGINRC) $(PLUGGED) $(BUNDLE) $(AUTOLOADDIR)/plug.vim $(FONTS)
 
-.PHONY: all install install-pkgs uninstall update $(TARGETPKGS) $(PYMS) $(EZINSTALL)
+.PHONY: all install install-pkgs uninstall update del-bash_profile $(TARGETPKGS) $(PYMS) $(EZINSTALL)
