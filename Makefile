@@ -73,7 +73,7 @@ GITTARGETS = $(addprefix $(BUNDLE)/,$(filter-out \
 	     $(addsuffix .vim,$(PKGTOGIT)),$(filter-out \
 	     $(addprefix vim-,$(PKGTOGIT)),$(notdir $(GITPLUGINS))))))
 
-$(VIMDIR):
+$(VIMDIR)/:
 	mkdir -p $(VIMDIR)
 
 $(INSTALLPKGS): $(APT_STAMP)
@@ -84,7 +84,7 @@ ifneq ($(TARGETPKGS),)
 	sudo apt-get -y install $(TARGETPKGS)
 endif
 
-$(PKGPLUGINTARGETS): $(VIMDIR) $(TARGETPKGS)
+$(PKGPLUGINTARGETS): $(TARGETPKGS) | $(VIMDIR)/
 	vam install $@
 
 $(BUNDLE)/%:
@@ -306,7 +306,7 @@ fonts/powerline-fonts/:
 $(FONTDIR)/:
 	mkdir -p $@
 
-$(FONTDIR)/%.ttf: %.ttf $(FONTDIR)/
+$(FONTDIR)/%.ttf: %.ttf | $(FONTDIR)/
 	install $< $@
 
 $(TARGETFONTS): $(TARGETPKGS)
