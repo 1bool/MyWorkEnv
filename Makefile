@@ -3,7 +3,7 @@ DIST ?= $(strip $(if $(filter Darwin,$(shell uname -s)),mac,\
 	$(if $(filter Msys,$(shell uname -o)),msys,\
 	$(if $(wildcard /etc/os-release),$(shell . /etc/os-release 2> /dev/null && echo $$ID),\
 	$(shell cat /etc/system-release | cut -d' ' -f1 | tr '[:upper:]' '[:lower:]')))))
-RCFILES = vimrc vimrc.local gvimrc gvimrc.local screenrc tmux.conf bashrc profile pylintrc
+RCFILES = vimrc vimrc.local gvimrc gvimrc.local screenrc tmux.conf bashrc profile bash_aliases pylintrc
 DESTFILES = $(addprefix $(HOME)/.,$(RCFILES)) $(LOCALDIR)/$(PLCONF)
 VIMDIR = $(HOME)/.vim
 AUTOLOADDIR = $(VIMDIR)/autoload
@@ -43,6 +43,7 @@ GITTOPKG = $(shell echo $(subst nerdcommenter,nerd-commenter,\
 		   $(basename $(notdir $(subst a.vim,alternate.vim,$(GITPLUGINS))))) \
 		   | tr [:upper:] [:lower:])
 ifeq ($(UBUNTU_VER),16.04)
+INSTALLPKGS += thefuck
 # vim-youcompleteme doesn't work in 16.04
 VIMPKGS = $(filter-out vim-youcompleteme,$(shell apt-cache search --names-only '^vim-' | cut -d' ' -f1))
 INSTALLPKGS += cmake python-dev python3-dev g++ gcc
@@ -131,7 +132,7 @@ $(PLUGGED): $(AUTOLOADDIR)/plug.vim $(PLUGINRC)
 ifeq ($(DIST),mac)
 FONTDIR := $(HOME)/Library/Fonts
 BREW = $(shell which brew &> /dev/null || echo brew)
-PKGS += macvim the_silver_searcher
+PKGS += macvim the_silver_searcher thefuck
 INSTALLPKGS = $(filter-out python-setuptools,$(PKGS))
 TARGETPKGS = $(filter-out $(shell brew cask list),$(filter-out $(shell brew list),$(INSTALLPKGS)))
 PKGUPDATE = brew-update
