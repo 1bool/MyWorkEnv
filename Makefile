@@ -107,9 +107,13 @@ $(VIMDIR)/autoload/pathogen.vim:
 	mkdir -p $(dir $@)
 	curl -LSso $@ https://raw.githubusercontent.com/tpope/vim-pathogen/master/autoload/pathogen.vim
 
-update: install
+update: apt-update
+
+apt-update:
 	sudo apt-get -y update
 	sudo apt-get -y upgrade $(INSTALLPKGS)
+
+vimplug-update:
 	@for dir in $(GITTARGETS); do \
 		echo Updating $$dir; git -C $$dir pull; done
 
@@ -247,7 +251,7 @@ update: pacman-update
 install: $(VIMDIR)/plugged/YouCompleteMe/
 endif
 
-update: install
+vimplug-update:
 	vim +PlugUpgrade +PlugUpdate +qall
 endif
 
@@ -315,6 +319,10 @@ $(TARGETFONTS): $(TARGETPKGS)
 .fonts_installed: fonts/powerline-fonts/ $(TARGETFONTS)
 	fonts/powerline-fonts/install.sh && touch $@
 
+fonts-update: fonts/powerline-fonts/
+	git -C $< pull
+	$</install.sh
+
 $(TARGETPKGS): install-pkgs
 
 ifneq ($(wildcard $(HOME)/.bash_profile),)
@@ -326,7 +334,10 @@ del-bash_profile:
 
 install: $(DESTFILES) $(TARGETPKGS) $(PKGPLUGINTARGETS) $(GITTARGETS) $(PLUGINRC) $(PLUGGED) $(PYMS) $(FONTS)
 
+update: install vimplug-update $(patsubst %,fonts-update,$(filter-out msys,$(DIST)))
+
 uninstall:
 	-rm -fr $(DESTFILES) $(GITTARGETS) $(PLUGINRC) $(PLUGGED) $(BUNDLE) $(AUTOLOADDIR)/plug.vim $(FONTS)
 
-.PHONY: all install install-pkgs uninstall update del-bash_profile $(TARGETPKGS) $(PYMS) $(EZINSTALL)
+.PHONY: all install install-pkgs uninstall update del-bash_profile vimplug-update fonts-update\
+	$(TARGETPKGS) $(PYMS) $(EZINSTALL)
