@@ -1,8 +1,8 @@
 set background=light
-colorscheme PaperColor
+colorscheme hybrid_material
+" let g:airline_theme = 'papercolor'
 
 " For airline
-let g:airline_theme = 'papercolor'
 if !exists('g:airline_symbols')
 	let g:airline_symbols = {}
 endif
@@ -35,7 +35,7 @@ let g:airline_symbols.readonly = ''
 let g:airline_symbols.linenr = ''
 
 if has("gui_gtk2")
-	set guifont=Input\ Mono\ Condensed\\,\ Regular\ Condensed\ 12,Roboto\ Mono\ Medium\ for\ Powerline\ 9,Monospace\ 9
+	set guifont=Fira\ Mono\ for\ Powerline\ 11,Input\ Mono\ Condensed\\,\ Regular\ Condensed\ 12,Monospace\ 11
 elseif has("gui_macvim")
 	set guifont=InputMonoCondensed:h13,Cousine\ for\ Powerline:h12
 elseif has("gui_win32")
