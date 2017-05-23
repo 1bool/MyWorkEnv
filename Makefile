@@ -93,7 +93,7 @@ $(BUNDLE)/%:
 	@if [ -d $@/doc ]; then \
 		vim +Helptags $@/doc +qall; fi
 
-$(BUNDLE)/YouCompleteMe: $(TARGETPKGS)
+$(BUNDLE)/YouCompleteMe/: $(TARGETPKGS)
 	git clone https://github.com/$(filter %/$(notdir $@),$(GITPLUGINS)).git $@
 	cd $@ && git submodule update --init --recursive
 	cd $@ && ./install.py --clang-completer
