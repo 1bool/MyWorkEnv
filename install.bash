@@ -25,7 +25,7 @@ case "$DIST" in
 		export PKGM
 		sudo $PKGM -y install $PKGS
 		;;
-	ubuntu|debian)
+	ubuntu|debian|deepin)
 		sudo apt-get -y install $PKGS grep
 		;;
 	msys)

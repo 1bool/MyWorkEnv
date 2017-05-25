@@ -3,7 +3,7 @@ DIST ?= $(strip $(if $(filter Darwin,$(shell uname -s)),mac,\
 	$(if $(filter Msys,$(shell uname -o)),msys,\
 	$(if $(wildcard /etc/os-release),$(shell . /etc/os-release 2> /dev/null && echo $$ID),\
 	$(shell cat /etc/system-release | cut -d' ' -f1 | tr '[:upper:]' '[:lower:]')))))
-RCFILES = vimrc vimrc.local gvimrc gvimrc.local screenrc tmux.conf bashrc profile bash_aliases pylintrc
+RCFILES = vimrc vimrc.local gvimrc gvimrc.local screenrc tmux.conf bashrc profile bash_aliases pylintrc dircolors
 DESTFILES = $(addprefix $(HOME)/.,$(RCFILES)) $(LOCALDIR)/$(PLCONF)
 VIMDIR = $(HOME)/.vim
 AUTOLOADDIR = $(VIMDIR)/autoload
@@ -17,7 +17,7 @@ FONTS = .fonts_installed
 all: install
 
 
-ifneq ($(filter $(DIST),ubuntu debian),)
+ifneq ($(filter $(DIST),ubuntu debian deepin),)
 ifneq ($(shell fgrep 'Microsoft@Microsoft.com' /proc/version),)
 DIST = win
 endif
