@@ -1,5 +1,6 @@
 set background=light
 colorscheme hybrid_material
+let g:airline_theme = 'hybrid'
 " let g:airline_theme = 'papercolor'
 
 " For airline
