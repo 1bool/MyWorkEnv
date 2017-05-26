@@ -4,12 +4,13 @@ DIST ?= $(strip $(if $(filter Darwin,$(shell uname -s)),mac,\
 	$(if $(wildcard /etc/os-release),$(shell . /etc/os-release 2> /dev/null && echo $$ID),\
 	$(shell cat /etc/system-release | cut -d' ' -f1 | tr '[:upper:]' '[:lower:]')))))
 RCFILES = vimrc vimrc.local gvimrc gvimrc.local screenrc tmux.conf bashrc profile bash_aliases pylintrc dircolors
-DESTFILES = $(addprefix $(HOME)/.,$(RCFILES))
+DESTFILES = $(addprefix $(HOME)/.,$(RCFILES)) $(LOCALDIR)/$(PLCONF)
 VIMDIR = $(HOME)/.vim
 AUTOLOADDIR = $(VIMDIR)/autoload
 PLUGINRC = $(VIMDIR)/pluginrc.vim
 PKGS := coreutils tmux curl python-setuptools
 LOCALDIR = $(HOME)/.local/share
+PLCONF = powerline/bindings/tmux/powerline.conf
 FONTDIR = $(HOME)/.local/share/fonts
 FONTS = .fonts_installed
 
@@ -263,9 +264,25 @@ TARGETFONTS = $(filter-out $(wildcard $(FONTDIR)/*.ttf), \
 
 vpath %.ttf $(FONTDIRS)
 
+ifeq ($(filter powerline,$(INSTALLPKGS)),)
 ifeq ($(shell echo 'import sys; print([x for x in sys.path if "powerline_status" in x][0])' | python 2> /dev/null),)
-PYMS += $(if $(filter powerline,$(INSTALLPKGS)),,powerline-status)
+PYMS += powerline-status
 endif
+$(LOCALDIR)/$(PLCONF): $(PYMS)
+	mkdir -p $(dir $@)
+ifeq ($(DIST),msys)
+	ln -sf `echo 'import sys; print([x for x in sys.path if "powerline_status" in x][0])' \
+		| python`/$(PLCONF) $@
+else
+	touch $@
+endif
+else
+
+$(LOCALDIR)/$(PLCONF):
+	mkdir -p $(dir $@)
+	ln -sf /usr/share/$(PLCONF) $@
+endif
+
 ifeq ($(shell echo 'import sys; print([x for x in sys.path if "psutil" in x][0])' | python 2> /dev/null),)
 PYMS += $(if $(filter python-psutil,$(INSTALLPKGS)),,$(if $(filter $(DIST),msys),,psutil))
 endif
