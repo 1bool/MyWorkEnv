@@ -10,7 +10,6 @@ AUTOLOADDIR = $(VIMDIR)/autoload
 PLUGINRC = $(VIMDIR)/pluginrc.vim
 PKGS := coreutils tmux curl python-setuptools
 LOCALDIR = $(HOME)/.local/share
-PLCONF = powerline/bindings/tmux/powerline.conf
 FONTDIR = $(HOME)/.local/share/fonts
 FONTS = .fonts_installed
 
