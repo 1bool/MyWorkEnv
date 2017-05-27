@@ -76,7 +76,12 @@ GITTARGETS = $(addprefix $(BUNDLE)/,$(filter-out \
 $(VIMDIR)/:
 	mkdir -p $(VIMDIR)
 
-$(INSTALLPKGS): $(APT_STAMP)
+powerline: $(APT_STAMP)
+	sudo apt-get -y install $@
+	systemctl --user enable powerline-daemon
+	systemctl --user start powerline-daemon
+
+$(filter-out powerline,$(INSTALLPKGS)): $(APT_STAMP)
 	sudo apt-get -y install $@
 
 install-pkgs: $(APT_STAMP)
