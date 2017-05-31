@@ -125,9 +125,12 @@ function! PluginSetup()
 		" When search with git, search from top level of the repository
 		"let g:grepper.git =
 		"\ { 'grepprg': 'git grep -nI $* -- `git rev-parse --show-toplevel`' }
-		nnoremap gs   :Grepper -highlight -cword -noprompt<cr>
-		nmap <F3> <plug>(GrepperOperator)
-		xmap <F3> <plug>(GrepperOperator)
+		nmap gs <plug>(GrepperOperator)
+		xmap gs <plug>(GrepperOperator)
+		nnoremap <leader>gg :Grepper -tool git<cr>
+		nnoremap <leader>ga :Grepper -tool ag<cr>
+		nnoremap <leader>gs :Grepper -tool ag -side<cr>
+		nnoremap <leader>*  :Grepper -tool ag -cword -noprompt<cr>
 	endif
 	if exists(":YcmCompleter")
 		let g:ycm_seed_identifiers_with_syntax = 1 " Completion for programming language's keyword
@@ -189,6 +192,13 @@ let g:ctrlp_cmd = 'CtrlPMRU' " MRU file list as ctrlp default
 let g:python_highlight_all = 1 " python-syntax
 
 let g:ycm_confirm_extra_conf = 0
+
+" grepper
+let g:grepper           = {}
+let g:grepper.tools     = ['git', 'ag', 'grep']
+" let g:grepper.open      = 1
+" let g:grepper.jump      = 1
+let g:grepper.next_tool = '<leader>g'
 
 if !has("gui_running")
 	try

@@ -95,14 +95,14 @@ $(PKGPLUGINTARGETS): $(TARGETPKGS) | $(VIMDIR)/
 $(BUNDLE)/%:
 	git clone https://github.com/$(filter %/$(notdir $@),$(GITPLUGINS)).git $@
 	@if [ -d $@/doc ]; then \
-		vim +Helptags $@/doc +qall; fi
+		vim +Helptags $@/doc/*.txt +qall; fi
 
 $(BUNDLE)/YouCompleteMe/: $(TARGETPKGS)
 	git clone https://github.com/$(filter %/$(notdir $@),$(GITPLUGINS)).git $@
 	cd $@ && git submodule update --init --recursive
 	cd $@ && ./install.py --clang-completer
 	@if [ -d $@/doc ]; then \
-		vim +Helptags $@/doc +qall; fi
+		vim +Helptags $@/doc/*.txt +qall; fi
 
 $(APT_STAMP):
 	sudo apt-get update
@@ -119,7 +119,7 @@ apt-update:
 
 vimplug-update:
 	@for dir in $(GITTARGETS); do \
-		echo Updating $$dir; git -C $$dir pull; done
+		echo Updating $$dir; git -C $$dir pull; vim +Helptags $$dir/doc/*.txt +qall; done
 
 .PHONY: $(PKGPLUGINS) $(PKGPLUGINTARGETS)
 else
