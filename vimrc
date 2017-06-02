@@ -60,6 +60,9 @@ set display+=lastline
 
 set fencs=utf-8,gb18030,cp936,big5,euc-jp,euc-kr,latin1
 
+" Use system clipboard as default
+set clipboard=unnamedplus
+
 let mapleader = "\<Space>"
 
 " Easier to switch window
@@ -143,7 +146,7 @@ function! PluginSetup()
 		nnoremap <Leader>h :YcmCompleter GoToInclude<CR>
 		nnoremap <Leader>t :YcmCompleter GetType<CR>
 		nnoremap <Leader>m :YcmCompleter GetDoc<CR>
-		nnoremap <Leader>f  :YcmCompleter FixIt<CR>
+		nnoremap <Leader>f :YcmCompleter FixIt<CR>
 		nnoremap <F5> :YcmForceCompileAndDiagnostics<CR>
 	endif
 	if exists(":IndentGuidesToggle")
@@ -199,6 +202,7 @@ let g:grepper.tools     = ['git', 'ag', 'grep']
 " let g:grepper.open      = 1
 " let g:grepper.jump      = 1
 let g:grepper.next_tool = '<leader>g'
+let g:grepper.highlight = 1
 
 if !has("gui_running")
 	try
