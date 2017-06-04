@@ -78,8 +78,10 @@ $(VIMDIR)/:
 
 powerline: $(APT_STAMP)
 	sudo apt-get -y install $@
+ifneq ($(DIST),win)
 	systemctl --user enable powerline-daemon
 	systemctl --user start powerline-daemon
+endif
 
 $(filter-out powerline,$(INSTALLPKGS)): $(APT_STAMP)
 	sudo apt-get -y install $@
@@ -97,7 +99,7 @@ $(BUNDLE)/%:
 	@if [ -d $@/doc ]; then \
 		vim +Helptags $@/doc/*.txt +qall; fi
 
-$(BUNDLE)/YouCompleteMe/: $(TARGETPKGS)
+$(BUNDLE)/YouCompleteMe: $(TARGETPKGS)
 	git clone https://github.com/$(filter %/$(notdir $@),$(GITPLUGINS)).git $@
 	cd $@ && git submodule update --init --recursive
 	cd $@ && ./install.py --clang-completer
