@@ -60,8 +60,13 @@ set display+=lastline
 
 set fencs=utf-8,gb18030,cp936,big5,euc-jp,euc-kr,latin1
 
-" Use system clipboard as default
-set clipboard=unnamedplus
+" Use system clipboard
+if !has("gui_running")
+	vnoremap <S-Del> "+x
+	vnoremap <C-Insert> "+y
+	map <S-Insert>		"+gP
+	cmap <S-Insert>		<C-R>+
+endif
 
 let mapleader = "\<Space>"
 
@@ -204,6 +209,7 @@ let g:grepper.tools     = ['git', 'ag', 'grep']
 let g:grepper.next_tool = '<leader>g'
 let g:grepper.highlight = 1
 
+let g:onedark_terminal_italics = 1
 if !has("gui_running")
 	try
 		colorscheme landscape
