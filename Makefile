@@ -1,6 +1,7 @@
 SHELL := /bin/bash
-DIST ?= $(strip $(if $(filter Darwin,$(shell uname -s)),mac,\
-	$(if $(filter Msys,$(shell uname -o)),msys,\
+OS := $(shell uname -s)
+DIST := $(strip $(if $(filter Darwin,$(OS)),mac,\
+	$(if $(findstring MSYS_NT,$(OS)),msys,\
 	$(if $(wildcard /etc/os-release),$(shell . /etc/os-release 2> /dev/null && echo $$ID),\
 	$(shell cat /etc/system-release | cut -d' ' -f1 | tr '[:upper:]' '[:lower:]')))))
 RCFILES = vimrc vimrc.local gvimrc gvimrc.local screenrc tmux.conf bashrc profile pylintrc dircolors
@@ -117,7 +118,7 @@ update: apt-update
 
 apt-update:
 	sudo apt-get -y update
-	sudo apt-get -y upgrade $(INSTALLPKGS)
+	sudo apt-get -y install $(INSTALLPKGS)
 
 vimplug-update:
 	@for dir in $(GITTARGETS); do \
@@ -289,7 +290,7 @@ $(HOME)/%vimrc.local:
 VPATH = dotfiles:vim
 
 .SECONDEXPANSION:
-$(HOME)/.%: $$(wildcard platform/$$(DIST)$$(@F)) %
+$(HOME)/.%: $$(wildcard platform/$$(DIST)$$(@F)) $$(wildcard platform/$$(OS)$$(@F)) %
 	@if [ -h $@ ] || [[ -f $@ && "$$(stat -c %h -- $@ 2> /dev/null)" -gt 1 ]]; then rm -f $@; fi
 	cat $^ > $@
 
