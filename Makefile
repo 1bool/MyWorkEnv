@@ -3,7 +3,7 @@ DIST ?= $(strip $(if $(filter Darwin,$(shell uname -s)),mac,\
 	$(if $(filter Msys,$(shell uname -o)),msys,\
 	$(if $(wildcard /etc/os-release),$(shell . /etc/os-release 2> /dev/null && echo $$ID),\
 	$(shell cat /etc/system-release | cut -d' ' -f1 | tr '[:upper:]' '[:lower:]')))))
-RCFILES = vimrc vimrc.local gvimrc gvimrc.local screenrc tmux.conf bashrc profile bash_aliases pylintrc dircolors
+RCFILES = vimrc vimrc.local gvimrc gvimrc.local screenrc tmux.conf bashrc profile pylintrc dircolors
 DESTFILES = $(addprefix $(HOME)/.,$(RCFILES))
 VIMDIR = $(HOME)/.vim
 AUTOLOADDIR = $(VIMDIR)/autoload
@@ -23,7 +23,7 @@ endif
 UBUNTU_VER = $(shell . /etc/os-release && echo $$VERSION_ID)
 APT_STAMP = '/var/lib/apt/periodic/update-success-stamp'
 BUNDLE = $(VIMDIR)/bundle
-PRCFILE = pathogenrc.vim
+PRCFILE = vim/pathogenrc.vim
 PKGS += git \
 	exuberant-ctags \
 	vim-gnome \
@@ -37,7 +37,7 @@ PKGS += git \
 	powerline \
 	language-pack-zh-hans
 INSTALLPKGS = $(filter $(shell apt-cache search --names-only '.*' | cut -d' ' -f1),$(PKGS))
-GITPLUGINS = $(shell grep '^[[:blank:]]*Plug ' plugrc.vim | cut -d\' -f2) pathogen
+GITPLUGINS = $(shell grep '^[[:blank:]]*Plug ' vim/plugrc.vim | cut -d\' -f2) pathogen
 GITTOPKG = $(shell echo $(subst nerdcommenter,nerd-commenter,\
 		   $(basename $(notdir $(subst a.vim,alternate.vim,$(GITPLUGINS))))) \
 		   | tr [:upper:] [:lower:])
@@ -129,7 +129,7 @@ else
 
 
 PLUGGED = $(VIMDIR)/plugged
-PRCFILE = plugrc.vim
+PRCFILE = vim/plugrc.vim
 PKGS += ctags cmake ack
 
 $(AUTOLOADDIR)/plug.vim:
@@ -286,8 +286,10 @@ $(PYMS): $(EZINSTALL) $(TARGETPKGS)
 $(HOME)/%vimrc.local:
 	touch $@
 
+VPATH = dotfiles:vim
+
 .SECONDEXPANSION:
-$(HOME)/.%: $$(wildcard include/$$(DIST)$$(@F)) %
+$(HOME)/.%: $$(wildcard platform/$$(DIST)$$(@F)) %
 	@if [ -h $@ ] || [[ -f $@ && "$$(stat -c %h -- $@ 2> /dev/null)" -gt 1 ]]; then rm -f $@; fi
 	cat $^ > $@
 
