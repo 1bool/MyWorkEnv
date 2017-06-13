@@ -117,7 +117,7 @@ update: apt-update
 
 apt-update:
 	sudo apt-get -y update
-	sudo apt-get -y upgrade $(INSTALLPKGS)
+	sudo apt-get -y install $(INSTALLPKGS)
 
 vimplug-update:
 	@for dir in $(GITTARGETS); do \
