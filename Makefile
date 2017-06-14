@@ -121,7 +121,7 @@ apt-update:
 
 vimplug-update:
 	@for dir in $(GITTARGETS); do \
-		echo Updating $$dir; git -C $$dir pull; vim +Helptags $$dir/doc/*.txt +qall; done
+		echo Updating $$dir; git -C $$dir pull && vim +Helptags $$dir/doc/*.txt +qall; done
 
 .PHONY: $(PKGPLUGINS) $(PKGPLUGINTARGETS)
 else
