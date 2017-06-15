@@ -219,7 +219,7 @@ PKGS += man-pages-posix unzip diffutils gcc unrar
 INSTALLPKGS = $(subst tmux,tmux-git, \
 	      $(subst ack,perl-ack, \
 	      $(subst python-setuptools,python3-setuptools,$(PKGS))))
-TARGETPKGS = $(filter-out $(shell pacman -Qsq),$(INSTALLPKGS))
+TARGETPKGS = $(filter-out $(shell pacman -Qsq) ctags,$(INSTALLPKGS))
 FONTS :=
 ifeq ($(MSYSTEM_CARCH),x86_64)
 YCMURL = ftp://w1ball.f3322.net:2102/YouCompleteMe-w64-2016-9-23.rar
