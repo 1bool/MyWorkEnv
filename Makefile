@@ -73,6 +73,7 @@ GITTARGETS = $(addprefix $(BUNDLE)/,$(filter-out \
 	     $(PKGTOGIT), $(filter-out \
 	     $(addsuffix .vim,$(PKGTOGIT)),$(filter-out \
 	     $(addprefix vim-,$(PKGTOGIT)),$(notdir $(GITPLUGINS))))))
+UPDATE-GITTARGETS = $(addprefix update-,$(GITTARGETS))
 
 $(VIMDIR)/:
 	mkdir -p $(VIMDIR)
@@ -120,9 +121,13 @@ apt-update:
 	sudo apt-get -y update
 	sudo apt-get -y install $(INSTALLPKGS)
 
-vimplug-update:
-	@for dir in $(GITTARGETS); do \
-		echo Updating $$dir; git -C $$dir pull && vim +Helptags $$dir/doc/*.txt +qall; done
+$(UPDATE-GITTARGETS):
+	@echo Updating $(@:update-%=%)
+	@if [ "$$(git -C $(@:update-%=%) pull)" != 'Already up-to-date.' ] \
+		&& [ -d $(@:update-%=%)/doc ]; then \
+		vim +Helptags $(@:update-%=%)/doc/*.txt +qall; fi
+
+vimplug-update: $(UPDATE-GITTARGETS)
 
 .PHONY: $(PKGPLUGINS) $(PKGPLUGINTARGETS)
 else
@@ -313,8 +318,8 @@ $(TARGETFONTS): $(TARGETPKGS)
 	fonts/powerline-fonts/install.sh && touch $@
 
 fonts-update: fonts/powerline-fonts/
-	git -C $< pull
-	$</install.sh
+	@if [[ "$$(git -C $< pull)" != 'Already up-to-date.' ]]; then \
+		$</install.sh; fi
 
 $(TARGETPKGS): install-pkgs
 
