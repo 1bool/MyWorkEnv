@@ -103,6 +103,9 @@ nmap <C-N><C-N> :setlocal invnumber<CR>
 " Toggle background
 map <Leader>b :let &background = ( &background == "dark"? "light" : "dark" )<CR>
 
+nnoremap <X1Mouse> <C-O>
+nnoremap <X2Mouse> <C-I>
+
 if has("autocmd")
 	autocmd BufEnter,BufWrite,FileType c,cpp,python,sh,java,javascript,perl,ruby,php,make,vim
 				\ setlocal number | setlocal cursorline
@@ -209,7 +212,7 @@ let g:grepper.highlight = 1
 let g:onedark_terminal_italics = 1
 if !has("gui_running")
 	try
-		colorscheme landscape
+		colorscheme vividchalk
 	catch /^Vim\%((\a\+)\)\=:E185/
 		" Fallback to desert
 		colorscheme desert
