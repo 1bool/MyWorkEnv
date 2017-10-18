@@ -40,6 +40,7 @@ set t_Co=256
 set laststatus=2 " For powerline always show
 set wildmenu
 set autoindent
+set smartindent
 set smarttab
 
 " termguicolors not working
@@ -111,6 +112,7 @@ if has("autocmd")
 				\ setlocal number | setlocal cursorline
 	autocmd VimEnter,FileType * call PluginSetup()
 	autocmd BufEnter,FileType c,cpp,python,sh,java,javascript,perl,ruby,php,make,vim nested TagbarOpen
+	autocmd BufEnter,FileType c,cpp,python,sh,java,javascript,perl,ruby,php,make,vim setlocal shiftwidth=4 tabstop=4
 	autocmd FilterWritePre * nested if &diff | TagbarClose
 endif
 
