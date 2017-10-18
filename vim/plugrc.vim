@@ -37,4 +37,6 @@ Plug 'nanotech/jellybeans.vim'
 Plug 'sickill/vim-monokai'
 Plug 'tomasr/molokai'
 Plug 'joshdick/onedark.vim'
+Plug 'sjl/badwolf'
+Plug 'jnurmine/Zenburn'
 call plug#end()
