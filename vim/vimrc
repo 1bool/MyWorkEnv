@@ -65,7 +65,7 @@ if !has("gui_running")
 	cmap <S-Insert>		<C-R>+
 endif
 
-let mapleader = "\<Space>"
+" let mapleader = "\<Space>"
 
 " Easier to switch window
 noremap <C-J> <C-W>j
