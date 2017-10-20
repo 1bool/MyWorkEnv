@@ -39,4 +39,5 @@ Plug 'tomasr/molokai'
 Plug 'joshdick/onedark.vim'
 Plug 'sjl/badwolf'
 Plug 'jnurmine/Zenburn'
+Plug 'jonathanfilip/vim-lucius'
 call plug#end()
