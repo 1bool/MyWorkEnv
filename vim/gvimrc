@@ -1,4 +1,8 @@
-set background=light
+set guioptions-=T  "remove toolbar
+set guioptions-=r  "remove right-hand scroll bar
+set guioptions-=L  "remove left-hand scroll bar
+
+" set background=light
 colorscheme PaperColor
 " let g:airline_theme = 'hybrid'
 let g:airline_theme = 'papercolor'
