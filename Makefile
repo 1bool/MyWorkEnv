@@ -5,7 +5,7 @@ DIST := $(strip $(if $(filter Darwin,$(OS)),mac,\
 	$(if $(wildcard /etc/os-release),$(shell . /etc/os-release 2> /dev/null && echo $$ID),\
 	$(shell cat /etc/system-release | cut -d' ' -f1 | tr '[:upper:]' '[:lower:]')))))
 RCFILES = vimrc vimrc.local gvimrc gvimrc.local screenrc tmux.conf bashrc profile pylintrc dircolors
-DESTFILES = $(addprefix $(HOME)/.,$(RCFILES))
+DESTFILES = $(addprefix $(HOME)/.,$(RCFILES)) $(HOME)/$(wildcard bin/*)
 VIMDIR = $(HOME)/.vim
 AUTOLOADDIR = $(VIMDIR)/autoload
 PLUGINRC = $(VIMDIR)/pluginrc.vim
@@ -307,6 +307,12 @@ $(PLUGINRC): $(PRCFILE)
 	mkdir -p $(dir $(PLUGINRC))
 	ln -nfv $(abspath $(PRCFILE)) $@ || cp -fv $(PRCFILE) $@
 
+$(HOME)/bin/:
+	mkdir -p $@
+
+$(HOME)/bin/%: bin/% | $(HOME)/bin/
+	install -m 0755 $< $@
+
 fonts/powerline-fonts/:
 	git clone https://github.com/powerline/fonts.git $@
 
@@ -314,7 +320,7 @@ $(FONTDIR)/:
 	mkdir -p $@
 
 $(FONTDIR)/%.ttf: %.ttf | $(FONTDIR)/
-	install $< $@
+	install -m 0644 $< $@
 
 $(TARGETFONTS): $(TARGETPKGS)
 
