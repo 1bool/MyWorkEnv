@@ -56,7 +56,7 @@ if !&sidescrolloff
 endif
 set display+=lastline
 
-set fencs=utf-8,gb18030,cp936,big5,euc-jp,euc-kr,latin1
+set fencs=ucs-bom,utf-8,default,latin1,gb18030,cp936,big5
 
 " Use system clipboard
 if !has("gui_running")
