@@ -5,7 +5,7 @@ DIST := $(strip $(if $(filter Darwin,$(OS)),mac,\
 	$(if $(wildcard /etc/os-release),$(shell . /etc/os-release 2> /dev/null && echo $$ID),\
 	$(shell cat /etc/system-release | cut -d' ' -f1 | tr '[:upper:]' '[:lower:]')))))
 RCFILES = vimrc vimrc.local gvimrc gvimrc.local screenrc tmux.conf bashrc profile pylintrc dircolors
-DESTFILES = $(addprefix $(HOME)/.,$(RCFILES))
+DESTFILES = $(addprefix $(HOME)/.,$(RCFILES)) $(addprefix $(HOME)/,$(wildcard bin/*))
 VIMDIR = $(HOME)/.vim
 AUTOLOADDIR = $(VIMDIR)/autoload
 PLUGINRC = $(VIMDIR)/pluginrc.vim
@@ -37,16 +37,16 @@ PKGS += git \
 	python-psutil \
 	powerline \
 	language-pack-zh-hans
-INSTALLPKGS = $(filter $(shell apt-cache search --names-only '.*' | cut -d' ' -f1),$(PKGS))
+INSTALLTARGETS = $(filter $(shell apt-cache search --names-only '.*' | cut -d' ' -f1),$(PKGS))
 GITPLUGINS = $(shell grep '^[[:blank:]]*Plug ' vim/plugrc.vim | cut -d\' -f2) pathogen
 GITTOPKG = $(shell echo $(subst nerdcommenter,nerd-commenter,\
 		   $(basename $(notdir $(subst a.vim,alternate.vim,$(GITPLUGINS))))) \
 		   | tr [:upper:] [:lower:])
 ifeq ($(UBUNTU_VER),16.04)
-INSTALLPKGS += thefuck
+INSTALLTARGETS += thefuck
 # vim-youcompleteme doesn't work in 16.04
 VIMPKGS = $(filter-out vim-youcompleteme,$(shell apt-cache search --names-only '^vim-' | cut -d' ' -f1))
-INSTALLPKGS += cmake python-dev python3-dev g++ gcc
+INSTALLTARGETS += cmake python-dev python3-dev g++ gcc
 else
 VIMPKGS = $(shell apt-cache search --names-only '^vim-' | cut -d' ' -f1)
 endif
@@ -54,11 +54,11 @@ PLUGINPKGS = $(filter $(addprefix %,$(GITTOPKG)),$(VIMPKGS))
 VAMLIST = $(basename $(shell apt-cache show vim-scripts | grep '*' \
 		  | sed -e 's/_/-/g' -e 's/a.vim/alternate.vim/' \
 		  | grep -o '[[:alnum:]-]*\.vim' | tr '[:upper:]' '[:lower:]')) \
-		  $(VIMPKGS:vim-%=%)
+		  $(VIMPKGS:vim-%=%) detectindent
 PKGPLUGINS = $(filter $(GITTOPKG:vim-%=%),$(VAMLIST))
-INSTALLPKGS += $(PLUGINPKGS)
+INSTALLTARGETS += $(PLUGINPKGS)
 TARGETPKGS = $(filter-out $(shell dpkg --get-selections | cut -f1 | cut -d':' -f1),\
-	$(INSTALLPKGS))
+	$(INSTALLTARGETS))
 PKGPLUGINTARGETS = $(filter-out $(shell vam -q status $(PKGPLUGINS) 2> /dev/null | \
 				   grep installed | cut -f1),$(PKGPLUGINS))
 PKGTOGIT = $(subst youcompleteme,YouCompleteMe,\
@@ -73,6 +73,7 @@ GITTARGETS = $(addprefix $(BUNDLE)/,$(filter-out \
 	     $(PKGTOGIT), $(filter-out \
 	     $(addsuffix .vim,$(PKGTOGIT)),$(filter-out \
 	     $(addprefix vim-,$(PKGTOGIT)),$(notdir $(GITPLUGINS))))))
+UPDATE-GITTARGETS = $(addprefix update-,$(GITTARGETS))
 
 $(VIMDIR)/:
 	mkdir -p $(VIMDIR)
@@ -120,9 +121,13 @@ apt-update:
 	sudo apt-get -y update
 	sudo apt-get -y install $(INSTALLPKGS)
 
-vimplug-update:
-	@for dir in $(GITTARGETS); do \
-		echo Updating $$dir; git -C $$dir pull && vim +Helptags $$dir/doc/*.txt +qall; done
+$(UPDATE-GITTARGETS):
+	@echo Updating $(@:update-%=%)
+	@if [ "$$(git -C $(@:update-%=%) pull)" != 'Already up-to-date.' ] \
+		&& [ -d $(@:update-%=%)/doc ]; then \
+		vim +Helptags $(@:update-%=%)/doc/*.txt +qall; fi
+
+vimplug-update: $(UPDATE-GITTARGETS)
 
 .PHONY: $(PKGPLUGINS) $(PKGPLUGINTARGETS)
 else
@@ -144,7 +149,7 @@ ifeq ($(DIST),mac)
 FONTDIR := $(HOME)/Library/Fonts
 BREW = $(shell which brew &> /dev/null || echo brew)
 PKGS += macvim the_silver_searcher thefuck
-INSTALLPKGS = $(filter-out python-setuptools,$(PKGS))
+INSTALLTARGETS = $(filter-out python-setuptools,$(PKGS))
 TARGETPKGS = $(filter-out $(shell brew cask list),$(filter-out $(shell brew list),$(INSTALLPKGS)))
 PKGUPDATE = brew-update
 
@@ -187,6 +192,7 @@ PKGS += git \
 	kernel-devel \
 	python-devel \
 	python-psutil \
+	python-argparse \
 	pylint \
 	wqy-zenhei-fonts
 PKGS += $(if $(shell fgrep ' 6.' /etc/redhat-release),\
@@ -194,7 +200,7 @@ PKGS += $(if $(shell fgrep ' 6.' /etc/redhat-release),\
 	python3-devel \
 	wqy-bitmap-fonts \
 	wqy-unibit-fonts)
-INSTALLPKGS = $(PKGS)
+INSTALLTARGETS = $(PKGS)
 TARGETPKGS = $(filter-out $(shell rpm -qa --qf '%{NAME} '),$(INSTALLPKGS))
 PKGM ?= $(shell which dnf 2> /dev/null || echo yum)
 PKGUPDATE = dnf-update
@@ -216,7 +222,7 @@ endif
 ifeq ($(DIST),msys)
 DESTFILES += $(HOME)/.minttyrc /usr/bin/vi
 PKGS += man-pages-posix unzip diffutils gcc unrar
-INSTALLPKGS = $(subst tmux,tmux-git, \
+INSTALLTARGETS = $(subst tmux,tmux-git, \
 	      $(subst ack,perl-ack, \
 	      $(subst python-setuptools,python3-setuptools,$(PKGS))))
 TARGETPKGS = $(filter-out $(shell pacman -Qsq) ctags,$(INSTALLPKGS))
@@ -272,17 +278,20 @@ TARGETFONTS = $(filter-out $(wildcard $(FONTDIR)/*.ttf), \
 vpath %.ttf $(FONTDIRS)
 
 ifeq ($(shell echo 'import sys; print([x for x in sys.path if "powerline_status" in x][0])' | python 2> /dev/null),)
-PYMS += $(if $(filter powerline,$(INSTALLPKGS)),,powerline-status)
+PYMS += $(if $(filter powerline,$(INSTALLTARGETS)),,powerline-status)
 endif
 ifeq ($(shell echo 'import sys; print([x for x in sys.path if "psutil" in x][0])' | python 2> /dev/null),)
-PYMS += $(if $(filter python-psutil,$(INSTALLPKGS)),,$(if $(filter $(DIST),msys),,psutil))
+PYMS += $(if $(filter python-psutil,$(INSTALLTARGETS)),,$(if $(filter $(DIST),msys),,psutil))
 endif
 ifeq ($(shell echo 'import sys; print([x for x in sys.path if "pylint" in x][0])' | python 2> /dev/null),)
-PYMS += $(if $(filter pylint,$(INSTALLPKGS)),,pylint)
+PYMS += $(if $(filter pylint,$(INSTALLTARGETS)),,pylint)
 endif
 
 $(PYMS): $(EZINSTALL) $(TARGETPKGS)
+	mkdir -p ~/.local/lib/python$$(python -V 2>&1 | cut -d' ' -f2 | cut -d'.' -f-2)/site-packages
 	easy_install $(if $(shell easy_install --help | fgrep -e '--user'),--user,--prefix ~/.local) $@
+
+INSTALLPKGS = $(filter-out $(PYMS),$(INSTALLTARGETS))
 
 $(HOME)/%vimrc.local:
 	touch $@
@@ -298,6 +307,12 @@ $(PLUGINRC): $(PRCFILE)
 	mkdir -p $(dir $(PLUGINRC))
 	ln -nfv $(abspath $(PRCFILE)) $@ || cp -fv $(PRCFILE) $@
 
+$(HOME)/bin/:
+	mkdir -p $@
+
+$(HOME)/bin/%: bin/% | $(HOME)/bin/
+	install -m 0755 $< $@
+
 fonts/powerline-fonts/:
 	git clone https://github.com/powerline/fonts.git $@
 
@@ -305,7 +320,7 @@ $(FONTDIR)/:
 	mkdir -p $@
 
 $(FONTDIR)/%.ttf: %.ttf | $(FONTDIR)/
-	install $< $@
+	install -m 0644 $< $@
 
 $(TARGETFONTS): $(TARGETPKGS)
 
@@ -313,8 +328,8 @@ $(TARGETFONTS): $(TARGETPKGS)
 	fonts/powerline-fonts/install.sh && touch $@
 
 fonts-update: fonts/powerline-fonts/
-	git -C $< pull
-	$</install.sh
+	@if [[ "$$(git -C $< pull)" != 'Already up-to-date.' ]]; then \
+		$</install.sh; fi
 
 $(TARGETPKGS): install-pkgs
 
