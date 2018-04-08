@@ -27,6 +27,7 @@ Plug 'ciaranm/detectindent'
 Plug 'wincent/terminus'
 Plug 'Shougo/vimproc.vim', {'do' : 'make'}
 Plug 'Shougo/vimshell.vim'
+Plug 'ekalinin/Dockerfile.vim'
 "Plug 'flazz/vim-colorschemes'
 Plug 'NLKNguyen/papercolor-theme'
 Plug 'morhetz/gruvbox'
