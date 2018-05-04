@@ -36,6 +36,7 @@ PKGS += git \
 	fontconfig \
 	python-psutil \
 	powerline \
+	clang \
 	language-pack-zh-hans
 INSTALLTARGETS = $(filter $(shell apt-cache search --names-only '.*' | cut -d' ' -f1),$(PKGS))
 GITPLUGINS = $(shell grep '^[[:blank:]]*Plug ' vim/plugrc.vim | cut -d\' -f2) pathogen
@@ -194,6 +195,7 @@ PKGS += git \
 	python-psutil \
 	python-argparse \
 	pylint \
+	clang \
 	wqy-zenhei-fonts
 PKGS += $(if $(shell fgrep ' 6.' /etc/redhat-release),\
 	python34-devel,\
