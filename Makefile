@@ -98,12 +98,12 @@ $(PKGPLUGINTARGETS): $(TARGETPKGS) | $(VIMDIR)/
 	vam install $@
 
 $(BUNDLE)/%:
-	git clone https://github.com/$(filter %/$(notdir $@),$(GITPLUGINS)).git $@
+	git clone -b master https://github.com/$(filter %/$(notdir $@),$(GITPLUGINS)).git $@
 	@if [ -d $@/doc ]; then \
 		vim +Helptags $@/doc/*.txt +qall; fi
 
 $(BUNDLE)/YouCompleteMe: $(TARGETPKGS)
-	git clone https://github.com/$(filter %/$(notdir $@),$(GITPLUGINS)).git $@
+	git clone -b master https://github.com/$(filter %/$(notdir $@),$(GITPLUGINS)).git $@
 	cd $@ && git submodule update --init --recursive
 	cd $@ && ./install.py --clang-completer
 	@if [ -d $@/doc ]; then \
@@ -124,7 +124,7 @@ apt-update:
 
 $(UPDATE-GITTARGETS):
 	@echo Updating $(@:update-%=%)
-	@if [ "$$(git -C $(@:update-%=%) pull)" != 'Already up-to-date.' ] \
+	@if [ "$$(git -C $(@:update-%=%) pull origin master | tail -1)" != 'Already up-to-date.' ] \
 		&& [ -d $(@:update-%=%)/doc ]; then \
 		vim +Helptags $(@:update-%=%)/doc/*.txt +qall; fi
 
@@ -316,7 +316,7 @@ $(HOME)/bin/%: bin/% | $(HOME)/bin/
 	install -m 0755 $< $@
 
 fonts/powerline-fonts/:
-	git clone https://github.com/powerline/fonts.git $@
+	git clone -b master https://github.com/powerline/fonts.git $@
 
 $(FONTDIR)/:
 	mkdir -p $@
@@ -330,7 +330,7 @@ $(TARGETFONTS): $(TARGETPKGS)
 	fonts/powerline-fonts/install.sh && touch $@
 
 fonts-update: fonts/powerline-fonts/
-	@if [[ "$$(git -C $< pull)" != 'Already up-to-date.' ]]; then \
+	@if [[ "$$(git -C $< pull origin master | tail -1)" != 'Already up-to-date.' ]]; then \
 		$</install.sh; fi
 
 $(TARGETPKGS): install-pkgs
