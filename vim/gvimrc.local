@@ -6,3 +6,5 @@ if has("gui_win32")
 	runtime! menu.vim
 	set guifont=NovaMono_for_Powerline:h11:cANSI,InputMonoCondensed:h12:cANSI
 endif
+
+colorscheme solarized8

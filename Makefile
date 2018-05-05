@@ -55,7 +55,7 @@ PLUGINPKGS = $(filter $(addprefix %,$(GITTOPKG)),$(VIMPKGS))
 VAMLIST = $(basename $(shell apt-cache show vim-scripts | grep '*' \
 		  | sed -e 's/_/-/g' -e 's/a.vim/alternate.vim/' \
 		  | grep -o '[[:alnum:]-]*\.vim' | tr '[:upper:]' '[:lower:]')) \
-		  $(VIMPKGS:vim-%=%) detectindent
+		  $(VIMPKGS:vim-%=%) detectindent surround
 PKGPLUGINS = $(filter $(GITTOPKG:vim-%=%),$(VAMLIST))
 INSTALLTARGETS += $(PLUGINPKGS)
 TARGETPKGS = $(filter-out $(shell dpkg --get-selections | cut -f1 | cut -d':' -f1),\

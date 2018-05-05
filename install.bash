@@ -42,4 +42,7 @@ case "$DIST" in
 		;;
 esac
 
+cd $(dirname $0)
+touch dotfiles/* vim/*
+
 make install

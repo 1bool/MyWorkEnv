@@ -1,1 +1,1 @@
-set guifont=Fira\ Mono\ for\ Powerline\ 10
+set guifont=Fira\ Mono\ for\ Powerline\ 12
