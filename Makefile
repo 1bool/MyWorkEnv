@@ -9,7 +9,7 @@ DESTFILES = $(addprefix $(HOME)/.,$(RCFILES)) $(addprefix $(HOME)/,$(wildcard bi
 VIMDIR = $(HOME)/.vim
 AUTOLOADDIR = $(VIMDIR)/autoload
 PLUGINRC = $(VIMDIR)/pluginrc.vim
-PKGS := coreutils tmux curl python-setuptools
+PKGS := coreutils tmux curl python-setuptools clang
 LOCALDIR = $(HOME)/.local/share
 FONTDIR = $(HOME)/.local/share/fonts
 FONTS = .fonts_installed
@@ -36,7 +36,6 @@ PKGS += git \
 	fontconfig \
 	python-psutil \
 	powerline \
-	clang \
 	language-pack-zh-hans
 INSTALLTARGETS = $(filter $(shell apt-cache search --names-only '.*' | cut -d' ' -f1),$(PKGS))
 GITPLUGINS = $(shell grep '^[[:blank:]]*Plug ' vim/plugrc.vim | cut -d\' -f2) pathogen
@@ -195,7 +194,6 @@ PKGS += git \
 	python-psutil \
 	python-argparse \
 	pylint \
-	clang \
 	wqy-zenhei-fonts
 PKGS += $(if $(shell fgrep ' 6.' /etc/redhat-release),\
 	python34-devel,\
@@ -223,11 +221,11 @@ endif
 
 ifeq ($(DIST),msys)
 DESTFILES += $(HOME)/.minttyrc /usr/bin/vi
-PKGS += man-pages-posix unzip diffutils gcc unrar
-INSTALLTARGETS = $(subst tmux,tmux-git, \
-	      $(subst ack,perl-ack, \
-	      $(subst python-setuptools,python3-setuptools,$(PKGS))))
-TARGETPKGS = $(filter-out $(shell pacman -Qsq) ctags,$(INSTALLPKGS))
+PKGS += man-pages-posix unzip diffutils gcc unrar python2
+INSTALLTARGETS = $(subst ack,perl-ack,\
+	      $(subst python-setuptools,python3-setuptools,\
+		  $(subst clang,clang-svn,$(PKGS))))
+TARGETPKGS = $(filter-out $(shell pacman -Qsq),$(INSTALLPKGS))
 FONTS :=
 ifeq ($(MSYSTEM_CARCH),x86_64)
 YCMURL = ftp://w1ball.f3322.net:2102/YouCompleteMe-w64-2016-9-23.rar
@@ -240,10 +238,8 @@ endif
 $(INSTALLPKGS):
 	pacman -S --noconfirm --needed $@
 
-ifneq ($(TARGETPKGS),)
 install-pkgs:
 	pacman -S --noconfirm --needed $(TARGETPKGS)
-endif
 
 /usr/bin/vi:
 	ln -s vim $@
@@ -349,5 +345,11 @@ update: install vimplug-update $(patsubst %,fonts-update,$(filter-out msys,$(DIS
 uninstall:
 	-rm -fr $(DESTFILES) $(GITTARGETS) $(PLUGINRC) $(PLUGGED) $(BUNDLE) $(AUTOLOADDIR)/plug.vim $(FONTS)
 
-.PHONY: all install install-pkgs uninstall update del-bash_profile vimplug-update fonts-update\
+debug:
+	@echo PKGS: $(PKGS)
+	@echo INSTALLPKGS: $(INSTALLPKGS)
+	@echo INSTALLTARGETS: $(INSTALLTARGETS)
+	@echo TARGETPKGS: $(TARGETPKGS)
+
+.PHONY: all install install-pkgs uninstall update del-bash_profile vimplug-update fonts-update \
 	$(TARGETPKGS) $(PYMS) $(EZINSTALL)
