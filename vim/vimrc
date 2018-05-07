@@ -231,6 +231,5 @@ if !has("gui_running")
 		colorscheme desert
 	endtry
 endif
-let g:airline_theme = 'papercolor'
 
 source $HOME/.vimrc.local
