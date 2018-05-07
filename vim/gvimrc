@@ -4,6 +4,9 @@ set guioptions-=L  "remove left-hand scroll bar
 
 set background=light
 
+colorscheme pencil
+let g:airline_theme = 'pencil'
+
 " For airline
 if !exists('g:airline_symbols')
 	let g:airline_symbols = {}
