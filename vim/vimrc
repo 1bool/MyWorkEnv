@@ -225,9 +225,11 @@ if !has("gui_running")
 				\   }
 				\ }
 	try
+		let g:airline_theme = 'papercolor'
 		colorscheme PaperColor
 	catch /^Vim\%((\a\+)\)\=:E185/
 		" Fallback to desert
+		let g:airline_theme = 'dark'
 		colorscheme desert
 	endtry
 endif
