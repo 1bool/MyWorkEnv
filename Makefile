@@ -306,7 +306,7 @@ $(PLUGINRC): $(PRCFILE)
 	ln -nfv $(abspath $(PRCFILE)) $@ || cp -fv $(PRCFILE) $@
 
 $(HOME)/bin/:
-	mkdir -p $@
+	install -m 0755 -d $@
 
 $(HOME)/bin/%: bin/% | $(HOME)/bin/
 	install -m 0755 $< $@
