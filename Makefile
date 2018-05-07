@@ -13,6 +13,7 @@ PKGS := coreutils tmux curl python-setuptools clang
 LOCALDIR = $(HOME)/.local/share
 FONTDIR = $(HOME)/.local/share/fonts
 FONTS = .fonts_installed
+BRANCH = master
 
 all: install
 
@@ -96,8 +97,10 @@ endif
 $(PKGPLUGINTARGETS): $(TARGETPKGS) | $(VIMDIR)/
 	vam install $@
 
+$(BUNDLE)/YCM-Generator: BRANCH = stable
+
 $(BUNDLE)/%:
-	git clone -b master https://github.com/$(filter %/$(notdir $@),$(GITPLUGINS)).git $@
+	git clone -b $(BRANCH) https://github.com/$(filter %/$(notdir $@),$(GITPLUGINS)).git $@
 	@if [ -d $@/doc ]; then \
 		vim +Helptags $@/doc/*.txt +qall; fi
 
