@@ -224,14 +224,13 @@ if !has("gui_running")
 				\     }
 				\   }
 				\ }
-	" try
-		" colorscheme vividchalk
-	" catch /^Vim\%((\a\+)\)\=:E185/
-		" " Fallback to desert
-		" colorscheme desert
-	" endtry
+	try
+		colorscheme PaperColor
+	catch /^Vim\%((\a\+)\)\=:E185/
+		" Fallback to desert
+		colorscheme desert
+	endtry
 endif
-colorscheme PaperColor
 let g:airline_theme = 'papercolor'
 
 source $HOME/.vimrc.local
