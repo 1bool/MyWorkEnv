@@ -14,7 +14,7 @@ elif [ -r /etc/system-release ]; then
 fi
 export DIST
 
-PKGS="make git curl"
+PKGS="make git curl bc"
 case "$DIST" in
 	fedora|centos|redhat)
 		if command -v yum; then

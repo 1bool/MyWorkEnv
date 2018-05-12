@@ -1,11 +1,12 @@
+export LANG =
 SHELL := /bin/bash
-OS := $(shell uname -s)
+OS := $(if $(shell fgrep 'Microsoft@Microsoft.com' /proc/version),WSL,$(patsubst MSYS%,MSYS,$(shell uname -s)))
 DIST := $(strip $(if $(filter Darwin,$(OS)),mac,\
-	$(if $(findstring MSYS_NT,$(OS)),msys,\
+	$(if $(filter MSYS,$(OS)),msys,\
 	$(if $(wildcard /etc/os-release),$(shell . /etc/os-release 2> /dev/null && echo $$ID),\
 	$(shell cat /etc/system-release | cut -d' ' -f1 | tr '[:upper:]' '[:lower:]')))))
-RCFILES = vimrc vimrc.local gvimrc gvimrc.local screenrc tmux.conf bashrc profile pylintrc dircolors
-DESTFILES = $(addprefix $(HOME)/.,$(RCFILES)) $(addprefix $(HOME)/,$(wildcard bin/*))
+DOTFILES = vimrc vimrc.local gvimrc gvimrc.local screenrc tmux.conf bashrc profile pylintrc dircolors
+DESTFILES = $(addprefix $(HOME)/.,$(DOTFILES)) $(addprefix $(HOME)/,$(wildcard bin/*))
 VIMDIR = $(HOME)/.vim
 AUTOLOADDIR = $(VIMDIR)/autoload
 PLUGINRC = $(VIMDIR)/pluginrc.vim
@@ -19,9 +20,6 @@ all: install
 
 
 ifneq ($(filter $(DIST),ubuntu debian deepin),)
-ifneq ($(shell fgrep 'Microsoft@Microsoft.com' /proc/version),)
-DIST = win
-endif
 UBUNTU_VER = $(shell . /etc/os-release && echo $$VERSION_ID)
 APT_STAMP = '/var/lib/apt/periodic/update-success-stamp'
 BUNDLE = $(VIMDIR)/bundle
@@ -81,7 +79,7 @@ $(VIMDIR)/:
 
 powerline: $(APT_STAMP)
 	sudo apt-get -y install $@
-ifneq ($(DIST),win)
+ifneq ($(OS),WSL)
 	systemctl --user enable powerline-daemon
 	systemctl --user start powerline-daemon
 endif
@@ -238,6 +236,8 @@ YCMURL = https://bitbucket.org/Alexander-Shukaev/vim-youcompleteme-for-windows/d
 UNPAK = unzip -q
 endif
 
+$(HOME)/.profile: auto-ssh-agent.profile
+
 $(INSTALLPKGS):
 	pacman -S --noconfirm --needed $@
 
@@ -297,10 +297,15 @@ INSTALLPKGS = $(filter-out $(PYMS),$(INSTALLTARGETS))
 $(HOME)/%vimrc.local:
 	touch $@
 
-VPATH = dotfiles:vim
+VPATH = dotfiles:snippets
+
+$(HOME)/.vimrc: $(if $(filter-out MSYS,$(OS)),set-tmpfiles.vimrc)
+$(HOME)/.tmux.conf: $(if $(filter ubuntu debian deepin,$(DIST)),ubuntu.tmux.conf)
+$(HOME)/.tmux.conf: $(if $(filter 16.04,$(UBUNTU_VER)),vi-style-2.1.tmux.conf,vi-style.tmux.conf)
+$(HOME)/.profile: $(if $(filter WSL MSYS,$(OS)),auto-ssh-agent.profile)
 
 .SECONDEXPANSION:
-$(HOME)/.%: $$(wildcard platform/$$(DIST)$$(@F)) $$(wildcard platform/$$(OS)$$(@F)) %
+$(HOME)/.%: % $$(wildcard snippets/$$(DIST)$$(@F)) $$(wildcard snippets/$$(OS)$$(@F))
 	@if [ -h $@ ] || [[ -f $@ && "$$(stat -c %h -- $@ 2> /dev/null)" -gt 1 ]]; then rm -f $@; fi
 	cat $^ > $@
 

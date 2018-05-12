@@ -2,4 +2,3 @@
 LANG=zh_CN.UTF-8
 export DISPLAY=:0
 alias tmux="tmux -2"
-
