@@ -298,9 +298,15 @@ $(HOME)/%vimrc.local:
 VPATH = dotfiles:snippets
 
 $(HOME)/.vimrc: $(if $(filter-out MSYS_NT,$(OS)),set-tmpfiles.vimrc)
-$(HOME)/.tmux.conf: $(if $(filter ubuntu debian deepin,$(DIST)),ubuntu.tmux.conf)
-$(HOME)/.tmux.conf: $(if $(filter 16.04,$(UBUNTU_VER)),vi-style-2.1.tmux.conf,vi-style.tmux.conf)
 $(HOME)/.profile: $(if $(filter WSL MSYS_NT,$(OS)),auto-ssh-agent.profile)
+$(HOME)/.tmux.conf: \
+	$(if $(filter 16.04,$(UBUNTU_VER)),vi-style-2.1.tmux.conf,vi-style.tmux.conf) \
+	$(if $(filter powerline,$(INSTALLTARGETS)),$(if \
+	$(filter ubuntu debian deepin,$(DIST)),ubuntu.tmux.conf), pym-powerline.tmux.conf)
+ 
+snippets/pym-powerline.tmux.conf: $(filter powerline-status,$(PYMS))
+	echo source \"$$(echo 'import sys; print([x for x in sys.path if "powerline_status" in x][0])' | python)/powerline/bindings/tmux/powerline.conf\" > $@
+
 
 .SECONDEXPANSION:
 $(HOME)/.%: % $$(wildcard snippets/$$(DIST)$$(@F)) $$(wildcard snippets/$$(OS)$$(@F))
