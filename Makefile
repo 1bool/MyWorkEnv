@@ -1,4 +1,3 @@
-export LANG =
 SHELL := /bin/bash
 OS := $(if $(shell fgrep 'Microsoft@Microsoft.com' /proc/version),WSL,$(patsubst MSYS_NT%,MSYS_NT,$(shell uname -s)))
 DIST := $(strip $(if $(filter Darwin,$(OS)),mac,\
@@ -305,11 +304,11 @@ $(HOME)/.tmux.conf: \
 	$(filter ubuntu debian deepin,$(DIST)),ubuntu.tmux.conf), pym-powerline.tmux.conf)
  
 snippets/pym-powerline.tmux.conf: $(filter powerline-status,$(PYMS))
-	echo source \"$$(echo 'import sys; print([x for x in sys.path if "powerline_status" in x][0])' | python)/powerline/bindings/tmux/powerline.conf\" > $@
-
+	echo source \"$$(echo 'import sys; print([x for x in sys.path if "powerline_status" in x][0])' \
+		| python)/powerline/bindings/tmux/powerline.conf\" > $@
 
 .SECONDEXPANSION:
-$(HOME)/.%: % $$(wildcard snippets/$$(DIST)$$(@F)) $$(wildcard snippets/$$(OS)$$(@F))
+$(HOME)/.%: $$(wildcard snippets/$$(OS)$$(@F)) $$(wildcard snippets/$$(DIST)$$(@F)) %
 	@if [ -h $@ ] || [[ -f $@ && "$$(stat -c %h -- $@ 2> /dev/null)" -gt 1 ]]; then rm -f $@; fi
 	cat $^ > $@
 

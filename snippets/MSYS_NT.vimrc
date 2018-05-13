@@ -1,5 +1,5 @@
 " Make windows use ~/.vim too, I don't want to use _vimfiles
-set runtimepath^=~/.vim
+set runtimepath^=~/.vim,$VIMRUNTIME
 "
 " ycm for win
 if !has("gui_running")
