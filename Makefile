@@ -1,8 +1,8 @@
 export LANG =
 SHELL := /bin/bash
-OS := $(if $(shell fgrep 'Microsoft@Microsoft.com' /proc/version),WSL,$(patsubst MSYS%,MSYS,$(shell uname -s)))
+OS := $(if $(shell fgrep 'Microsoft@Microsoft.com' /proc/version),WSL,$(patsubst MSYS_NT%,MSYS_NT,$(shell uname -s)))
 DIST := $(strip $(if $(filter Darwin,$(OS)),mac,\
-	$(if $(filter MSYS,$(OS)),msys,\
+	$(if $(filter MSYS_NT,$(OS)),msys,\
 	$(if $(wildcard /etc/os-release),$(shell . /etc/os-release 2> /dev/null && echo $$ID),\
 	$(shell cat /etc/system-release | cut -d' ' -f1 | tr '[:upper:]' '[:lower:]')))))
 DOTFILES = vimrc vimrc.local gvimrc gvimrc.local screenrc tmux.conf bashrc profile pylintrc dircolors
@@ -236,8 +236,6 @@ YCMURL = https://bitbucket.org/Alexander-Shukaev/vim-youcompleteme-for-windows/d
 UNPAK = unzip -q
 endif
 
-$(HOME)/.profile: auto-ssh-agent.profile
-
 $(INSTALLPKGS):
 	pacman -S --noconfirm --needed $@
 
@@ -299,10 +297,10 @@ $(HOME)/%vimrc.local:
 
 VPATH = dotfiles:snippets
 
-$(HOME)/.vimrc: $(if $(filter-out MSYS,$(OS)),set-tmpfiles.vimrc)
+$(HOME)/.vimrc: $(if $(filter-out MSYS_NT,$(OS)),set-tmpfiles.vimrc)
 $(HOME)/.tmux.conf: $(if $(filter ubuntu debian deepin,$(DIST)),ubuntu.tmux.conf)
 $(HOME)/.tmux.conf: $(if $(filter 16.04,$(UBUNTU_VER)),vi-style-2.1.tmux.conf,vi-style.tmux.conf)
-$(HOME)/.profile: $(if $(filter WSL MSYS,$(OS)),auto-ssh-agent.profile)
+$(HOME)/.profile: $(if $(filter WSL MSYS_NT,$(OS)),auto-ssh-agent.profile)
 
 .SECONDEXPANSION:
 $(HOME)/.%: % $$(wildcard snippets/$$(DIST)$$(@F)) $$(wildcard snippets/$$(OS)$$(@F))
