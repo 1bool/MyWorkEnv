@@ -94,7 +94,7 @@ endif
 $(PKGPLUGINTARGETS): $(TARGETPKGS) | $(VIMDIR)/
 	vam install $@
 
-$(BUNDLE)/YCM-Generator: BRANCH = stable
+%$(BUNDLE)/YCM-Generator: BRANCH = stable
 
 $(BUNDLE)/%:
 	git clone -b $(BRANCH) https://github.com/$(filter %/$(notdir $@),$(GITPLUGINS)).git $@
@@ -123,7 +123,7 @@ apt-update:
 
 $(UPDATE-GITTARGETS):
 	@echo Updating $(@:update-%=%)
-	@if [ "$$(git -C $(@:update-%=%) pull origin master | tail -1)" != 'Already up-to-date.' ] \
+	@if ! LANGUAGE=en.US_UTF-8 git -C $(@:update-%=%) pull origin $(BRANCH) | tail -1 | fgrep 'Already up' \
 		&& [ -d $(@:update-%=%)/doc ]; then \
 		vim +Helptags $(@:update-%=%)/doc/*.txt +qall; fi
 
@@ -337,7 +337,7 @@ $(TARGETFONTS): $(TARGETPKGS)
 	fonts/powerline-fonts/install.sh && touch $@
 
 fonts-update: fonts/powerline-fonts/
-	@if [[ "$$(git -C $< pull origin master | tail -1)" != 'Already up-to-date.' ]]; then \
+	@if ! LANGUAGE=en.US_UTF-8 git -C $< pull origin master | tail -1 | fgrep 'Already up'; then \
 		$</install.sh; fi
 
 $(TARGETPKGS): install-pkgs
