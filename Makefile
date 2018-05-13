@@ -310,7 +310,11 @@ snippets/pym-powerline.tmux.conf: $(filter powerline-status,$(PYMS))
 .SECONDEXPANSION:
 $(HOME)/.%: $$(wildcard snippets/$$(OS)$$(@F)) $$(wildcard snippets/$$(DIST)$$(@F)) %
 	@if [ -h $@ ] || [[ -f $@ && "$$(stat -c %h -- $@ 2> /dev/null)" -gt 1 ]]; then rm -f $@; fi
-	cat $^ > $@
+	@if [ "$(@F)" = ".$(notdir $^)" ]; then \
+		echo "ln -f $< $@"; \
+		ln -f $< $@; else \
+		echo "cat $^ > $@"; \
+		cat $^ > $@; fi
 
 $(PLUGINRC): $(PRCFILE)
 	mkdir -p $(dir $(PLUGINRC))
