@@ -49,10 +49,10 @@ else
 VIMPKGS = $(shell apt-cache search --names-only '^vim-' | cut -d' ' -f1)
 endif
 PLUGINPKGS = $(filter $(addprefix %,$(GITTOPKG)),$(VIMPKGS))
-VAMLIST = $(basename $(shell apt-cache show vim-scripts | grep '*' \
-		  | sed -e 's/_/-/g' -e 's/a.vim/alternate.vim/' \
-		  | grep -o '[[:alnum:]-]*\.vim' | tr '[:upper:]' '[:lower:]')) \
-		  $(VIMPKGS:vim-%=%) detectindent surround
+VAMLIST = $(if $(and $(shell dpkg --get-selections | fgrep vim-scripts),\
+		  $(shell dpkg --get-selections | fgrep vim-addon-manager)),\
+		  $(shell vam list),$(error "vim-scripts or vim-addon-manager not installed")) \
+		  $(VIMPKGS:vim-%=%)
 PKGPLUGINS = $(filter $(GITTOPKG:vim-%=%),$(VAMLIST))
 INSTALLTARGETS += $(PLUGINPKGS)
 TARGETPKGS = $(filter-out $(shell dpkg --get-selections | cut -f1 | cut -d':' -f1),\
