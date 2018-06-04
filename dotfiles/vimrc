@@ -104,6 +104,7 @@ nmap <C-N><C-N> :setlocal invnumber<CR>
 " Toggle background
 map <Leader>b :let &background = ( &background == "dark"? "light" : "dark" )<CR>
 
+" Go back and forth as like in browser with mouse
 nnoremap <X1Mouse> <C-O>
 nnoremap <X2Mouse> <C-I>
 
@@ -111,25 +112,35 @@ if has("autocmd")
 	autocmd BufEnter,BufWrite,FileType c,cpp,python,sh,java,javascript,perl,ruby,php,make,vim
 				\ setlocal number | setlocal cursorline
 	autocmd VimEnter,FileType * call PluginSetup()
-	autocmd BufEnter,FileType c,cpp,python,sh,java,javascript,perl,ruby,php,vim nested TagbarOpen
+	" autocmd BufEnter,FileType c,cpp,python,sh,java,javascript,perl,ruby,php,vim nested TagbarOpen
+	" autocmd FilterWritePre * nested if &diff | TagbarClose
 	autocmd BufReadPost * DetectIndent 
-	autocmd FilterWritePre * nested if &diff | TagbarClose
 endif
 
 function! PluginSetup()
 	if exists(":TagbarToggle")
-		let g:Tagbar_title = "[Tagbar]"
-		let g:tagbar_width = 36
+		let g:tagbar_width = 48
 		let g:tagbar_zoomwidth = 0
+		let g:tagbar_autoclose = 1
+		let g:tagbar_autofocus = 1
+		let g:tagbar_sort = 0
+		let g:tagbar_compact = 1
+		let g:tagbar_indent = 1
 		nnoremap <silent> <F7> :TagbarToggle<CR>
+		nnoremap tt :TagbarToggle<CR>
 	endif
 	if exists(":NERDTreeToggle")
-		let g:NERDTreeWinSize=36 "设置 NERDTree 子窗口宽度
+		let g:NERDTreeWinSize=48 "设置 NERDTree 子窗口宽度
 		let g:NERDTreeWinPos="left" "设置 NERDTree 子窗口位置
 		let g:NERDTreeShowBookmarks = 1
 		let g:NERDTreeQuitOnOpen = 1
-		let g:NERDTreeMouseMode = 2
+		let g:NERDTreeMinimalUI = 1
+		let g:NERDTreeAutoCenterThreshold = 5
+		let g:NERDTreeNaturalSort = 1
+		let NERDTreeAutoDeleteBuffer=1
+		" let g:NERDTreeMouseMode = 2
 		nnoremap <silent> <F6> :NERDTreeToggle<CR>
+		nnoremap tf :NERDTreeToggle<CR>
 	endif
 	if exists(":Grepper")
 		" When search with git, search from top level of the repository
@@ -137,9 +148,6 @@ function! PluginSetup()
 		"\ { 'grepprg': 'git grep -nI $* -- `git rev-parse --show-toplevel`' }
 		nmap gs <plug>(GrepperOperator)
 		xmap gs <plug>(GrepperOperator)
-		nnoremap <leader>gg :Grepper -tool git<cr>
-		nnoremap <leader>ga :Grepper -tool ag<cr>
-		nnoremap <leader>gs :Grepper -tool ag -side<cr>
 		nnoremap <leader>*  :Grepper -tool ag -cword -noprompt<cr>
 	endif
 	if exists(":YcmCompleter")
