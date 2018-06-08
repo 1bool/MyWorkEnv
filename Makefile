@@ -94,7 +94,7 @@ endif
 $(PKGPLUGINTARGETS): $(TARGETPKGS) | $(VIMDIR)/
 	vam install $@
 
-%$(BUNDLE)/YCM-Generator: BRANCH = stable
+$(BUNDLE)/YCM-Generator: BRANCH = stable
 
 $(BUNDLE)/%:
 	git clone -b $(BRANCH) https://github.com/$(filter %/$(notdir $@),$(GITPLUGINS)).git $@
