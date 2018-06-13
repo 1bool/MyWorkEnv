@@ -302,6 +302,15 @@ $(HOME)/.tmux.conf: \
 	$(if $(filter 16.04,$(UBUNTU_VER)),vi-style-2.1.tmux.conf,vi-style.tmux.conf) \
 	$(if $(filter powerline,$(INSTALLTARGETS)),$(if \
 	$(filter ubuntu debian deepin,$(DIST)),ubuntu.tmux.conf), pym-powerline.tmux.conf)
+
+dotfiles/dircolors: LS_COLORS/LS_COLORS
+	ln -f $< $@
+
+LS_COLORS/LS_COLORS:
+	git clone -b $(BRANCH) https://github.com/trapd00r/LS_COLORS.git $(dir $@)
+
+update-LS_COLOR:
+	git -C $(@:update-%=%) pull origin $(BRANCH)
  
 snippets/pym-powerline.tmux.conf: $(filter powerline-status,$(PYMS))
 	echo source \"$$(echo 'import sys; print([x for x in sys.path if "powerline_status" in x][0])' \

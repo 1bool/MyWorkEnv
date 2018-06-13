@@ -2,3 +2,5 @@
 fonts/powerline-fonts
 .fonts_installed
 snippets/pym-powerline.tmux.conf
+LS_COLORS
+dotfiles/dircolors
