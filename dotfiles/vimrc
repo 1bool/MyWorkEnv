@@ -119,7 +119,7 @@ endif
 
 function! PluginSetup()
 	if exists(":TagbarToggle")
-		let g:tagbar_width = 48
+		let g:tagbar_width = 40
 		let g:tagbar_zoomwidth = 0
 		let g:tagbar_autoclose = 1
 		let g:tagbar_autofocus = 1
@@ -130,12 +130,12 @@ function! PluginSetup()
 		nnoremap tt :TagbarToggle<CR>
 	endif
 	if exists(":NERDTreeToggle")
-		let g:NERDTreeWinSize=48 "设置 NERDTree 子窗口宽度
+		let g:NERDTreeWinSize=40 "设置 NERDTree 子窗口宽度
 		let g:NERDTreeWinPos="left" "设置 NERDTree 子窗口位置
 		let g:NERDTreeShowBookmarks = 1
 		let g:NERDTreeQuitOnOpen = 1
 		let g:NERDTreeMinimalUI = 1
-		let g:NERDTreeAutoCenterThreshold = 5
+		let g:NERDTreeAutoCenterThreshold = 8
 		let g:NERDTreeNaturalSort = 1
 		let NERDTreeAutoDeleteBuffer=1
 		" let g:NERDTreeMouseMode = 2
