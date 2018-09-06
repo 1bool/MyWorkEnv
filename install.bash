@@ -26,6 +26,7 @@ case "$DIST" in
 		sudo $PKGM -y install $PKGS
 		;;
 	ubuntu|debian|deepin)
+		sudo apt-get update
 		sudo apt-get -y install $PKGS grep vim-scripts vim-addon-manager
 		;;
 	msys)
