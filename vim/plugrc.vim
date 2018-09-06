@@ -28,6 +28,7 @@ Plug 'wincent/terminus'
 Plug 'Shougo/vimproc.vim', {'do' : 'make'}
 Plug 'Shougo/vimshell.vim'
 Plug 'ekalinin/Dockerfile.vim'
+Plug 'airblade/vim-gitgutter'
 "Plug 'flazz/vim-colorschemes'
 Plug 'NLKNguyen/papercolor-theme'
 Plug 'morhetz/gruvbox'
@@ -48,4 +49,5 @@ Plug 'jnurmine/Zenburn'
 Plug 'jonathanfilip/vim-lucius'
 Plug 'arcticicestudio/nord-vim'
 Plug 'cocopon/iceberg.vim'
+Plug 'dracula/vim', { 'as': 'dracula' }
 call plug#end()

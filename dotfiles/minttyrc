@@ -1,5 +1,5 @@
 BoldAsFont=yes
-Font=DejaVu Sans Mono for Powerline
+Font=Fira Mono for Powerline
 FontHeight=12
 FontIsBold=no
 Term=xterm-256color

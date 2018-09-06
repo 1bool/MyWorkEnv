@@ -6,3 +6,4 @@ if !has("gui_running")
 	let g:ycm_server_python_interpreter = '/c/Program Files/Python35/python.exe'
 endif
 
+set encoding=utf-8
