@@ -91,7 +91,7 @@ ifneq ($(TARGETPKGS),)
 	sudo apt-get -y install $(TARGETPKGS)
 endif
 
-$(PKGPLUGINTARGETS): $(TARGETPKGS) | $(VIMDIR)/
+$(PKGPLUGINTARGETS): | $(VIMDIR)/
 	vam install $@
 
 $(BUNDLE)/YCM-Generator update-$(BUNDLE)/YCM-Generator: BRANCH = stable
