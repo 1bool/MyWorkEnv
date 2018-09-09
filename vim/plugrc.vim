@@ -1,5 +1,3 @@
-let g:plug_window = "vertical botright new"
-call plug#begin()
 Plug 'scrooloose/nerdtree', { 'on': 'NERDTreeToggle' }
 Plug 'scrooloose/nerdcommenter'
 Plug 'scrooloose/syntastic'
@@ -12,7 +10,6 @@ Plug 'tpope/vim-fugitive'
 Plug 'tpope/vim-surround'
 Plug 'mhinz/vim-grepper'
 Plug 'mhinz/vim-startify'
-Plug 'Valloric/YouCompleteMe', { 'do': './install.py --clang-completer' }
 Plug 'rdnetto/YCM-Generator', { 'branch': 'stable', 'on': [ 'YcmGenerateConfig', 'CCGenerateConfig' ]}
 Plug 'airblade/vim-rooter'
 Plug 'ctrlpvim/ctrlp.vim'
@@ -50,4 +47,3 @@ Plug 'jonathanfilip/vim-lucius'
 Plug 'arcticicestudio/nord-vim'
 Plug 'cocopon/iceberg.vim'
 Plug 'dracula/vim', { 'as': 'dracula' }
-call plug#end()
