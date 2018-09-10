@@ -173,9 +173,6 @@ function! PluginSetup()
 		" 快捷键 i 开/关缩进可视化
 		nmap <silent> <Leader>i <Plug>IndentGuidesToggle
 	endif
-	if exists(":Deol")
-		nnoremap tc :Deol<CR>
-	endif
 endfunction
 
 
