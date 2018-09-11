@@ -15,6 +15,7 @@ Plug 'airblade/vim-rooter'
 Plug 'ctrlpvim/ctrlp.vim'
 Plug 'hdima/python-syntax' ", { 'for': 'py' }
 Plug 'nathanaelkane/vim-indent-guides'
+Plug 'Yggdroot/indentLine'
 Plug 'majutsushi/tagbar'
 Plug 'jeffkreeftmeijer/vim-numbertoggle'
 Plug 'michaeljsmith/vim-indent-object'

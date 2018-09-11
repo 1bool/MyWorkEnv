@@ -42,6 +42,7 @@ set wildmenu
 set autoindent
 set smartindent
 set smarttab
+set expandtab
 
 " termguicolors not working
 " if (has("termguicolors"))
