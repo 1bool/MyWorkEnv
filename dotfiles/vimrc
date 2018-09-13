@@ -207,6 +207,9 @@ let g:NERDDefaultAlign = 'left'
 let g:NERDAltDelims_c = 1
 " Enable trimming of trailing whitespace when uncommenting
 let g:NERDTrimTrailingWhitespace = 1
+" No nesting
+let g:NERDDefaultNesting = 0
+
 
 let g:ctrlp_cmd = 'CtrlPMRU' " MRU file list as ctrlp default
 
