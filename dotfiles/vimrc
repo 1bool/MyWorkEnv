@@ -59,7 +59,7 @@ set display+=lastline
 
 set fencs=ucs-bom,utf-8,default,latin1,gb18030,cp936,big5
 
-set updatetime=100 "Decrease update delay for gitgutter
+" set updatetime=100 "Decrease update delay for gitgutter
 
 " Use system clipboard
 if !has("gui_running")
