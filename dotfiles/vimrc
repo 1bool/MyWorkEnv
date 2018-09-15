@@ -231,16 +231,21 @@ let g:detectindent_preferred_indent = 4 " specify a preferred indent level when 
 let g:onedark_terminal_italics = 1
 
 if !has("gui_running")
-	let g:PaperColor_Theme_Options = {
-				\   'theme': {
-				\     'default': {
-				\       'transparent_background': 1
-				\     }
-				\   }
-				\ }
 	try
-		let g:airline_theme = 'papercolor'
-		colorscheme PaperColor
+		" let g:PaperColor_Theme_Options = {
+		"             \   'theme': {
+		"             \     'default': {
+		"             \       'transparent_background': 1
+		"             \     }
+		"             \   }
+		"             \ }
+		" let g:airline_theme = 'papercolor'
+		" colorscheme PaperColor
+		let g:airline_theme = 'solarized'
+		let g:solarized_enable_extra_hi_groups = 1
+		let g:solarized_statusline = "low"
+		let g:solarized_termtrans = 1
+		colorscheme solarized8
 	catch /^Vim\%((\a\+)\)\=:E185/
 		" Fallback to desert
 		let g:airline_theme = 'dark'

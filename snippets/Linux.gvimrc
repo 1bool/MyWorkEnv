@@ -1,1 +1,1 @@
-set guifont=Go\ Mono\ for\ Powerline\ 12
+set guifont=Go\ Mono\ for\ Powerline\ 14
