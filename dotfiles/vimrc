@@ -202,7 +202,7 @@ let g:rooter_silent_chdir = 1
 " Add spaces after comment delimiters by default
 let g:NERDSpaceDelims = 1
 " Align line-wise comment delimiters flush left instead of following code indentation
-let g:NERDDefaultAlign = 'left'
+let g:NERDDefaultAlign = 'both'
 " Set a language to use its alternate delimiters by default
 let g:NERDAltDelims_c = 1
 " Enable trimming of trailing whitespace when uncommenting
@@ -212,6 +212,7 @@ let g:NERDDefaultNesting = 0
 
 
 let g:ctrlp_cmd = 'CtrlPMRU' " MRU file list as ctrlp default
+let g:ctrlp_by_filename = 1 " Search by file name instead of full path
 
 let g:python_highlight_all = 1 " python-syntax
 
@@ -219,12 +220,10 @@ let g:ycm_confirm_extra_conf = 0
 
 " grepper
 let g:grepper           = {}
-" let g:grepper.tools     = ['git', 'ag', 'grep']
-" let g:grepper.open      = 1
-" let g:grepper.jump      = 1
-" let g:grepper.next_tool = '<leader>g'
+let g:grepper.tools     = ['git', 'ag', 'grep']
 let g:grepper.highlight = 1
-let g:grepper.simple_prompt = 1
+" let g:grepper.simple_prompt = 1
+let g:grepper.dir = 'repo,file'
 
 let g:detectindent_preferred_indent = 4 " specify a preferred indent level when no detection is possible
 
