@@ -46,10 +46,12 @@ ifeq ($(filter pathogen,$(PKGTOGIT)),)
 PKGTOGIT += pathogen
 DESTFILES += $(VIMDIR)/autoload/pathogen.vim
 endif
+SEOUL256 = vim-airline-themes/autoload/airline/themes/seoul256.vim
 GITTARGETS = $(addprefix $(BUNDLE)/,$(filter-out \
-	     $(PKGTOGIT), $(filter-out \
-	     $(addsuffix .vim,$(PKGTOGIT)),$(filter-out \
-	     $(addprefix vim-,$(PKGTOGIT)),$(notdir $(GITPLUGINS))))))
+			 $(PKGTOGIT), $(filter-out \
+			 $(addsuffix .vim,$(PKGTOGIT)),$(filter-out \
+			 $(addprefix vim-,$(PKGTOGIT)),$(notdir $(GITPLUGINS))))) \
+			 $(SEOUL256))
 UPDATE-GITTARGETS = $(addprefix update-,$(GITTARGETS))
 
 $(VIMDIR)/:
@@ -83,6 +85,9 @@ $(BUNDLE)/%:
 	git clone -b $(BRANCH) https://github.com/$(filter %/$(notdir $@),$(GITPLUGINS)).git $@
 	@if [ -d $@/doc ]; then \
 		vim +Helptags $@/doc/*.txt +qall; fi
+
+$(BUNDLE)/$(SEOUL256): | $(BUNDLE)/vim-airline-themes/
+	wget -P $(@D) https://gist.github.com/jbkopecky/a2f66baa8519747b388f2a1617159c07/raw/f73313795a9b3135ea23735b3e6d4a1969da3cfe/seoul256.vim
 
 $(BUNDLE)/YouCompleteMe: $(TARGETPKGS)
 	git clone -b master https://github.com/$(filter %/$(notdir $@),$(GITPLUGINS)).git $@
