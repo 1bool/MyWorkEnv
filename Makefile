@@ -24,6 +24,7 @@ include include/ubuntu.mk
 else
 PLUGGED = $(VIMDIR)/plugged
 PKGS += ctags cmake ack
+SEOUL256 = $(PLUGGED)/vim-airline-themes/autoload/airline/themes/seoul256.vim
 
 $(AUTOLOADDIR)/plug.vim:
 	curl -fLo $@ --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
@@ -32,7 +33,6 @@ $(PLUGGED): $(AUTOLOADDIR)/plug.vim $(PLUGINRC)
 	vim +PlugInstall +qall
 	@touch $(PLUGGED)
 
-SEOUL256 = $(PLUGGED)/vim-airline-themes/autoload/airline/themes/seoul256.vim
 
 ifeq ($(DIST),mac)
 include include/mac.mk

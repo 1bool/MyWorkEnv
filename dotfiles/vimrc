@@ -243,7 +243,7 @@ if !has("gui_running")
 		" colorscheme PaperColor
 		let g:airline_theme = 'solarized'
 		let g:solarized_enable_extra_hi_groups = 1
-		let g:solarized_statusline = "low"
+		let g:solarized_statusline = 'low'
 		let g:solarized_termtrans = 1
 		colorscheme solarized8
 	catch /^Vim\%((\a\+)\)\=:E185/
