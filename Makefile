@@ -93,7 +93,7 @@ dotfiles/dircolors: LS_COLORS/LS_COLORS
 LS_COLORS/LS_COLORS:
 	git clone -b $(BRANCH) https://github.com/trapd00r/LS_COLORS.git $(dir $@)
 
-update-LS_COLOR:
+update-LS_COLORS:
 	git -C $(@:update-%=%) pull origin $(BRANCH)
  
 snippets/pym-powerline.tmux.conf: $(filter powerline-status,$(PYMS))
@@ -144,7 +144,7 @@ del-bash_profile:
 
 install: $(DESTFILES) $(TARGETPKGS) $(PKGPLUGINTARGETS) $(GITTARGETS) $(PLUGINRC) $(PLUGGED) $(PYMS) $(FONTS)
 
-update: install vimplug-update $(patsubst %,fonts-update,$(filter-out msys,$(DIST)))
+update: install update-LS_COLORS vimplug-update $(patsubst %,fonts-update,$(filter-out msys,$(DIST)))
 
 uninstall:
 	-rm -fr $(DESTFILES) $(GITTARGETS) $(PLUGINRC) $(PLUGGED) $(BUNDLE) $(AUTOLOADDIR)/plug.vim $(FONTS)

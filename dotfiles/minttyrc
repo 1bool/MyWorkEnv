@@ -1,6 +1,6 @@
 BoldAsFont=yes
 Font=Fira Mono for Powerline
-FontHeight=12
+FontHeight=14
 FontIsBold=no
 Term=xterm-256color
 BellSound=yes
