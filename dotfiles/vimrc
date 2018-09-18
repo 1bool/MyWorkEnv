@@ -49,6 +49,9 @@ set expandtab
 "         set termguicolors
 " endif
 
+set t_8b=^[[48;2;%lu;%lu;%lum
+set t_8f=^[[38;2;%lu;%lu;%lum
+
 if !&scrolloff
 	set scrolloff=1
 endif
@@ -58,8 +61,6 @@ endif
 set display+=lastline
 
 set fencs=ucs-bom,utf-8,default,latin1,gb18030,cp936,big5
-
-" set updatetime=100 "Decrease update delay for gitgutter
 
 " Use system clipboard
 if !has("gui_running")
@@ -242,7 +243,7 @@ if !has("gui_running")
 		" colorscheme PaperColor
 		let g:airline_theme = 'solarized'
 		let g:solarized_enable_extra_hi_groups = 1
-		let g:solarized_statusline = "low"
+		let g:solarized_statusline = 'low'
 		let g:solarized_termtrans = 1
 		colorscheme solarized8
 	catch /^Vim\%((\a\+)\)\=:E185/

@@ -24,6 +24,7 @@ include include/ubuntu.mk
 else
 PLUGGED = $(VIMDIR)/plugged
 PKGS += ctags cmake ack
+SEOUL256 = $(PLUGGED)/vim-airline-themes/autoload/airline/themes/seoul256.vim
 
 $(AUTOLOADDIR)/plug.vim:
 	curl -fLo $@ --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
@@ -31,6 +32,7 @@ $(AUTOLOADDIR)/plug.vim:
 $(PLUGGED): $(AUTOLOADDIR)/plug.vim $(PLUGINRC)
 	vim +PlugInstall +qall
 	@touch $(PLUGGED)
+
 
 ifeq ($(DIST),mac)
 include include/mac.mk
@@ -95,6 +97,9 @@ LS_COLORS/LS_COLORS:
 
 update-LS_COLORS:
 	git -C $(@:update-%=%) pull origin $(BRANCH)
+
+$(SEOUL256): | $(or $(filter %airline-themes,$(PKGPLUGINTARGETS) $(GITTARGETS)),$(PLUGGED))
+	wget -P $(@D) https://gist.github.com/jbkopecky/a2f66baa8519747b388f2a1617159c07/raw/f73313795a9b3135ea23735b3e6d4a1969da3cfe/seoul256.vim
  
 snippets/pym-powerline.tmux.conf: $(filter powerline-status,$(PYMS))
 	echo source \"$$(echo 'import sys; print([x for x in sys.path if "powerline_status" in x][0])' \
@@ -143,6 +148,7 @@ del-bash_profile:
 	mv -iv $(HOME)/.bash_profile $(HOME)/.bash_profile.old
 
 install: $(DESTFILES) $(TARGETPKGS) $(PKGPLUGINTARGETS) $(GITTARGETS) $(PLUGINRC) $(PLUGGED) $(PYMS) $(FONTS)
+install: $(SEOUL256)
 
 update: install update-LS_COLORS vimplug-update $(patsubst %,fonts-update,$(filter-out msys,$(DIST)))
 

@@ -4,7 +4,7 @@ Plug 'scrooloose/syntastic'
 Plug 'vim-scripts/a.vim', { 'for': ['c', 'h', 'cpp', 'hpp'] }
 Plug 'jlanzarotta/bufexplorer'
 Plug 'vim-airline/vim-airline'
-Plug 'vim-airline/vim-airline-themes', { 'dir': 'autoload/airline/themes', 'do': 'wget https://gist.github.com/jbkopecky/a2f66baa8519747b388f2a1617159c07/raw/f73313795a9b3135ea23735b3e6d4a1969da3cfe/seoul256.vim' }
+Plug 'vim-airline/vim-airline-themes', { 'do': 'wget -P autoload/airline/themes https://gist.github.com/jbkopecky/a2f66baa8519747b388f2a1617159c07/raw/f73313795a9b3135ea23735b3e6d4a1969da3cfe/seoul256.vim' }
 Plug 'tpope/vim-fugitive'
 Plug 'tpope/vim-surround'
 Plug 'mhinz/vim-grepper'
