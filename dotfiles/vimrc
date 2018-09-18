@@ -141,7 +141,7 @@ function! PluginSetup()
 		let g:NERDTreeMinimalUI = 1
 		let g:NERDTreeAutoCenterThreshold = 8
 		let g:NERDTreeNaturalSort = 1
-		let NERDTreeAutoDeleteBuffer=1
+		let g:NERDTreeChDirMode = 2
 		" let g:NERDTreeMouseMode = 2
 		nnoremap <silent> <F6> :NERDTreeToggle<CR>
 		nnoremap tf :NERDTreeToggle<CR>

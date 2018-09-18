@@ -5,7 +5,7 @@ DIST := $(strip $(if $(filter Darwin,$(OS)),mac,\
 	$(if $(wildcard /etc/os-release),$(shell . /etc/os-release 2> /dev/null && echo $$ID),\
 	$(shell cat /etc/system-release | cut -d' ' -f1 | tr '[:upper:]' '[:lower:]')))))
 DOTFILES = vimrc vimrc.local gvimrc gvimrc.local screenrc tmux.conf bashrc profile pylintrc dircolors
-DESTFILES = $(addprefix $(HOME)/.,$(DOTFILES)) $(addprefix $(HOME)/,$(wildcard bin/*))
+DESTFILES = $(addprefix $(HOME)/.,$(DOTFILES)) $(addprefix $(HOME)/.local/,$(wildcard bin/*))
 VIMDIR = $(HOME)/.vim
 AUTOLOADDIR = $(VIMDIR)/autoload
 PLUGINRC = $(VIMDIR)/pluginrc.vim
@@ -114,10 +114,10 @@ $(HOME)/.%: $$(wildcard snippets/$$(OS)$$(@F)) $$(wildcard snippets/$$(DIST)$$(@
 		echo "cat $^ > $@"; \
 		cat $^ > $@; fi
 
-$(HOME)/bin/:
+$(HOME)/.local/bin/:
 	install -m 0755 -d $@
 
-$(HOME)/bin/%: bin/% | $(HOME)/bin/
+$(HOME)/.local/bin/%: bin/% | $(HOME)/.local/bin/
 	install -m 0755 $< $@
 
 fonts/powerline-fonts/:
