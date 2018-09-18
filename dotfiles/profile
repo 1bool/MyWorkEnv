@@ -32,3 +32,23 @@ EDITOR='vim'
 if which powerline-daemon &> /dev/null; then
     powerline-daemon -q
 fi
+
+if [ -r /usr/share/powerline/bindings/bash/powerline.sh ]; then
+  POWERLINE_BASH_CONTINUATION=1
+  POWERLINE_BASH_SELECT=1
+  . /usr/share/powerline/bindings/bash/powerline.sh
+else
+  POWERLINE_DIR="$(echo 'import sys; print([x for x in sys.path if "powerline_status" in x][0])' | python 2> /dev/null)"
+  [ -z "$POWERLINE_DIR" ] && POWERLINE_DIR='.local/lib/python2.6/site-packages'
+  if [ -r $POWERLINE_DIR/powerline/bindings/bash/powerline.sh ]; then
+    POWERLINE_BASH_CONTINUATION=1
+    POWERLINE_BASH_SELECT=1
+    if [ -x $POWERLINE_DIR/bin/powerline ]; then
+      POWERLINE_COMMAND=$POWERLINE_DIR/bin/powerline
+    fi
+    if [ -x $POWERLINE_DIR/EGG-INFO/scripts/powerline-config ]; then
+      POWERLINE_CONFIG_COMMAND=$POWERLINE_DIR/EGG-INFO/scripts/powerline-config
+    fi
+    . $POWERLINE_DIR/powerline/bindings/bash/powerline.sh
+  fi
+fi
