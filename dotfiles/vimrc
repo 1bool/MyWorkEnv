@@ -196,7 +196,7 @@ let g:syntastic_check_on_open = 1
 let g:syntastic_check_on_wq = 0
 
 " auto cd
-" let g:rooter_change_directory_for_non_project_files = 'current'
+let g:rooter_change_directory_for_non_project_files = 'current'
 let g:rooter_use_lcd = 1
 let g:rooter_silent_chdir = 1
 
@@ -224,7 +224,7 @@ let g:grepper           = {}
 " let g:grepper.tools     = ['git', 'ag', 'grep']
 let g:grepper.highlight = 1
 " let g:grepper.simple_prompt = 1
-let g:grepper.dir = 'repo,file'
+let g:grepper.dir = 'repo,filecwd'
 
 let g:detectindent_preferred_indent = 4 " specify a preferred indent level when no detection is possible
 
