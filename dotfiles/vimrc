@@ -195,7 +195,7 @@ let g:syntastic_check_on_open = 1
 let g:syntastic_check_on_wq = 0
 
 " auto cd
-let g:rooter_change_directory_for_non_project_files = 'current'
+" let g:rooter_change_directory_for_non_project_files = 'current'
 let g:rooter_use_lcd = 1
 let g:rooter_silent_chdir = 1
 
@@ -220,7 +220,7 @@ let g:ycm_confirm_extra_conf = 0
 
 " grepper
 let g:grepper           = {}
-let g:grepper.tools     = ['git', 'ag', 'grep']
+" let g:grepper.tools     = ['git', 'ag', 'grep']
 let g:grepper.highlight = 1
 " let g:grepper.simple_prompt = 1
 let g:grepper.dir = 'repo,file'
