@@ -113,7 +113,7 @@ nnoremap <X1Mouse> <C-O>
 nnoremap <X2Mouse> <C-I>
 
 if has("autocmd")
-	autocmd BufEnter,BufWrite,FileType c,cpp,python,sh,java,javascript,perl,ruby,php,make,vim
+	autocmd BufEnter,BufWrite,FileType c,cpp,python,sh,java,javascript,perl,ruby,php,make,vim,go
 				\ setlocal number | setlocal cursorline
 	autocmd VimEnter,FileType * call PluginSetup()
 	" autocmd BufEnter,FileType c,cpp,python,sh,java,javascript,perl,ruby,php,vim nested TagbarOpen
@@ -168,12 +168,21 @@ function! PluginSetup()
 		nnoremap <Leader>f :YcmCompleter FixIt<CR>
 		nnoremap <F5> :YcmForceCompileAndDiagnostics<CR>
 	endif
-	if exists(":IndentGuidesToggle")
+	" if exists(":IndentGuidesToggle")
 		"let g:indent_guides_enable_on_vim_startup=1 " 随 vim 自启动
-		let g:indent_guides_start_level=2 "从第二层开始可视化显示缩进
-		let g:indent_guides_guide_size=1 " 色块宽度
+		" let g:indent_guides_start_level=2 "从第二层开始可视化显示缩进
+		" let g:indent_guides_guide_size=1 " 色块宽度
 		" 快捷键 i 开/关缩进可视化
-		nmap <silent> <Leader>i <Plug>IndentGuidesToggle
+		" nmap <silent> <Leader>i <Plug>IndentGuidesToggle
+	" endif
+	if exists(":IndentLinesToggle")
+		let g:indentLine_fileType = [ 'c', 'cpp', 'python', 'go', 'sh', 'make', 'spec', 'vim', 'yaml', 'json',
+					\ 'perl', 'java', 'javascript', 'lua', 'php', 'tcl', 'ruby' ]
+		let g:indentLine_char = '┊'
+		let g:indentLine_bufTypeExclude = ['help', 'terminal', 'quickfix']
+		let g:indentLine_bufNameExclude = ['_.*', 'NERD_tree.*']
+		nmap <silent> <Leader>i :IndentLinesToggle<CR>
+		nmap <silent> <Leader>l :LeadingSpaceToggle<CR>
 	endif
 endfunction
 
