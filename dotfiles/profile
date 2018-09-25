@@ -20,6 +20,10 @@ fi
 
 EDITOR='vim'
 
+if [ -f "$HOME/.profile.local" ]; then
+    . "$HOME/.profile.local"
+fi
+
 # Powerline
 if which powerline-daemon &> /dev/null; then
     powerline-daemon -q
