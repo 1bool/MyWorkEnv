@@ -11,6 +11,7 @@ Plug 'tpope/vim-surround'
 Plug 'mhinz/vim-grepper'
 Plug 'mhinz/vim-startify'
 Plug 'rdnetto/YCM-Generator', { 'branch': 'stable', 'on': [ 'YcmGenerateConfig', 'CCGenerateConfig' ]}
+Plug 'jeaye/color_coded', { 'do': 'rm -f CMakeCache.txt && cmake . && make && make install' }
 Plug 'airblade/vim-rooter'
 Plug 'ctrlpvim/ctrlp.vim'
 Plug 'hdima/python-syntax' ", { 'for': 'py' }

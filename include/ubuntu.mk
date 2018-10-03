@@ -13,7 +13,10 @@ PKGS += git \
 	fontconfig \
 	python-psutil \
 	powerline \
-	language-pack-zh-hans
+	language-pack-zh-hans \
+	lua5.2 liblua5.2-dev \
+	libncurses5-dev \
+	zlib1g-dev
 INSTALLTARGETS = $(filter $(shell apt-cache search --names-only '.*' | cut -d' ' -f1),$(PKGS))
 GITPLUGINS = $(shell grep '^[[:blank:]]*Plug ' vim/plugrc.vim | cut -d\' -f2) pathogen
 GITTOPKG = $(shell echo $(subst nerdcommenter,nerd-commenter,\
@@ -89,6 +92,12 @@ $(BUNDLE)/YouCompleteMe: $(TARGETPKGS)
 	git clone -b master https://github.com/$(filter %/$(notdir $@),$(GITPLUGINS)).git $@
 	cd $@ && git submodule update --init --recursive
 	cd $@ && ./install.py --clang-completer
+	@if [ -d $@/doc ]; then \
+		vim +Helptags $@/doc/*.txt +qall; fi
+
+$(BUNDLE)/color_coded: $(TARGETPKGS)
+	git clone -b master https://github.com/$(filter %/$(notdir $@),$(GITPLUGINS)).git $@
+	cd $@ && rm -f CMakeCache.txt && cmake . && make && make install
 	@if [ -d $@/doc ]; then \
 		vim +Helptags $@/doc/*.txt +qall; fi
 
