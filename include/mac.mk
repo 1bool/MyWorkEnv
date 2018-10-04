@@ -1,9 +1,9 @@
 FONTDIR := $(HOME)/Library/Fonts
-BREW = $(shell which brew &> /dev/null || echo brew)
+BREW := $(shell which brew &> /dev/null || echo brew)
 PKGS += macvim the_silver_searcher thefuck
-INSTALLTARGETS = $(filter-out python-setuptools,$(PKGS))
-TARGETPKGS = $(filter-out $(shell brew cask list),$(filter-out $(shell brew list),$(INSTALLPKGS)))
-PKGUPDATE = brew-update
+INSTALLTARGETS := $(filter-out python-setuptools,$(PKGS))
+TARGETPKGS := $(filter-out $(shell brew cask list),$(filter-out $(shell brew list),$(INSTALLPKGS)))
+PKGUPDATE := brew-update
 
 $(EZINSTALL):
 	xcode-select --install

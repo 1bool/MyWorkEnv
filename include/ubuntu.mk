@@ -1,7 +1,7 @@
-UBUNTU_VER = $(shell . /etc/os-release && echo $$VERSION_ID)
-APT_STAMP = '/var/lib/apt/periodic/update-success-stamp'
-BUNDLE = $(VIMDIR)/bundle
-PRCFILE = vim/pathogenrc.vim
+UBUNTU_VER := $(shell . /etc/os-release && echo $$VERSION_ID)
+APT_STAMP := '/var/lib/apt/periodic/update-success-stamp'
+BUNDLE := $(VIMDIR)/bundle
+PRCFILE := vim/pathogenrc.vim
 PKGS += git \
 	exuberant-ctags \
 	vim-gnome \
@@ -14,34 +14,32 @@ PKGS += git \
 	python-psutil \
 	powerline \
 	language-pack-zh-hans \
-	lua5.2 liblua5.2-dev \
-	libncurses5-dev \
-	zlib1g-dev
-INSTALLTARGETS = $(filter $(shell apt-cache search --names-only '.*' | cut -d' ' -f1),$(PKGS))
-GITPLUGINS = $(shell grep '^[[:blank:]]*Plug ' vim/plugrc.vim | cut -d\' -f2) pathogen
-GITTOPKG = $(shell echo $(subst nerdcommenter,nerd-commenter,\
+	thefuck \
+	cmake lua5.2 liblua5.2-dev libncurses5-dev zlib1g-dev # for color_coded
+INSTALLTARGETS := $(filter $(shell apt-cache search --names-only '.*' | cut -d' ' -f1),$(PKGS))
+GITPLUGINS := $(shell grep -E '^[[:blank:]]*Plug[[:blank:]]+' vim/plugrc.vim $(wildcard snippets/$(OS).pluginrc.vim snippets/$(DIST).pluginrc.vim) | cut -d\' -f2) pathogen
+GITTOPKG := $(shell echo $(subst nerdcommenter,nerd-commenter,\
 		   $(basename $(notdir $(subst a.vim,alternate.vim,$(GITPLUGINS))))) \
 		   | tr [:upper:] [:lower:])
 ifeq ($(UBUNTU_VER),16.04)
-INSTALLTARGETS += thefuck
-# vim-youcompleteme doesn't work in 16.04
-VIMPKGS = $(filter-out vim-youcompleteme,$(shell apt-cache search --names-only '^vim-' | cut -d' ' -f1))
+# vim-youcompleteme fail to work in 16.04
+VIMPKGS := $(filter-out vim-youcompleteme,$(shell apt-cache search --names-only '^vim-' | cut -d' ' -f1))
 INSTALLTARGETS += cmake python-dev python3-dev g++ gcc
 else
-VIMPKGS = $(shell apt-cache search --names-only '^vim-' | cut -d' ' -f1)
+VIMPKGS := $(shell apt-cache search --names-only '^vim-' | cut -d' ' -f1)
 endif
-PLUGINPKGS = $(filter $(addprefix %,$(GITTOPKG)),$(VIMPKGS))
-VAMLIST = $(if $(and $(shell dpkg --get-selections | fgrep vim-scripts),\
+PLUGINPKGS := $(filter $(addprefix %,$(GITTOPKG)),$(VIMPKGS))
+VAMLIST := $(if $(and $(shell dpkg --get-selections | fgrep vim-scripts),\
 		  $(shell dpkg --get-selections | fgrep vim-addon-manager)),\
 		  $(shell vam list),$(error "vim-scripts or vim-addon-manager not installed")) \
 		  $(VIMPKGS:vim-%=%)
-PKGPLUGINS = $(filter $(GITTOPKG:vim-%=%),$(VAMLIST))
+PKGPLUGINS := $(filter $(GITTOPKG:vim-%=%),$(VAMLIST))
 INSTALLTARGETS += $(PLUGINPKGS)
-TARGETPKGS = $(filter-out $(shell dpkg --get-selections | cut -f1 | cut -d':' -f1),\
+TARGETPKGS := $(filter-out $(shell dpkg --get-selections | cut -f1 | cut -d':' -f1),\
 	$(INSTALLTARGETS))
-PKGPLUGINTARGETS = $(filter-out $(shell vam -q status $(PKGPLUGINS) 2> /dev/null | \
+PKGPLUGINTARGETS := $(filter-out $(shell vam -q status $(PKGPLUGINS) 2> /dev/null | \
 				   grep installed | cut -f1),$(PKGPLUGINS))
-PKGTOGIT = $(subst youcompleteme,YouCompleteMe,\
+PKGTOGIT := $(subst youcompleteme,YouCompleteMe,\
 		   $(subst nerd-commenter,nerdcommenter,\
 		   $(subst alternate,a,\
 		   $(VAMLIST))))
@@ -49,12 +47,12 @@ ifeq ($(filter pathogen,$(PKGTOGIT)),)
 PKGTOGIT += pathogen
 DESTFILES += $(VIMDIR)/autoload/pathogen.vim
 endif
-GITTARGETS = $(addprefix $(BUNDLE)/,$(filter-out \
+GITTARGETS := $(addprefix $(BUNDLE)/,$(filter-out \
 			 $(PKGTOGIT), $(filter-out \
 			 $(addsuffix .vim,$(PKGTOGIT)),$(filter-out \
 			 $(addprefix vim-,$(PKGTOGIT)),$(notdir $(GITPLUGINS))))))
-UPDATE-GITTARGETS = $(addprefix update-,$(GITTARGETS))
-SEOUL256 = $(if $(filter airline-themes,$(GITTARGETS)),$(BUNDLE)/vim-airline-themes,$(VIMDIR))/autoload/airline/themes/seoul256.vim
+UPDATE-GITTARGETS := $(addprefix update-,$(GITTARGETS))
+SEOUL256 := $(if $(filter airline-themes,$(GITTARGETS)),$(BUNDLE)/vim-airline-themes,$(VIMDIR))/autoload/airline/themes/seoul256.vim
 
 $(VIMDIR)/:
 	mkdir -p $(VIMDIR)
@@ -81,7 +79,7 @@ endif
 $(PKGPLUGINTARGETS): | $(VIMDIR)/
 	vam install $@
 
-$(BUNDLE)/YCM-Generator update-$(BUNDLE)/YCM-Generator: BRANCH = stable
+$(BUNDLE)/YCM-Generator update-$(BUNDLE)/YCM-Generator: BRANCH := stable
 
 $(BUNDLE)/%:
 	git clone -b $(BRANCH) https://github.com/$(filter %/$(notdir $@),$(GITPLUGINS)).git $@

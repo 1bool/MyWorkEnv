@@ -15,10 +15,10 @@ PKGS += $(if $(shell fgrep ' 6.' /etc/redhat-release),\
 	python3-devel \
 	wqy-bitmap-fonts \
 	wqy-unibit-fonts)
-INSTALLTARGETS = $(PKGS)
-TARGETPKGS = $(filter-out $(shell rpm -qa --qf '%{NAME} '),$(INSTALLPKGS))
+INSTALLTARGETS := $(PKGS)
+TARGETPKGS := $(filter-out $(shell rpm -qa --qf '%{NAME} '),$(INSTALLPKGS))
 PKGM ?= $(shell which dnf 2> /dev/null || echo yum)
-PKGUPDATE = dnf-update
+PKGUPDATE := dnf-update
 
 $(INSTALLPKGS):
 	sudo $(PKGM) -y install $@

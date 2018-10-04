@@ -4,17 +4,17 @@ DIST := $(strip $(if $(filter Darwin,$(OS)),mac,\
 	$(if $(filter MSYS_NT,$(OS)),msys,\
 	$(if $(wildcard /etc/os-release),$(shell . /etc/os-release 2> /dev/null && echo $$ID),\
 	$(shell cat /etc/system-release | cut -d' ' -f1 | tr '[:upper:]' '[:lower:]')))))
-DOTFILES = vimrc vimrc.local gvimrc gvimrc.local screenrc tmux.conf bashrc profile pylintrc dircolors
-DESTFILES = $(addprefix $(HOME)/.,$(DOTFILES)) $(addprefix $(HOME)/.local/,$(wildcard bin/*))
-VIMDIR = $(HOME)/.vim
-AUTOLOADDIR = $(VIMDIR)/autoload
-PLUGINRC = $(VIMDIR)/pluginrc.vim
-PKGS := coreutils tmux curl python-setuptools clang cmake
-LOCALDIR = $(HOME)/.local/share
-FONTDIR = $(HOME)/.local/share/fonts
-FONTS = .fonts_installed
-BRANCH = master
-VPATH = dotfiles:snippets
+DOTFILES := vimrc vimrc.local gvimrc gvimrc.local screenrc tmux.conf bashrc profile pylintrc dircolors
+DESTFILES := $(addprefix $(HOME)/.,$(DOTFILES)) $(addprefix $(HOME)/.local/,$(wildcard bin/*))
+VIMDIR := $(HOME)/.vim
+AUTOLOADDIR := $(VIMDIR)/autoload
+PLUGINRC := $(VIMDIR)/pluginrc.vim
+PKGS := coreutils tmux curl python-setuptools clang
+LOCALDIR := $(HOME)/.local/share
+FONTDIR := $(HOME)/.local/share/fonts
+FONTS := .fonts_installed
+BRANCH := master
+VPATH := dotfiles:snippets
 
 all: install
 
@@ -22,9 +22,9 @@ all: install
 ifneq ($(filter $(DIST),ubuntu debian deepin),)
 include include/ubuntu.mk
 else
-PLUGGED = $(VIMDIR)/plugged
+PLUGGED := $(VIMDIR)/plugged
 PKGS += ctags cmake ack
-SEOUL256 = $(PLUGGED)/vim-airline-themes/autoload/airline/themes/seoul256.vim
+SEOUL256 := $(PLUGGED)/vim-airline-themes/autoload/airline/themes/seoul256.vim
 
 $(AUTOLOADDIR)/plug.vim:
 	curl -fLo $@ --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
@@ -47,7 +47,7 @@ vimplug-update:
 	vim +PlugUpgrade +PlugUpdate +qall
 
 .SECONDEXPANSION:
-$(PLUGINRC): vim/plugrc.vim $$(wildcard snippets/$$(OS).$$(@F)) $$(wildcard snippets/$$(DIST).$$(@F))
+$(PLUGINRC): vim/plugrc.vim $$(wildcard snippets/$$(OS).$$(@F) snippets/$$(DIST).$$(@F))
 	mkdir -p $(dir $(PLUGINRC))
 	@echo 'let g:plug_window = "vertical botright new"' > $@
 	@echo 'call plug#begin()' >> $@
@@ -56,9 +56,9 @@ $(PLUGINRC): vim/plugrc.vim $$(wildcard snippets/$$(OS).$$(@F)) $$(wildcard snip
 endif
 
 
-INPUTFONTS = $(shell find fonts/InputMono -name *.ttf -type f)
-FONTDIRS = $(dir $(INPUTFONTS))
-TARGETFONTS = $(filter-out $(wildcard $(FONTDIR)/*.ttf), \
+INPUTFONTS := $(shell find fonts/InputMono -name *.ttf -type f)
+FONTDIRS := $(dir $(INPUTFONTS))
+TARGETFONTS := $(filter-out $(wildcard $(FONTDIR)/*.ttf), \
 	      $(addprefix $(FONTDIR)/,$(notdir $(INPUTFONTS))))
 
 vpath %.ttf $(FONTDIRS)
@@ -77,7 +77,7 @@ $(PYMS): $(EZINSTALL) $(TARGETPKGS)
 	mkdir -p ~/.local/lib/python$$(python -V 2>&1 | cut -d' ' -f2 | cut -d'.' -f-2)/site-packages
 	easy_install $(if $(shell easy_install --help | fgrep -e '--user'),--user,--prefix ~/.local) $@
 
-INSTALLPKGS = $(filter-out $(PYMS),$(INSTALLTARGETS))
+INSTALLPKGS := $(filter-out $(PYMS),$(INSTALLTARGETS))
 
 $(HOME)/%vimrc.local:
 	touch $@
