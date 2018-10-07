@@ -143,6 +143,7 @@ function! PluginSetup()
 		let g:NERDTreeNaturalSort = 1
 		let g:NERDTreeChDirMode = 2
 		" let g:NERDTreeMouseMode = 2
+		let g:NERDTreeShowIgnoredStatus = 0 " for nerdtree git plugin
 		nnoremap <silent> <F6> :NERDTreeToggle<CR>
 		nnoremap tf :NERDTreeToggle<CR>
 	endif
