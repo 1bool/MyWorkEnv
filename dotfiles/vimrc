@@ -240,6 +240,9 @@ let g:detectindent_preferred_indent = 4 " specify a preferred indent level when 
 
 let g:onedark_terminal_italics = 1
 
+let g:signify_realtime = 1
+set updatetime=250
+
 if !has("gui_running")
 	try
 		" let g:PaperColor_Theme_Options = {
