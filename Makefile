@@ -147,7 +147,7 @@ endif
 del-bash_profile:
 	mv -iv $(HOME)/.bash_profile $(HOME)/.bash_profile.old
 
-install: $(DESTFILES) $(TARGETPKGS) $(PKGPLUGINTARGETS) $(GITTARGETS) $(PLUGINRC) $(PLUGGED) $(PYMS) $(FONTS)
+install: $(DESTFILES) $(TARGETPKGS) $(PKGPLUGINTARGETS) $(PLUGINRC) $(PLUGGED) $(PYMS) $(FONTS)
 install: $(SEOUL256)
 
 update: install update-LS_COLORS vimplug-update $(patsubst %,fonts-update,$(filter-out msys,$(DIST)))

@@ -81,20 +81,20 @@ $(PKGPLUGINTARGETS): | $(VIMDIR)/
 
 $(BUNDLE)/YCM-Generator update-$(BUNDLE)/YCM-Generator: BRANCH := stable
 
-$(BUNDLE)/%:
-	git clone -b $(BRANCH) https://github.com/$(filter %/$(notdir $@),$(GITPLUGINS)).git $@
+$(BUNDLE)/%/:
+	git clone -b $(BRANCH) https://github.com/$(filter %/$(notdir $(@:/=)),$(GITPLUGINS)).git $@
 	@if [ -d $@/doc ]; then \
 		vim +Helptags $@/doc/*.txt +qall; fi
 
-$(BUNDLE)/YouCompleteMe: $(TARGETPKGS)
-	git clone -b master https://github.com/$(filter %/$(notdir $@),$(GITPLUGINS)).git $@
+$(BUNDLE)/YouCompleteMe/: | $(TARGETPKGS)
+	git clone -b master https://github.com/$(filter %/$(notdir $(@:/=)),$(GITPLUGINS)).git $@
 	cd $@ && git submodule update --init --recursive
 	cd $@ && ./install.py --clang-completer
 	@if [ -d $@/doc ]; then \
 		vim +Helptags $@/doc/*.txt +qall; fi
 
-$(BUNDLE)/color_coded: $(TARGETPKGS)
-	git clone -b master https://github.com/$(filter %/$(notdir $@),$(GITPLUGINS)).git $@
+$(BUNDLE)/color_coded/: | $(TARGETPKGS)
+	git clone -b master https://github.com/$(filter %/$(notdir $(@:/=)),$(GITPLUGINS)).git $@
 	cd $@ && rm -f CMakeCache.txt && cmake . && make && make install
 	@if [ -d $@/doc ]; then \
 		vim +Helptags $@/doc/*.txt +qall; fi
@@ -119,5 +119,7 @@ $(UPDATE-GITTARGETS):
 		vim +Helptags $(@:update-%=%)/doc/*.txt +qall; fi
 
 vimplug-update: $(UPDATE-GITTARGETS)
+
+install: $(addsuffix /,$(GITTARGETS))
 
 .PHONY: $(PKGPLUGINS) $(PKGPLUGINTARGETS)
