@@ -64,10 +64,13 @@ set fencs=ucs-bom,utf-8,default,latin1,gb18030,cp936,big5
 
 " Use system clipboard
 vnoremap <S-Del> "+x
+vnoremap <C-X> "+x
 vnoremap <C-Insert> "+y
+vnoremap <C-C> "+y
 map <silent> <S-Insert> "+gP
-imap <silent> <S-Insert> <ESC>"+gP
-cmap <silent> <S-Insert> <C-R>+
+map <silent> <C-V> "+gP
+imap <silent> <C-V> <ESC>"+gP
+cmap <silent> <C-V> <C-R>+
 
 " let mapleader = "\<Space>"
 
