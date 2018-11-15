@@ -1,5 +1,5 @@
 SHELL := /bin/bash
-OS := $(if $(shell fgrep 'Microsoft@Microsoft.com' /proc/version),WSL,$(patsubst MSYS_NT%,MSYS_NT,$(shell uname -s)))
+OS := $(if $(shell fgrep 'Microsoft@Microsoft.com' /proc/version 2> /dev/null),WSL,$(patsubst MSYS_NT%,MSYS_NT,$(shell uname -s)))
 DIST := $(strip $(if $(filter Darwin,$(OS)),mac,\
 	$(if $(filter MSYS_NT,$(OS)),msys,\
 	$(if $(wildcard /etc/os-release),$(shell . /etc/os-release 2> /dev/null && echo $$ID),\
@@ -9,7 +9,7 @@ DESTFILES := $(addprefix $(HOME)/.,$(DOTFILES)) $(addprefix $(HOME)/.local/,$(wi
 VIMDIR := $(HOME)/.vim
 AUTOLOADDIR := $(VIMDIR)/autoload
 PLUGINRC := $(VIMDIR)/pluginrc.vim
-PKGS := coreutils tmux curl python-setuptools clang
+PKGS := coreutils tmux curl python-setuptools wget
 LOCALDIR := $(HOME)/.local/share
 FONTDIR := $(HOME)/.local/share/fonts
 FONTS := .fonts_installed
@@ -162,4 +162,4 @@ debug:
 	@echo TARGETPKGS: $(TARGETPKGS)
 
 .PHONY: all install install-pkgs uninstall update del-bash_profile vimplug-update fonts-update \
-	$(TARGETPKGS) $(PYMS) $(EZINSTALL)
+	$(PKGS) $(PYMS) $(EZINSTALL)
