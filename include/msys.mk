@@ -3,7 +3,7 @@ PKGS += man-pages-posix unzip diffutils gcc python2 clang
 INSTALLTARGETS := $(subst ack,perl-ack,\
 	      $(subst python-setuptools,python3-setuptools,\
 		  $(subst clang,clang-svn,$(PKGS))))
-TARGETPKGS := $(filter-out $(shell pacman -Qsq),$(INSTALLPKGS))
+TARGETPKGS = $(filter-out $(shell pacman -Qsq),$(INSTALLPKGS))
 FONTS :=
 
 $(INSTALLPKGS):
