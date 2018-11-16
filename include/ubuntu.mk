@@ -36,7 +36,7 @@ VAMLIST := $(if $(and $(shell dpkg --get-selections | fgrep vim-scripts),\
 		  $(VIMPKGS:vim-%=%)
 PKGPLUGINS := $(filter $(GITTOPKG:vim-%=%),$(VAMLIST))
 INSTALLTARGETS += $(PLUGINPKGS)
-TARGETPKGS := $(filter-out $(shell dpkg --get-selections | cut -f1 | cut -d':' -f1),\
+TARGETPKGS = $(filter-out $(shell dpkg --get-selections | cut -f1 | cut -d':' -f1),\
 	$(INSTALLTARGETS))
 PKGPLUGINTARGETS := $(filter-out $(shell vam -q status $(PKGPLUGINS) 2> /dev/null | \
 				   grep installed | cut -f1),$(PKGPLUGINS))
