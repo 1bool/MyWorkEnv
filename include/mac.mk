@@ -17,11 +17,13 @@ $(BREW):
 $(filter-out macvim,$(INSTALLPKGS)): $(BREW)
 	brew install $@
 
+install-pkgs: $(filter macvim,$(TARGETPKGS)) $(if $(filter-out macvim,$(TARGETPKGS)),,brew-install)
+
+brew-install:
+	brew install $(filter-out macvim,$(TARGETPKGS))
+
 macvim: $(BREW)
 	brew cask install $@
-
-install-pkgs: $(filter macvim,$(TARGETPKGS))
-	brew install $(filter-out macvim,$(TARGETPKGS))
 
 brew-update:
 	brew update
