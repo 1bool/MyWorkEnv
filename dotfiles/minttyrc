@@ -1,5 +1,5 @@
 BoldAsFont=yes
-Font=Fira Mono for Powerline
+Font=InputMonoCondensed
 FontHeight=14
 FontIsBold=no
 Term=xterm-256color
