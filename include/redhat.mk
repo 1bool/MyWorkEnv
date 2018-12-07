@@ -1,5 +1,5 @@
+PKGM ?= $(shell which dnf 2> /dev/null || echo yum)
 PKGS += git \
-	vim-enhanced \
 	vim-X11 \
 	automake \
 	gcc \
@@ -9,27 +9,21 @@ PKGS += git \
 	python-psutil \
 	python-argparse \
 	pylint \
-	wqy-zenhei-fonts \
 	clang
-PKGS += $(if $(shell fgrep ' 6.' /etc/redhat-release),\
-	python34-devel,\
-	python3-devel \
-	wqy-bitmap-fonts \
-	wqy-unibit-fonts)
+PKGS += $(or $(shell $(PKGM) list -q python3-devel | tail -1 | cut -d' ' -f1),python2-devel)
+PKGS += $(shell $(PKGM) list -q python-pip | tail -1 | cut -d' ' -f1)
 INSTALLTARGETS := $(PKGS)
 TARGETPKGS = $(filter-out $(shell rpm -qa --qf '%{NAME} '),$(INSTALLPKGS))
-PKGM ?= $(shell which dnf 2> /dev/null || echo yum)
-PKGUPDATE := dnf-update
 
 $(INSTALLPKGS):
 	sudo $(PKGM) -y install $@
 
 install-pkgs:
-ifneq ($(TARGETPKGS),)
 	sudo $(PKGM) -y install $(TARGETPKGS)
-endif
 
 dnf-update:
 	sudo $(PKGM) -y upgrade $(INSTALLPKGS)
 
 update: dnf-update
+
+.PHONY: dnf-update
