@@ -1,5 +1,5 @@
 DESTFILES += $(HOME)/.minttyrc /usr/bin/vi
-PKGS += mintty man-pages-posix unzip diffutils gcc python2 clang
+PKGS += mintty man-pages-posix unzip diffutils gcc python2 clang libcrypt-devel
 INSTALLTARGETS := $(subst ack,perl-ack,\
 	      $(subst python-setuptools,python3-setuptools,\
 		  $(subst clang,clang-svn,$(PKGS))))
@@ -34,6 +34,7 @@ install-pkgs:
 #     mv /tmp/$(notdir $(YCMURL)).part $@
 
 pacman-update:
+	pacman -Sy --noconfirm
 	pacman -Su --noconfirm --needed $(INSTALLPKGS)
 
 update: pacman-update
