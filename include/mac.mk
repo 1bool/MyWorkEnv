@@ -1,9 +1,10 @@
 FONTDIR := $(HOME)/Library/Fonts
 BREW := $(shell which brew &> /dev/null || echo brew)
-PKGS += macvim the_silver_searcher thefuck lua llvm
+PKGS := $(subst vim,macvim,$(PKGS)) the_silver_searcher thefuck lua llvm
 INSTALLTARGETS := $(filter-out python-setuptools,$(PKGS))
 TARGETPKGS = $(filter-out $(shell brew cask list),$(filter-out $(shell brew list),$(INSTALLPKGS)))
 PKGUPDATE := brew-update
+MACVIM_APP := /Applications/MacVim.app
 
 $(EZINSTALL):
 	xcode-select --install
@@ -17,17 +18,22 @@ $(BREW):
 $(filter-out macvim,$(INSTALLPKGS)): $(BREW)
 	brew install $@
 
-install-pkgs: $(filter macvim,$(TARGETPKGS)) $(if $(filter-out macvim,$(TARGETPKGS)),,brew-install)
+install-pkgs:
+	brew install $(TARGETPKGS)
 
-brew-install:
-	brew install $(filter-out macvim,$(TARGETPKGS))
+install: $(MACVIM_APP)/Contents/
 
-macvim: $(BREW)
-	brew cask install $@
+$(MACVIM_APP)/Contents/: $(MACVIM_APP)/ $(filter macvim,$(TARGETPKGS))
+	ln -Fs $$(find /usr/local -name "MacVim.app")/Contents /Applications/MacVim.app/
+	touch $@
+
+$(MACVIM_APP)/:
+	mkdir $@
 
 brew-update:
 	brew update
 	-brew upgrade
+	ln -Fs $(find /usr/local -name "MacVim.app")/Contents /Applications/MacVim.app/
 
 update: brew-update
 
