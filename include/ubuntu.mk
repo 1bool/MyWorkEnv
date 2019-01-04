@@ -15,8 +15,9 @@ PKGS += git \
 	powerline \
 	language-pack-zh-hans \
 	thefuck \
-	clang \
-	cmake lua5.2 liblua5.2-dev libncurses5-dev zlib1g-dev # for color_coded
+	clang
+PKGS += cmake lua5.2 liblua5.2-dev libncurses5-dev zlib1g-dev # for color_coded
+PKGS += dconf-cli # for Gogh
 INSTALLTARGETS := $(filter $(shell apt-cache search --names-only '.*' | cut -d' ' -f1),$(PKGS))
 GITPLUGINS := $(shell grep -E '^[[:blank:]]*Plug[[:blank:]]+' vim/plugrc.vim $(wildcard snippets/$(OS).pluginrc.vim snippets/$(DIST).pluginrc.vim) | cut -d\' -f2) pathogen
 GITTOPKG := $(shell echo $(subst nerdcommenter,nerd-commenter,\
