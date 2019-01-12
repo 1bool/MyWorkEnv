@@ -15,7 +15,8 @@ FONTDIR := $(HOME)/.local/share/fonts
 FONTS := .fonts_installed
 BRANCH := master
 VPATH := dotfiles:snippets
-SUDOERSDIR ?= /etc/sudoers.d/
+SUDOERSDIR := /etc/sudoers.d/
+SUDOERSFILE := $(if $(LOGNAME),$(SUDOERSDIR)/nopass_for_$(LOGNAME),)
 
 all: install
 
@@ -96,8 +97,8 @@ dotfiles/dircolors: LS_COLORS/LS_COLORS
 LS_COLORS/LS_COLORS:
 	git clone -b $(BRANCH) https://github.com/trapd00r/LS_COLORS.git $(dir $@)
 
-$(SUDOERSDIR)/nopass_for_$(shell logname):
-	sudo sh -c 'echo "$(shell logname) ALL=(ALL) NOPASSWD: ALL" > $@'
+$(SUDOERSFILE):
+	sudo sh -c 'echo "$(LOGNAME) ALL=(ALL) NOPASSWD: ALL" > $@'
 	sudo chmod 0440 $@
 
 update-LS_COLORS:
@@ -152,7 +153,7 @@ endif
 del-bash_profile:
 	mv -iv $(HOME)/.bash_profile $(HOME)/.bash_profile.old
 
-install: $(SUDOERSDIR)/nopass_for_$(shell logname)
+install: $(SUDOERSFILE)
 install: $(DESTFILES) $(TARGETPKGS) $(PKGPLUGINTARGETS) $(PLUGINRC) $(PLUGGED) $(PYMS) $(FONTS)
 install: $(SEOUL256)
 
