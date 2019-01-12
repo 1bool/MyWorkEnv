@@ -1,1 +1,1 @@
-set guifont=GoMonoForPowerline:h14,InputMonoCondensed-Regular:h14,Fira\ Mono\ for\ Powerline:h14
+set guifont=InputMono-Regular:h14,Fira\ Mono\ for\ Powerline:h14,GoMonoForPowerline:h14
