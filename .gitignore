@@ -1,5 +1,6 @@
 *.swp
 fonts/powerline-fonts
+fonts/nerd-fonts
 .fonts_installed
 snippets/pym-powerline.tmux.conf
 LS_COLORS
