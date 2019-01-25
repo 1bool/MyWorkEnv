@@ -11,12 +11,16 @@ AUTOLOADDIR := $(VIMDIR)/autoload
 PLUGINRC := $(VIMDIR)/pluginrc.vim
 PKGS := coreutils tmux curl python-setuptools wget vim
 LOCALDIR := $(HOME)/.local/share
-FONTDIR := $(HOME)/.local/share/fonts
-FONTS := .fonts_installed
+FONTDIR := $(if $(filter Darwin,$(OS)),$(HOME)/Library/Fonts,$(HOME)/.local/share/fonts)
+FONTS := $(if $(filter MSYS_NT,$(OS)),,'.fonts_installed')
 BRANCH := master
 VPATH := dotfiles:snippets
 SUDOERSDIR := /etc/sudoers.d/
 SUDOERSFILE := $(if $(LOGNAME),$(SUDOERSDIR)/nopass_for_$(LOGNAME),)
+NERD_FONT_NAMES := Go-Mono FiraCode CodeNewRoman Hack Mononoki ProFont
+NERD_FONT_DIR := $(FONTDIR)/NerdFonts
+POWERLINE_FONT_NAMES := 'Symbol Neu'
+POWERLINE_FONT_DIR := $(FONTDIR)/PowerlineFonts
 
 all: install
 
@@ -58,12 +62,13 @@ $(PLUGINRC): vim/plugrc.vim $$(wildcard snippets/$$(OS).$$(@F) snippets/$$(DIST)
 endif
 
 
-INPUTFONTS := $(shell find fonts/InputMono -name *.ttf -type f)
-FONTDIRS := $(dir $(INPUTFONTS))
-TARGETFONTS := $(filter-out $(wildcard $(FONTDIR)/*.ttf), \
-	      $(addprefix $(FONTDIR)/,$(notdir $(INPUTFONTS))))
+S_INPUT_FONTS := $(shell find fonts/InputMono -name *.ttf -type f)
+S_INPUT_FONTDIRS := $(dir $(S_INPUT_FONTS))
+INPUT_FONT_DIR := $(FONTDIR)/InputFonts
+INPUT_FONTS := $(filter-out $(wildcard $(FONTDIR)/*.ttf), \
+	      $(addprefix $(INPUT_FONT_DIR)/,$(notdir $(S_INPUT_FONTS))))
 
-vpath %.ttf $(FONTDIRS)
+vpath %.ttf $(S_INPUT_FONTDIRS)
 
 ifeq ($(shell echo 'import sys; print([x for x in sys.path if "powerline_status" in x][0])' | python 2> /dev/null),)
 PYMS += $(if $(filter powerline,$(INSTALLTARGETS)),,powerline-status)
@@ -129,20 +134,44 @@ $(HOME)/.local/bin/%: bin/% | $(HOME)/.local/bin/
 fonts/powerline-fonts/:
 	git clone -b master https://github.com/powerline/fonts.git $@
 
-$(FONTDIR)/:
+fonts/nerd-fonts/:
+	git clone --depth 1 -b master https://github.com/ryanoasis/nerd-fonts.git $@
+
+$(FONTDIR)/ $(INPUT_FONT_DIR)/:
 	mkdir -p $@
 
-$(FONTDIR)/%.ttf: %.ttf | $(FONTDIR)/
+$(INPUT_FONT_DIR)/%.ttf: %.ttf | $(INPUT_FONT_DIR)/
 	install -m 0644 $< $@
 
-$(TARGETFONTS): $(TARGETPKGS)
+$(INPUT_FONTS): $(TARGETPKGS)
 
-.fonts_installed: fonts/powerline-fonts/ $(TARGETFONTS)
-	fonts/powerline-fonts/install.sh && touch $@
+$(POWERLINE_FONT_DIR)/: fonts/powerline-fonts/
+	mkdir -p $@
+	@for prefix in $(POWERLINE_FONT_NAMES); do \
+		find fonts/powerline-fonts/ \( -name "$$prefix*.[ot]tf" -or -name "$$prefix*.pcf.gz" \) -type f -print0 | xargs -0 -n1 -I % cp -v "%" "$@/"; done
 
-fonts-update: fonts/powerline-fonts/
+powerline-update: fonts/powerline-fonts/
 	@if ! LANGUAGE=en.US_UTF-8 git -C $< pull origin master | tail -1 | fgrep 'Already up'; then \
-		$</install.sh; fi
+		for prefix in $(POWERLINE_FONT_NAMES); do \
+		find fonts/powerline-fonts/ \( -name "$$prefix*.[ot]tf" -or -name "$$prefix*.pcf.gz" \) -type f -print0 | xargs -0 -n1 -I % cp "%" "$@/"; done; fi
+
+$(NERD_FONT_DIR)/: fonts/nerd-fonts/
+	mkdir -p $@
+	@for NERD_FONT_NAME in $(NERD_FONT_NAMES); do \
+		fonts/nerd-fonts/install.sh -sL "$$NERD_FONT_NAME" | sort | uniq | while read -r NERD_FONT_FILE; do \
+		find fonts/nerd-fonts/ -name "$$(basename "$$NERD_FONT_FILE")" -type f -print0 | xargs -0 -n1 -I % cp -v "%" "$@/"; done; done
+
+nerd-update: fonts/nerd-fonts/
+	@if ! LANGUAGE=en.US_UTF-8 git -C $< pull origin master | tail -1 | fgrep 'Already up'; then \
+		for NERD_FONT_NAME in $(NERD_FONT_NAMES); do \
+		fonts/nerd-fonts/install.sh -sL "$$NERD_FONT_NAME" | sort | uniq | while read -r NERD_FONT_FILE; \
+		do find fonts/nerd-fonts/ -name "$$(basename "$$NERD_FONT_FILE")" -type f -print0 | xargs -0 -n1 -I % cp -v "%" "$@/"; done; done; fi
+
+$(FONTS): $(INPUT_FONTS) $(POWERLINE_FONT_DIR)/ $(NERD_FONT_DIR)/
+	fc-cache -vf "$(FONTDIR)"
+	touch $@
+
+fonts-update: nerd-update powerline-update
 
 $(TARGETPKGS): install-pkgs
 
@@ -162,11 +191,6 @@ update: install update-LS_COLORS vimplug-update $(patsubst %,fonts-update,$(filt
 uninstall:
 	-rm -fr $(DESTFILES) $(GITTARGETS) $(PLUGINRC) $(PLUGGED) $(BUNDLE) $(AUTOLOADDIR)/plug.vim $(FONTS)
 
-debug:
-	@echo PKGS: $(PKGS)
-	@echo INSTALLPKGS: $(INSTALLPKGS)
-	@echo INSTALLTARGETS: $(INSTALLTARGETS)
-	@echo TARGETPKGS: $(TARGETPKGS)
-
-.PHONY: all install install-pkgs uninstall update del-bash_profile vimplug-update fonts-update \
+.PHONY: all install install-pkgs uninstall update del-bash_profile \
+	vimplug-update fonts-update nerd-update powerline-update \
 	$(PKGS) $(PYMS) $(EZINSTALL)
