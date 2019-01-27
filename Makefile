@@ -1,7 +1,7 @@
-SHELL := /bin/bash
+SHELL := bash
 OS := $(if $(shell fgrep 'Microsoft@Microsoft.com' /proc/version 2> /dev/null),WSL,$(patsubst MSYS_NT%,MSYS_NT,$(shell uname -s)))
-DIST := $(strip $(if $(filter Darwin,$(OS)),mac,\
-	$(if $(filter MSYS_NT,$(OS)),msys,\
+DIST := $(strip $(if $(findstring Darwin,$(OS)),mac,\
+	$(if $(findstring MSYS_NT,$(OS)),msys,\
 	$(if $(wildcard /etc/os-release),$(shell . /etc/os-release 2> /dev/null && echo $$ID),\
 	$(shell cat /etc/system-release | cut -d' ' -f1 | tr '[:upper:]' '[:lower:]')))))
 DOTFILES := vimrc vimrc.local gvimrc gvimrc.local screenrc tmux.conf bashrc profile pylintrc dircolors
@@ -11,16 +11,16 @@ AUTOLOADDIR := $(VIMDIR)/autoload
 PLUGINRC := $(VIMDIR)/pluginrc.vim
 PKGS := coreutils tmux curl python-setuptools wget vim
 LOCALDIR := $(HOME)/.local/share
-FONTDIR := $(if $(filter Darwin,$(OS)),$(HOME)/Library/Fonts,$(HOME)/.local/share/fonts)
-FONTS := $(if $(filter MSYS_NT,$(OS)),,'.fonts_installed')
+FONTDIR := $(if $(findstring mac,$(DIST)),$(HOME)/Library/Fonts,$(HOME)/.local/share/fonts)
+FONTS := $(if $(filter $(OS),Linux WSL),'.fonts_installed')
 BRANCH := master
 VPATH := dotfiles:snippets
 SUDOERSDIR := /etc/sudoers.d/
 SUDOERSFILE := $(if $(LOGNAME),$(SUDOERSDIR)/nopass_for_$(LOGNAME),)
-NERD_FONT_NAMES := Go-Mono FiraCode CodeNewRoman Hack Mononoki ProFont
-NERD_FONT_DIR := $(FONTDIR)/NerdFonts
-POWERLINE_FONT_NAMES := 'Symbol Neu'
-POWERLINE_FONT_DIR := $(FONTDIR)/PowerlineFonts
+NERD_FONT_NAMES ?= Go-Mono FiraCode CodeNewRoman Hack Monofur Mononoki ProFont
+NERD_FONT_DIR ?= $(FONTDIR)/NerdFonts/
+POWERLINE_FONT_NAMES ?= $(if $(findstring mac,$(DIST)),Consolas) SymbolNeu
+POWERLINE_FONT_DIR ?= $(FONTDIR)/PowerlineFonts/
 
 all: install
 
@@ -90,9 +90,9 @@ $(HOME)/%vimrc.local:
 	touch $@
 
 $(HOME)/.vimrc: $(if $(filter-out MSYS_NT,$(OS)),set-tmpfiles.vimrc)
-$(HOME)/.profile: $(if $(filter WSL MSYS_NT,$(OS)),auto-ssh-agent.profile)
+$(HOME)/.profile: $(if $(filter $(OS),WSL MSYS_NT),auto-ssh-agent.profile)
 $(HOME)/.tmux.conf: \
-	$(if $(filter 16.04,$(UBUNTU_VER)),vi-style-2.1.tmux.conf,vi-style.tmux.conf) \
+	$(if $(findstring 16.04,$(UBUNTU_VER)),vi-style-2.1.tmux.conf,vi-style.tmux.conf) \
 	$(if $(filter powerline,$(INSTALLTARGETS)),$(if \
 	$(filter ubuntu debian deepin,$(DIST)),ubuntu.tmux.conf), pym-powerline.tmux.conf)
 
@@ -145,17 +145,17 @@ $(INPUT_FONT_DIR)/%.ttf: %.ttf | $(INPUT_FONT_DIR)/
 
 $(INPUT_FONTS): $(TARGETPKGS)
 
-$(POWERLINE_FONT_DIR)/: fonts/powerline-fonts/
+$(POWERLINE_FONT_DIR): fonts/powerline-fonts/
 	mkdir -p $@
-	@for prefix in $(POWERLINE_FONT_NAMES); do \
-		find fonts/powerline-fonts/ \( -name "$$prefix*.[ot]tf" -or -name "$$prefix*.pcf.gz" \) -type f -print0 | xargs -0 -n1 -I % cp -v "%" "$@/"; done
+	@for DIR in $(POWERLINE_FONT_NAMES); do \
+		cp -v "fonts/powerline-fonts/$$DIR/*.?tf" $@; done
 
 powerline-update: fonts/powerline-fonts/
 	@if ! LANGUAGE=en.US_UTF-8 git -C $< pull origin master | tail -1 | fgrep 'Already up'; then \
-		for prefix in $(POWERLINE_FONT_NAMES); do \
-		find fonts/powerline-fonts/ \( -name "$$prefix*.[ot]tf" -or -name "$$prefix*.pcf.gz" \) -type f -print0 | xargs -0 -n1 -I % cp "%" "$@/"; done; fi
+		for DIR in $(POWERLINE_FONT_NAMES); do \
+		cp -v "fonts/powerline-fonts/$$DIR/*.?tf" $@; done
 
-$(NERD_FONT_DIR)/: fonts/nerd-fonts/
+$(NERD_FONT_DIR): fonts/nerd-fonts/
 	mkdir -p $@
 	@for NERD_FONT_NAME in $(NERD_FONT_NAMES); do \
 		fonts/nerd-fonts/install.sh -sL "$$NERD_FONT_NAME" | sort | uniq | while read -r NERD_FONT_FILE; do \
@@ -167,7 +167,7 @@ nerd-update: fonts/nerd-fonts/
 		fonts/nerd-fonts/install.sh -sL "$$NERD_FONT_NAME" | sort | uniq | while read -r NERD_FONT_FILE; \
 		do find fonts/nerd-fonts/ -name "$$(basename "$$NERD_FONT_FILE")" -type f -print0 | xargs -0 -n1 -I % cp -v "%" "$@/"; done; done; fi
 
-$(FONTS): $(INPUT_FONTS) $(POWERLINE_FONT_DIR)/ $(NERD_FONT_DIR)/
+$(FONTS): $(INPUT_FONTS) $(POWERLINE_FONT_DIR) $(NERD_FONT_DIR)
 	fc-cache -vf "$(FONTDIR)"
 	touch $@
 
