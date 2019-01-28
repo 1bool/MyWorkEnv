@@ -12,7 +12,7 @@ PLUGINRC := $(VIMDIR)/pluginrc.vim
 PKGS := coreutils tmux curl python-setuptools wget vim
 LOCALDIR := $(HOME)/.local/share
 FONTDIR := $(if $(findstring mac,$(DIST)),$(HOME)/Library/Fonts,$(HOME)/.local/share/fonts)
-FONTS := $(if $(filter $(OS),Linux WSL),'.fonts_installed')
+FONTS := $(if $(filter $(OS),Linux WSL),.fonts_installed)
 BRANCH := master
 VPATH := dotfiles:snippets
 SUDOERSDIR := /etc/sudoers.d/
@@ -148,12 +148,13 @@ $(INPUT_FONTS): $(TARGETPKGS)
 $(POWERLINE_FONT_DIR): fonts/powerline-fonts/
 	mkdir -p $@
 	@for DIR in $(POWERLINE_FONT_NAMES); do \
-		cp -v "fonts/powerline-fonts/$$DIR/*.?tf" $@; done
+		cp -v fonts/powerline-fonts/"$$DIR"/*.?tf $@; done
 
 powerline-update: fonts/powerline-fonts/
 	@if ! LANGUAGE=en.US_UTF-8 git -C $< pull origin master | tail -1 | fgrep 'Already up'; then \
 		for DIR in $(POWERLINE_FONT_NAMES); do \
-		cp -v "fonts/powerline-fonts/$$DIR/*.?tf" $@; done
+		cp -v fonts/powerline-fonts/"$$DIR"/*.?tf $@; \
+		done; fi
 
 $(NERD_FONT_DIR): fonts/nerd-fonts/
 	mkdir -p $@
@@ -186,7 +187,7 @@ install: $(SUDOERSFILE)
 install: $(DESTFILES) $(TARGETPKGS) $(PKGPLUGINTARGETS) $(PLUGINRC) $(PLUGGED) $(PYMS) $(FONTS)
 install: $(SEOUL256)
 
-update: install update-LS_COLORS vimplug-update $(patsubst %,fonts-update,$(filter-out msys,$(DIST)))
+update: install update-LS_COLORS vimplug-update $(if $(findstring msys,$(DIST)),,fonts-update)
 
 uninstall:
 	-rm -fr $(DESTFILES) $(GITTARGETS) $(PLUGINRC) $(PLUGGED) $(BUNDLE) $(AUTOLOADDIR)/plug.vim $(FONTS)
