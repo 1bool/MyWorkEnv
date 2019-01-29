@@ -6,10 +6,13 @@ TARGETPKGS = $(filter-out $(shell brew list),$(INSTALLPKGS))
 PKGUPDATE := brew-update
 MACVIM_APP := /Applications/MacVim.app
 SUDOERSDIR := /private/etc/sudoers.d/
-POWERLINE_FONT_PKGS := $(patsubst %-symbolneu-for-powerline,%-powerline-symbols,$(addprefix font-,$(addsuffix -for-powerline,$(shell echo $(POWERLINE_FONT_NAMES) | tr A-Z a-z))))
-NERD_FONT_PKGS := $(addprefix font-,$(addsuffix -nerd-font-mono,$(shell echo $(NERD_FONT_NAMES) | tr A-Z a-z)))
-TARGET_CASK_PKGS := $(filter-out $(shell brew cask list),$(POWERLINE_FONT_PKGS) $(NERD_FONT_PKGS))
-FONTS := $(INPUT_FONTS) $(TARGET_CASK_PKGS)
+# brew install font doesn't work for multiple user
+# POWERLINE_FONT_PKGS := $(patsubst %-symbolneu-for-powerline,%-powerline-symbols,$(addprefix font-,$(addsuffix -for-powerline,$(shell echo $(POWERLINE_FONT_NAMES) | tr A-Z a-z))))
+# NERD_FONT_PKGS := $(addprefix font-,$(addsuffix -nerd-font-mono,$(shell echo $(NERD_FONT_NAMES) | tr A-Z a-z)))
+# TARGET_CASK_PKGS := $(filter-out $(shell brew cask list),$(POWERLINE_FONT_PKGS) $(NERD_FONT_PKGS))
+# FONTS := $(INPUT_FONTS) $(TARGET_CASK_PKGS)
+# POWERLINE_FONT_DIR :=
+# NERD_FONT_DIR :=
 
 $(EZINSTALL):
 	xcode-select --install
@@ -51,4 +54,4 @@ brew-update:
 
 update: brew-update
 
-.PHONY: $(BREW) brew-update install-cask-pkgs
+.PHONY: $(BREW) brew-update install-cask-pkgs $(TARGET_CASK_PKGS)
