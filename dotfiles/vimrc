@@ -68,8 +68,7 @@ vnoremap <C-X> "+x
 vnoremap <C-Insert> "+y
 vnoremap <C-C> "+y
 map <silent> <S-Insert> "+gP
-map <silent> <C-V> "+gP
-imap <silent> <C-V> <ESC>"+gP
+imap <silent> <C-V> <ESC>"+gPa
 cmap <silent> <C-V> <C-R>+
 
 " let mapleader = "\<Space>"
@@ -102,7 +101,7 @@ nnoremap K :Man <cword><cr>
 " by the following alternative for your vimrc
 nnoremap <F2> :set invpaste paste?<CR>
 set pastetoggle=<F2>
-set showmode
+set noshowmode " already displayed in status line
 
 " Toggle line number
 nmap <C-N><C-N> :setlocal invnumber<CR>
@@ -256,6 +255,7 @@ if !has("gui_running")
 		"             \ }
 		" let g:airline_theme = 'papercolor'
 		" colorscheme PaperColor
+		let g:airline_theme = 'solarized'
 		let g:solarized_enable_extra_hi_groups = 1
 		let g:solarized_statusline = 'low'
 		let g:solarized_termtrans = 1
