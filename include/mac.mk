@@ -49,7 +49,7 @@ $(MACVIM_APP)/:
 
 brew-update:
 	brew update
-	-@[ -n "$(brew outdated)" ] && brew upgrade && \
+	-@[ -n "$(shell brew outdated)" ] && brew upgrade && \
 		sudo ln -Fs $(find /usr/local -name "MacVim.app")/Contents /Applications/MacVim.app/
 
 update: brew-update
