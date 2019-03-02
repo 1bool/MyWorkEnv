@@ -152,6 +152,7 @@ $(POWERLINE_FONT_DIR): fonts/powerline-fonts/
 	touch $@
 
 powerline-update: fonts/powerline-fonts/
+	@echo "Checking if $< is up to date..."
 	@if ! LANGUAGE=en.US_UTF-8 git -C $< pull origin master | tail -1 | fgrep 'Already up'; then \
 		for DIR in $(POWERLINE_FONT_NAMES); do \
 		cp -v fonts/powerline-fonts/"$$DIR"/*.?tf $@; \
@@ -165,6 +166,7 @@ $(NERD_FONT_DIR): fonts/nerd-fonts/
 	touch $@
 
 nerd-update: fonts/nerd-fonts/
+	@echo "Checking if $< is up to date..."
 	@if ! LANGUAGE=en.US_UTF-8 git -C $< pull origin master | fgrep 'Already up'; then \
 		for NERD_FONT_NAME in $(NERD_FONT_NAMES); do \
 		fonts/nerd-fonts/install.sh -sL "$$NERD_FONT_NAME" | sort | uniq | while read -r NERD_FONT_FILE; \
