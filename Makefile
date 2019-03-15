@@ -156,7 +156,7 @@ powerline-update: fonts/powerline-fonts/
 	@if ! LANGUAGE=en.US_UTF-8 git -C $< pull origin master | tail -1 | fgrep 'Already up'; then \
 		for DIR in $(POWERLINE_FONT_NAMES); do \
 		cp -v fonts/powerline-fonts/"$$DIR"/*.?tf $@; \
-		done; touch $(POWERLINE_FONT_DIR); fi
+		done; touch $(POWERLINE_FONT_DIR) .fonts_updated; fi
 
 $(NERD_FONT_DIR): fonts/nerd-fonts/
 	mkdir -p $@
@@ -170,13 +170,15 @@ nerd-update: fonts/nerd-fonts/
 	@if ! LANGUAGE=en.US_UTF-8 git -C $< pull origin master | fgrep 'Already up'; then \
 		for NERD_FONT_NAME in $(NERD_FONT_NAMES); do \
 		fonts/nerd-fonts/install.sh -sL "$$NERD_FONT_NAME" | sort | uniq | while read -r NERD_FONT_FILE; \
-		do find fonts/nerd-fonts/ -name "$$(basename "$$NERD_FONT_FILE")" -type f -print0 | xargs -0 -n1 -I % cp -v "%" "$(NERD_FONT_DIR)/"; done; done; touch $(NERD_FONT_DIR); fi
+		do find fonts/nerd-fonts/ -name "$$(basename "$$NERD_FONT_FILE")" -type f -print0 | xargs -0 -n1 -I % cp -v "%" "$(NERD_FONT_DIR)/"; done; done; touch $(NERD_FONT_DIR) .fonts_updated; fi
 
 $(FONTS): $(INPUT_FONTS) $(POWERLINE_FONT_DIR) $(NERD_FONT_DIR)
 	fc-cache -vf "$(FONTDIR)"
 	touch $@
 
 fonts-update: nerd-update powerline-update
+	@if [ -f .fonts_updated ]; then \
+		fc-cache -vf "$(FONTDIR)" && rm -f .fonts_updated; fi
 
 $(TARGETPKGS): install-pkgs
 
