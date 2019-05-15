@@ -231,7 +231,7 @@ let g:python_highlight_all = 1 " python-syntax
 let g:ycm_confirm_extra_conf = 0
 
 " grepper
-let g:grepper           = {}
+runtime plugin/grepper.vim    " initialize g:grepper with default values
 " let g:grepper.tools     = ['git', 'ag', 'grep']
 let g:grepper.highlight = 1
 " let g:grepper.simple_prompt = 1
