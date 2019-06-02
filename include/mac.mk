@@ -40,7 +40,7 @@ install-cask-pkgs:
 
 install: $(MACVIM_APP)/Contents/
 
-$(MACVIM_APP)/Contents/: $(MACVIM_APP)/ $(filter macvim,$(TARGETPKGS))
+$(or $(shell readlink $(MACVIM_APP)/Contents),$(MACVIM_APP)/Contents)/: $(MACVIM_APP)/ $(filter macvim,$(TARGETPKGS))
 	sudo ln -Fs $$(find /usr/local -name "MacVim.app")/Contents /Applications/MacVim.app/
 	sudo touch $@
 
