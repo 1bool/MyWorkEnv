@@ -96,7 +96,7 @@ $(HOME)/.tmux.conf: \
 	$(if $(filter powerline,$(INSTALLTARGETS)),$(if \
 	$(filter ubuntu debian deepin,$(DIST)),ubuntu.tmux.conf), pym-powerline.tmux.conf)
 
-dotfiles/dircolors: LS_COLORS/LS_COLORS
+dotfiles/dircolors: | LS_COLORS/LS_COLORS
 	ln -f $< $@
 
 LS_COLORS/LS_COLORS:
