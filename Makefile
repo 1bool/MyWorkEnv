@@ -97,7 +97,7 @@ $(HOME)/.tmux.conf: \
 	$(filter ubuntu debian deepin,$(DIST)),ubuntu.tmux.conf), pym-powerline.tmux.conf)
 
 dotfiles/dircolors: | LS_COLORS/LS_COLORS
-	ln -f $< $@
+	ln -f $| $@
 
 LS_COLORS/LS_COLORS:
 	git clone -b $(BRANCH) https://github.com/trapd00r/LS_COLORS.git $(dir $@)
