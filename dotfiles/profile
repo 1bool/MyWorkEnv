@@ -19,6 +19,7 @@ if [ -d "$HOME/.local/bin" ] ; then
 fi
 
 EDITOR='vim'
+alias gvirt="gvim --remote-tab"
 
 if [ -f "$HOME/.profile.local" ]; then
     . "$HOME/.profile.local"
