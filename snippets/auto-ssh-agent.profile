@@ -1,23 +1,56 @@
+# SSH Agent
+# Note: ~/.ssh/environment should not be used, as it
+#       already has a different purpose in SSH.
+# source : https://www.schoonology.com/technology/ssh-agent-windows/
 
-# Auto-launching ssh-agent for Win
 env=~/.ssh/agent.env
 
-agent_load_env () { test -f "$env" && . "$env" >| /dev/null ; }
+# Note: Don't bother checking SSH_AGENT_PID. It's not used
+#       by SSH itself, and it might even be incorrect
+#       (for example, when using agent-forwarding over SSH).
 
-agent_start () {
-    (umask 077; ssh-agent >| "$env")
-    . "$env" >| /dev/null ; }
+agent_is_running() {
+  if [ "$SSH_AUTH_SOCK" ]; then
+    # ssh-add returns:
+    #   0 = agent running, has keys
+    #   1 = agent running, no keys
+    #   2 = agent not running
+    ssh-add -l >/dev/null 2>&1 || [ $? -eq 1 ]
+  else
+    false
+  fi
+}
 
-agent_load_env
+agent_has_keys() {
+  ssh-add -l >/dev/null 2>&1
+}
 
-# agent_run_state: 0=agent running w/ key; 1=agent w/o key; 2= agent not running
-agent_run_state=$(ssh-add -l >| /dev/null 2>&1; echo $?)
+agent_load_env() {
+  . "$env" >/dev/null
+}
 
-if [ ! "$SSH_AUTH_SOCK" ] || [ $agent_run_state = 2 ]; then
-    agent_start
-    ssh-add
-elif [ "$SSH_AUTH_SOCK" ] && [ $agent_run_state = 1 ]; then
-    ssh-add
+agent_start() {
+  (umask 077; ssh-agent >"$env")
+  . "$env" >/dev/null
+}
+
+add_all_keys() {
+  ls ~/.ssh | grep ^id_rsa.*$ | sed "s:^:`echo ~`/.ssh/:" | xargs -n 1 ssh-add
+}
+
+if ! agent_is_running; then
+  agent_load_env
 fi
+
+# if your keys are not stored in ~/.ssh/id_rsa.pub or ~/.ssh/id_dsa.pub, you'll need
+# to paste the proper path after ssh-add
+if ! agent_is_running; then
+  agent_start
+  add_all_keys
+elif ! agent_has_keys; then
+  add_all_keys
+fi
+
+echo `ssh-add -l | wc -l` SSH keys registered.
 
 unset env
