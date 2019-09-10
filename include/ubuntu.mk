@@ -15,7 +15,8 @@ PKGS += git \
 	powerline \
 	language-pack-zh-hans \
 	thefuck \
-	clang
+	clang \
+	tmux-plugin-manager
 PKGS += cmake lua5.2 liblua5.2-dev libncurses5-dev zlib1g-dev # for color_coded
 PKGS += dconf-cli # for Gogh
 INSTALLTARGETS := $(filter $(shell apt-cache search --names-only '.*' | cut -d' ' -f1),$(PKGS))
