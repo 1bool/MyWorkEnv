@@ -110,7 +110,7 @@ update-LS_COLORS:
 	git -C $(@:update-%=%) pull origin $(BRANCH)
 
 $(SEOUL256): | $(or $(filter %airline-themes,$(PKGPLUGINTARGETS) $(GITTARGETS)),$(PLUGGED))
-	wget -P $(@D) https://gist.github.com/jbkopecky/a2f66baa8519747b388f2a1617159c07/raw/f73313795a9b3135ea23735b3e6d4a1969da3cfe/seoul256.vim
+	wget -cP $(@D) https://gist.github.com/jbkopecky/a2f66baa8519747b388f2a1617159c07/raw/f73313795a9b3135ea23735b3e6d4a1969da3cfe/seoul256.vim
  
 snippets/pym-powerline.tmux.conf: $(filter powerline-status,$(PYMS))
 	echo source \"$$(echo 'import sys; print([x for x in sys.path if "powerline_status" in x][0])' \
@@ -143,7 +143,7 @@ $(FONTDIR)/ $(INPUT_FONT_DIR)/:
 $(INPUT_FONT_DIR)/%.ttf: %.ttf | $(INPUT_FONT_DIR)/
 	install -m 0644 $< $@
 
-$(INPUT_FONTS): $(TARGETPKGS)
+$(INPUT_FONTS):
 
 $(POWERLINE_FONT_DIR): fonts/powerline-fonts/
 	mkdir -p $@
