@@ -1,4 +1,5 @@
 PKGM ?= $(shell which dnf 2> /dev/null || echo yum)
+PKGS := $(subst ssh-askpass,openssh-askpass,$(PKGS))
 PKGS += git \
 	vim-X11 \
 	automake \
