@@ -17,7 +17,17 @@ BRANCH := master
 VPATH := dotfiles:snippets
 SUDOERSDIR := /etc/sudoers.d/
 SUDOERSFILE := $(if $(LOGNAME),$(SUDOERSDIR)/nopass_for_$(LOGNAME),)
-NERD_FONT_NAMES ?= Go-Mono FiraCode CodeNewRoman Hack Iosevka Monofur Mononoki Monoid SourceCodePro Blex FantasqueSansMono
+NERD_FONT_NAMES ?= Blex \
+				   DaddyTimeMono \
+				   FantasqueSansMono \
+				   Go-Mono \
+				   CodeNewRoman \
+				   FiraCode \
+				   Hack \
+				   Iosevka \
+				   Monofur \
+				   Mononoki \
+				   SourceCodePro
 NERD_FONT_DIR ?= $(FONTDIR)/NerdFonts/
 POWERLINE_FONT_NAMES ?= $(if $(findstring mac,$(DIST)),Consolas) SymbolNeu
 POWERLINE_FONT_DIR ?= $(FONTDIR)/PowerlineFonts/
