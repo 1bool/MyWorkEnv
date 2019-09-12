@@ -17,7 +17,7 @@ BRANCH := master
 VPATH := dotfiles:snippets
 SUDOERSDIR := /etc/sudoers.d/
 SUDOERSFILE := $(if $(LOGNAME),$(SUDOERSDIR)/nopass_for_$(LOGNAME),)
-NERD_FONT_NAMES ?= Blex \
+NERD_FONT_NAMES ?= IBMPlexMono \
 				   DaddyTimeMono \
 				   FantasqueSansMono \
 				   Go-Mono \
