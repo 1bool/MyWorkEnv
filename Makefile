@@ -72,13 +72,7 @@ $(PLUGINRC): vim/plugrc.vim $$(wildcard snippets/$$(OS).$$(@F) snippets/$$(DIST)
 endif
 
 
-S_INPUT_FONTS := $(shell find fonts/InputMono -name *.ttf -type f)
-S_INPUT_FONTDIRS := $(dir $(S_INPUT_FONTS))
-INPUT_FONT_DIR := $(FONTDIR)/InputFonts
-INPUT_FONTS := $(filter-out $(wildcard $(FONTDIR)/*.ttf), \
-	      $(addprefix $(INPUT_FONT_DIR)/,$(notdir $(S_INPUT_FONTS))))
-
-vpath %.ttf $(S_INPUT_FONTDIRS)
+vpath %.ttf
 
 ifeq ($(shell echo 'import sys; print([x for x in sys.path if "powerline_status" in x][0])' | python 2> /dev/null),)
 PYMS += $(if $(filter powerline,$(INSTALLTARGETS)),,powerline-status)
@@ -147,13 +141,8 @@ fonts/powerline-fonts/:
 fonts/nerd-fonts/:
 	git clone --depth 1 -b master https://github.com/ryanoasis/nerd-fonts.git $@
 
-$(FONTDIR)/ $(INPUT_FONT_DIR)/:
+$(FONTDIR)/:
 	mkdir -p $@
-
-$(INPUT_FONT_DIR)/%.ttf: %.ttf | $(INPUT_FONT_DIR)/
-	install -m 0644 $< $@
-
-$(INPUT_FONTS):
 
 $(POWERLINE_FONT_DIR): fonts/powerline-fonts/
 	mkdir -p $@
@@ -182,7 +171,7 @@ nerd-update: fonts/nerd-fonts/
 		fonts/nerd-fonts/install.sh -sL "$$NERD_FONT_NAME" | sort | uniq | while read -r NERD_FONT_FILE; \
 		do find fonts/nerd-fonts/ -name "$$(basename "$$NERD_FONT_FILE")" -type f -print0 | xargs -0 -n1 -I % cp -v "%" "$(NERD_FONT_DIR)/"; done; done; touch $(NERD_FONT_DIR) .fonts_updated; fi
 
-$(FONTS): $(INPUT_FONTS) $(POWERLINE_FONT_DIR) $(NERD_FONT_DIR)
+$(FONTS): $(POWERLINE_FONT_DIR) $(NERD_FONT_DIR)
 	fc-cache -vf "$(FONTDIR)"
 	touch $@
 
