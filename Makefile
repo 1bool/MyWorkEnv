@@ -5,6 +5,7 @@ DIST := $(strip $(if $(findstring Darwin,$(OS)),mac,\
 	$(if $(wildcard /etc/os-release),$(shell . /etc/os-release 2> /dev/null && echo $$ID),\
 	$(shell cat /etc/system-release | cut -d' ' -f1 | tr '[:upper:]' '[:lower:]')))))
 DOTFILES := vimrc vimrc.local gvimrc gvimrc.local screenrc tmux.conf bashrc profile pylintrc dircolors
+DOTFILES += $(if $(filter $(OS),WSL MSYS_NT),minttyrc)
 DESTFILES := $(addprefix $(HOME)/.,$(DOTFILES)) $(addprefix $(HOME)/.local/,$(wildcard bin/*))
 VIMDIR := $(HOME)/.vim
 AUTOLOADDIR := $(VIMDIR)/autoload
