@@ -1,4 +1,4 @@
-DESTFILES += $(HOME)/.minttyrc /usr/bin/vi
+DESTFILES += /usr/bin/vi
 PKGS += mintty man-pages-posix unzip diffutils gcc python2 clang libcrypt-devel
 INSTALLTARGETS := $(subst ack,perl-ack,\
 	      $(subst python-setuptools,python3-setuptools,\
