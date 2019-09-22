@@ -14,9 +14,6 @@ SUDOERSDIR := /private/etc/sudoers.d/
 # POWERLINE_FONT_DIR :=
 # NERD_FONT_DIR :=
 
-$(EZINSTALL):
-	xcode-select --install
-
 $(BREW):
 	-xcode-select --install
 	sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
