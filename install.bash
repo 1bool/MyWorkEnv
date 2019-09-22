@@ -23,6 +23,9 @@ case "$DIST" in
 			PKGM=dnf
 		fi
 		export PKGM
+		if [ ${DIST} = centos ]; then
+			PKGS+=" epel-release"
+		fi
 		sudo $PKGM -y install $PKGS
 		;;
 	ubuntu|debian|deepin)
