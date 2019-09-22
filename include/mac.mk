@@ -1,7 +1,6 @@
 FONTDIR := $(HOME)/Library/Fonts
 BREW := $(shell which brew &> /dev/null || echo brew)
-PKGS := $(filter-out ssh-askpass,$(subst vim,macvim,$(PKGS))) the_silver_searcher thefuck lua llvm
-INSTALLTARGETS := $(filter-out python-setuptools,$(PKGS))
+PKGS := $(filter-out ssh-askpass python-pip,$(subst vim,macvim,$(PKGS))) the_silver_searcher thefuck lua llvm
 TARGETPKGS = $(filter-out $(shell brew list),$(INSTALLPKGS))
 PKGUPDATE := brew-update
 MACVIM_APP := /Applications/MacVim.app
