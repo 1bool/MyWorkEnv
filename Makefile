@@ -32,6 +32,7 @@ NERD_FONT_NAMES ?= IBMPlexMono \
 NERD_FONT_DIR ?= $(FONTDIR)/NerdFonts/
 POWERLINE_FONT_NAMES ?= $(if $(findstring mac,$(DIST)),Consolas) SymbolNeu
 POWERLINE_FONT_DIR ?= $(FONTDIR)/PowerlineFonts/
+PIPINSTALL := $(shell command -v pip &> /dev/null || echo pip)
 
 all: install
 
@@ -85,9 +86,12 @@ ifeq ($(shell echo 'import sys; print([x for x in sys.path if "pylint" in x][0])
 PYMS += $(if $(filter pylint,$(INSTALLTARGETS)),,pylint)
 endif
 
-$(PYMS): $(EZINSTALL) $(TARGETPKGS)
-	mkdir -p ~/.local/lib/python$$(python -V 2>&1 | cut -d' ' -f2 | cut -d'.' -f-2)/site-packages
-	easy_install $(if $(shell easy_install --help | fgrep -e '--user'),--user,--prefix ~/.local) $@
+$(PIPINSTALL):
+	curl 'https://bootstrap.pypa.io/get-pip.py' -o /tmp/get-pip.py
+	python /tmp/get-pip.py --user
+
+$(PYMS): $(PIPINSTALL) $(TARGETPKGS)
+	pip install $(if $(shell pip install --help | fgrep -e '--user'),--user,--prefix ~/.local) $@
 
 INSTALLPKGS := $(filter-out $(PYMS),$(INSTALLTARGETS))
 
@@ -200,4 +204,4 @@ uninstall:
 
 .PHONY: all install install-pkgs uninstall update del-bash_profile \
 	vimplug-update fonts-update nerd-update powerline-update \
-	$(PKGS) $(PYMS) $(EZINSTALL)
+	$(PKGS) $(PYMS) $(PIPINSTALL)
