@@ -93,6 +93,9 @@ map ge :Texplore<CR>
 " Open buffer explorer
 map gb :BufExplorer<CR>
 
+" Open terminal
+map te :ter ++close ++rows=24<CR>
+
 " Man
 runtime ftplugin/man.vim
 nnoremap K :Man <cword><cr>
