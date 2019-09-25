@@ -33,6 +33,7 @@ NERD_FONT_DIR ?= $(FONTDIR)/NerdFonts/
 POWERLINE_FONT_NAMES ?= $(if $(findstring mac,$(DIST)),Consolas) SymbolNeu
 POWERLINE_FONT_DIR ?= $(FONTDIR)/PowerlineFonts/
 PIPINSTALL := $(shell command -v pip &> /dev/null || echo pip)
+PYMS := powerline-status psutil pylint
 
 all: install
 
@@ -76,24 +77,16 @@ endif
 
 vpath %.ttf
 
-ifeq ($(shell echo 'import sys; print([x for x in sys.path if "powerline_status" in x][0])' | python 2> /dev/null),)
-PYMS += $(if $(filter powerline,$(INSTALLTARGETS)),,powerline-status)
-endif
-ifeq ($(shell echo 'import sys; print([x for x in sys.path if "psutil" in x][0])' | python 2> /dev/null),)
-PYMS += $(if $(filter python-psutil,$(INSTALLTARGETS)),,$(if $(filter $(DIST),msys),,psutil))
-endif
-ifeq ($(shell echo 'import sys; print([x for x in sys.path if "pylint" in x][0])' | python 2> /dev/null),)
-PYMS += $(if $(filter pylint,$(INSTALLTARGETS)),,pylint)
-endif
+INSTALLPYMS = $(filter-out $(shell pip list 2> /dev/null | cut -d' ' -f1),$(PYMS))
 
 $(PIPINSTALL):
 	curl 'https://bootstrap.pypa.io/get-pip.py' -o /tmp/get-pip.py
 	python /tmp/get-pip.py --user
 
-$(PYMS): $(PIPINSTALL) $(TARGETPKGS)
+$(INSTALLPYMS): $(PIPINSTALL) $(TARGETPKGS)
 	pip install $(if $(shell pip install --help | fgrep -e '--user'),--user,--prefix ~/.local) $@
 
-INSTALLPKGS := $(filter-out $(PYMS),$(INSTALLTARGETS))
+INSTALLPKGS := $(filter-out $(INSTALLPYMS),$(INSTALLTARGETS))
 
 $(HOME)/%vimrc.local:
 	touch $@
@@ -121,9 +114,8 @@ update-LS_COLORS:
 $(SEOUL256): | $(or $(filter %airline-themes,$(PKGPLUGINTARGETS) $(GITTARGETS)),$(PLUGGED))
 	wget -cP $(@D) https://gist.github.com/jbkopecky/a2f66baa8519747b388f2a1617159c07/raw/f73313795a9b3135ea23735b3e6d4a1969da3cfe/seoul256.vim
  
-snippets/pym-powerline.tmux.conf: $(filter powerline-status,$(PYMS))
-	echo source \"$$(echo 'import sys; print([x for x in sys.path if "powerline_status" in x][0])' \
-		| python)/powerline/bindings/tmux/powerline.conf\" > $@
+snippets/pym-powerline.tmux.conf: $(filter powerline-status,$(INSTALLPYMS))
+	echo source \"$$(pip show powerline-status | fgrep Location | cut -d" " -f2)/powerline/bindings/tmux/powerline.conf\" > $@
 
 .SECONDEXPANSION:
 $(HOME)/.%: $$(wildcard snippets/$$(OS)$$(@F)) $$(wildcard snippets/$$(DIST)$$(@F)) %
