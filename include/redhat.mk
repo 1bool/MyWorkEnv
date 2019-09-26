@@ -12,11 +12,11 @@ PKGS += git \
 	python-psutil \
 	python-argparse \
 	pylint \
-	clang
+	clang \
+	the_silver_searcher
 PKGS += $(or $(shell $(PKGM) list -q python3-devel | tail -1 | cut -d' ' -f1),python2-devel)
-PKGS += $(shell $(PKGM) list -q python-pip | tail -1 | cut -d' ' -f1)
 INSTALLTARGETS := $(PKGS)
-TARGETPKGS = $(filter-out $(shell rpm -qa --qf '%{NAME} '),$(INSTALLPKGS))
+TARGETPKGS := $(filter-out $(shell rpm -qa --qf '%{NAME} '),$(INSTALLTARGETS))
 
 $(INSTALLPKGS):
 	sudo $(PKGM) -y install $@
