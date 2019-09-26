@@ -93,7 +93,7 @@ $(HOME)/%vimrc.local:
 	touch $@
 
 $(HOME)/.vimrc: $(if $(filter-out MSYS_NT,$(OS)),set-tmpfiles.vimrc)
-$(HOME)/.profile: $(if $(filter $(OS),WSL MSYS_NT),auto-ssh-agent.profile)
+$(HOME)/.profile: $(if $(filter $(OS),WSL MSYS_NT Darwin),auto-ssh-agent.profile)
 $(HOME)/.tmux.conf: \
 	$(if $(findstring 16.04,$(UBUNTU_VER)),vi-style-2.1.tmux.conf,vi-style.tmux.conf) \
 	$(if $(filter powerline,$(INSTALLTARGETS)),$(if \
