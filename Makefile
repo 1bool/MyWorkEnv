@@ -1,4 +1,4 @@
-SHELL := bash
+SHELL := bash -e
 OS := $(if $(shell fgrep 'Microsoft@Microsoft.com' /proc/version 2> /dev/null),WSL,$(patsubst MSYS_NT%,MSYS_NT,$(shell uname -s)))
 DIST := $(strip $(if $(findstring Darwin,$(OS)),mac,\
 	$(if $(findstring MSYS_NT,$(OS)),msys,\
@@ -32,8 +32,8 @@ NERD_FONT_NAMES ?= IBMPlexMono \
 NERD_FONT_DIR ?= $(FONTDIR)/NerdFonts/
 POWERLINE_FONT_NAMES ?= $(if $(findstring mac,$(DIST)),Consolas) SymbolNeu
 POWERLINE_FONT_DIR ?= $(FONTDIR)/PowerlineFonts/
-PIPINSTALL := $(shell command -v pip &> /dev/null || echo pip)
-PYMS := powerline-status psutil pylint
+PYMS := powerline psutil pylint
+INSTALLPYMS = $(subst powerline,powerline-status,$(foreach m,$(PYMS),$(shell python -c "import $(m)" 2> /dev/null || echo $(m))))
 
 all: install
 
@@ -77,14 +77,15 @@ endif
 
 vpath %.ttf
 
-INSTALLPYMS = $(filter-out $(shell pip list 2> /dev/null | cut -d' ' -f1),$(PYMS))
 
 $(PIPINSTALL):
 	curl 'https://bootstrap.pypa.io/get-pip.py' -o /tmp/get-pip.py
 	python /tmp/get-pip.py --user
 
-$(INSTALLPYMS): $(PIPINSTALL) $(TARGETPKGS)
-	pip install $(if $(shell pip install --help | fgrep -e '--user'),--user,--prefix ~/.local) $@
+$(INSTALLPYMS): install-pyms
+
+install-pyms: $(TARGETPKGS) $(PIPINSTALL)
+	pip install $(if $(shell pip install --help | fgrep -e '--user'),--user,--prefix ~/.local) $(INSTALLPYMS)
 
 INSTALLPKGS := $(filter-out $(INSTALLPYMS),$(INSTALLTARGETS))
 
@@ -109,7 +110,7 @@ $(SUDOERSFILE):
 	sudo chmod 0440 $@
 
 update-LS_COLORS:
-	git -C $(@:update-%=%) pull origin $(BRANCH)
+	cd $(@:update-%=%) && git pull origin $(BRANCH)
 
 $(SEOUL256): | $(or $(filter %airline-themes,$(PKGPLUGINTARGETS) $(GITTARGETS)),$(PLUGGED))
 	wget -cP $(@D) https://gist.github.com/jbkopecky/a2f66baa8519747b388f2a1617159c07/raw/f73313795a9b3135ea23735b3e6d4a1969da3cfe/seoul256.vim
@@ -186,7 +187,7 @@ del-bash_profile:
 	mv -iv $(HOME)/.bash_profile $(HOME)/.bash_profile.old
 
 install: $(SUDOERSFILE)
-install: $(DESTFILES) $(TARGETPKGS) $(PKGPLUGINTARGETS) $(PLUGINRC) $(PLUGGED) $(PYMS) $(FONTS)
+install: $(DESTFILES) $(TARGETPKGS) $(PKGPLUGINTARGETS) $(PLUGINRC) $(PLUGGED) $(INSTALLPYMS) $(FONTS)
 install: $(SEOUL256)
 
 update: install update-LS_COLORS vimplug-update $(if $(findstring msys,$(DIST)),,fonts-update)
@@ -194,6 +195,6 @@ update: install update-LS_COLORS vimplug-update $(if $(findstring msys,$(DIST)),
 uninstall:
 	-rm -fr $(DESTFILES) $(GITTARGETS) $(PLUGINRC) $(PLUGGED) $(BUNDLE) $(AUTOLOADDIR)/plug.vim $(FONTS)
 
-.PHONY: all install install-pkgs uninstall update del-bash_profile \
+.PHONY: all install install-pkgs install-pyms uninstall update del-bash_profile \
 	vimplug-update fonts-update nerd-update powerline-update \
-	$(PKGS) $(PYMS) $(PIPINSTALL)
+	$(PKGS) $(PYMS)
