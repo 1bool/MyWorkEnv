@@ -1,5 +1,5 @@
 DESTFILES += /usr/bin/vi
-PKGS += mintty man-pages-posix unzip diffutils gcc python2 clang libcrypt-devel
+PKGS += mintty man-pages-posix unzip diffutils gcc python2 clang libcrypt-devel python-pip
 INSTALLTARGETS := $(subst ack,perl-ack,\
 		  $(subst clang,clang-svn,$(PKGS)))
 TARGETPKGS = $(filter-out $(shell pacman -Qsq),$(INSTALLPKGS))

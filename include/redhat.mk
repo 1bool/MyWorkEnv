@@ -1,6 +1,5 @@
 PKGM ?= $(shell which dnf 2> /dev/null || echo yum)
 PKGS := $(subst ssh-askpass,openssh-askpass,\
-	$(subst python-pip,python2-pip,\
 	$(PKGS)))
 PKGS += git \
 	vim-X11 \
@@ -9,6 +8,7 @@ PKGS += git \
 	gcc-c++ \
 	kernel-devel \
 	python-devel \
+	python-pip \
 	python-psutil \
 	python-argparse \
 	pylint \
