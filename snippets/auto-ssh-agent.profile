@@ -35,7 +35,12 @@ agent_start() {
 }
 
 add_all_keys() {
-  ls ~/.ssh | grep ^id_rsa.*$ | sed "s:^:`echo ~`/.ssh/:" | xargs -n 1 ssh-add
+  # ls ~/.ssh | grep ^id_rsa.*$ | sed "s:^:`echo ~`/.ssh/:" | xargs -n 1 ssh-add
+  for F in ~/.ssh/*; do
+    if file $F | grep 'private key$'; then
+      ssh-add $F
+    fi
+  done
 }
 
 if ! agent_is_running; then
