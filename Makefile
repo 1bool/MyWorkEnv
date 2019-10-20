@@ -32,7 +32,7 @@ NERD_FONT_NAMES ?= IBMPlexMono \
 NERD_FONT_DIR ?= $(FONTDIR)/NerdFonts/
 POWERLINE_FONT_NAMES ?= $(if $(findstring mac,$(DIST)),Consolas) SymbolNeu
 POWERLINE_FONT_DIR ?= $(FONTDIR)/PowerlineFonts/
-PYMS := powerline psutil pylint
+PYMS := powerline $(if $(filter $(OS),msys),psutil) pylint
 INSTALLPYMS = $(subst powerline,powerline-status,$(foreach m,$(PYMS),$(shell python -c "import $(m)" 2> /dev/null || echo $(m))))
 
 all: install
