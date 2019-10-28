@@ -99,7 +99,7 @@ $(HOME)/.profile: $(if $(filter $(OS),WSL MSYS_NT Darwin),auto-ssh-agent.profile
 $(HOME)/.tmux.conf: \
 	$(if $(findstring 16.04,$(UBUNTU_VER)),vi-style-2.1.tmux.conf,vi-style.tmux.conf) \
 	$(if $(filter powerline,$(INSTALLTARGETS)),$(if \
-	$(filter ubuntu debian deepin,$(DIST)),ubuntu.tmux.conf), pym-powerline.tmux.conf)
+	$(filter debian,$(DIST_FAMILY)),debian.tmux.conf), pym-powerline.tmux.conf)
 
 dotfiles/dircolors: | LS_COLORS/LS_COLORS
 	ln -f $| $@
@@ -121,7 +121,7 @@ snippets/pym-powerline.tmux.conf: $(filter powerline-status,$(INSTALLPYMS))
 	echo source \"$$(pip show powerline-status | fgrep Location | cut -d" " -f2)/powerline/bindings/tmux/powerline.conf\" > $@
 
 .SECONDEXPANSION:
-$(HOME)/.%: $$(wildcard snippets/$$(OS)$$(@F)) $$(wildcard snippets/$$(DIST)$$(@F)) %
+$(HOME)/.%: $$(wildcard snippets/$$(OS)$$(@F)) $$(wildcard snippets/$$(DIST_FAMILY)$$(@F)) $$(wildcard snippets/$$(DIST)$$(@F)) %
 	@if [ -h $@ ] || [[ -f $@ && "$$(stat -c %h -- $@ 2> /dev/null)" -gt 1 ]]; then rm -f $@; fi
 	@if [ "$(@F)" = ".$(notdir $^)" ]; then \
 		echo "ln -f $< $@"; \
