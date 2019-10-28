@@ -4,19 +4,23 @@ set -e
 
 if [ "$(uname -o)" = Msys ]; then
 	DIST=msys
+	DIST_FAMILY=$DIST
 elif [ "$(uname -s)" = Darwin ]; then
 	DIST=mac
+	DIST_FAMILY=$DIST
 elif [ -r /etc/os-release ]; then
 	source /etc/os-release
 	DIST=$ID
+	DIST_FAMILY=$ID_LIKE
 elif [ -r /etc/system-release ]; then
 	DIST=$(cat /etc/system-release | cut -d' ' -f1 | tr '[:upper:]' '[:lower:]')
+	DIST_FAMILY=$DIST
 fi
 export DIST
 
 PKGS="make git curl bc"
-case "$DIST" in
-	fedora|centos|redhat)
+case "$DIST_FAMILY" in
+	'rhel fedora')
 		if command -v yum; then
 			PKGM=yum
 		else
@@ -28,7 +32,7 @@ case "$DIST" in
 		fi
 		sudo $PKGM -y install $PKGS
 		;;
-	ubuntu|debian|deepin)
+	debian)
 		sudo apt-get update
 		sudo apt-get -y install $PKGS grep vim-scripts vim-addon-manager
 		;;
