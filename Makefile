@@ -4,6 +4,8 @@ DIST := $(strip $(if $(findstring Darwin,$(OS)),mac,\
 	$(if $(findstring MSYS_NT,$(OS)),msys,\
 	$(if $(wildcard /etc/os-release),$(shell . /etc/os-release 2> /dev/null && echo $$ID),\
 	$(shell cat /etc/system-release | cut -d' ' -f1 | tr '[:upper:]' '[:lower:]')))))
+DIST_FAMILY := $(strip $(if $(filter mac msys,$(DIST)),$(DIST),\
+	$(if $(wildcard /etc/os-release),$(shell . /etc/os-release 2> /dev/null && echo $$ID_LIKE))))
 DOTFILES := vimrc vimrc.local gvimrc gvimrc.local screenrc tmux.conf bashrc profile pylintrc dircolors
 DOTFILES += $(if $(filter $(OS),WSL MSYS_NT),minttyrc)
 DESTFILES := $(addprefix $(HOME)/.,$(DOTFILES)) $(addprefix $(HOME)/.local/,$(wildcard bin/*))
@@ -38,7 +40,7 @@ INSTALLPYMS = $(subst powerline,powerline-status,$(foreach m,$(PYMS),$(shell pyt
 all: install
 
 
-ifneq ($(filter $(DIST),ubuntu debian deepin),)
+ifeq ($(DIST_FAMILY),debian)
 include include/ubuntu.mk
 else
 PLUGGED := $(VIMDIR)/plugged
@@ -56,7 +58,7 @@ $(PLUGGED): $(AUTOLOADDIR)/plug.vim $(PLUGINRC)
 ifeq ($(DIST),mac)
 include include/mac.mk
 endif
-ifneq ($(filter $(DIST),fedora centos redhat),)
+ifneq ($(DIST_FAMILY),rhel fedora)
 include include/redhat.mk
 endif
 ifeq ($(DIST),msys)
