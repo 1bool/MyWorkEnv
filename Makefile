@@ -136,7 +136,7 @@ $(HOME)/.local/bin/%: bin/% | $(HOME)/.local/bin/
 	install -m 0755 $< $@
 
 fonts/powerline-fonts/:
-	git clone -b master https://github.com/powerline/fonts.git $@
+	git clone --depth 1 -b master https://github.com/powerline/fonts.git $@
 
 fonts/nerd-fonts/:
 	git clone --depth 1 -b master https://github.com/ryanoasis/nerd-fonts.git $@
