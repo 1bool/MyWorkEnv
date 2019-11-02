@@ -40,7 +40,7 @@ case "$DIST_FAMILY" in
 		pacman -Sy --noconfirm --needed pacman
 		pacman -Sy --noconfirm --needed
 		pacman -Syu --noconfirm --needed
-		pacman -S --noconfirm --needed $PKGS
+		pacman -S --noconfirm --needed $PKGS python3-pip
 		;;
 	mac)
 		xcode-select --install || :
