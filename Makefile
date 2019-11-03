@@ -58,7 +58,7 @@ $(PLUGGED): $(AUTOLOADDIR)/plug.vim $(PLUGINRC)
 ifeq ($(DIST),mac)
 include include/mac.mk
 endif
-ifneq ($(DIST_FAMILY),rhel fedora)
+ifeq ($(DIST_FAMILY),rhel fedora)
 include include/redhat.mk
 endif
 ifeq ($(DIST),msys)
