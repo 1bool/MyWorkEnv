@@ -141,7 +141,7 @@ fonts/powerline-fonts/:
 fonts/nerd-fonts/:
 	git clone --depth 1 -b master https://github.com/ryanoasis/nerd-fonts.git $@
 
-$(FONTDIR)/:
+$(FONTDIR)/ /tmp/vim/:
 	mkdir -p $@
 
 $(POWERLINE_FONT_DIR): fonts/powerline-fonts/
@@ -191,6 +191,7 @@ del-bash_profile:
 install: $(SUDOERSFILE)
 install: $(DESTFILES) $(TARGETPKGS) $(PKGPLUGINTARGETS) $(PLUGINRC) $(PLUGGED) $(INSTALLPYMS) $(FONTS)
 install: $(SEOUL256)
+install: | /tmp/vim/
 
 update: install update-LS_COLORS vimplug-update $(if $(findstring msys,$(DIST)),,fonts-update)
 
