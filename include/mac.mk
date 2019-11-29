@@ -38,7 +38,7 @@ install-cask-pkgs:
 install: $(MACVIM_APP)/Contents/
 
 $(or $(shell readlink $(MACVIM_APP)/Contents),$(MACVIM_APP)/Contents)/: $(MACVIM_APP)/ $(filter macvim,$(TARGETPKGS))
-	sudo ln -Fs $$(find /usr/local -name "MacVim.app")/Contents /Applications/MacVim.app/
+	sudo ln -Fs $$(find /usr/local -name "MacVim.app")/Contents /Applications/MacVim.app/Contents
 	sudo touch $@
 
 $(MACVIM_APP)/:
@@ -47,7 +47,7 @@ $(MACVIM_APP)/:
 brew-update:
 	brew update
 	-@[ -n "$$(brew outdated)" ] && brew upgrade && \
-		sudo ln -Fs $$(find /usr/local -name "MacVim.app")/Contents /Applications/MacVim.app/
+		sudo ln -Fs $$(find /usr/local -name "MacVim.app")/Contents /Applications/MacVim.app/Contents
 
 update: brew-update
 
