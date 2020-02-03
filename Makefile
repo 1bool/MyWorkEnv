@@ -14,7 +14,7 @@ AUTOLOADDIR := $(VIMDIR)/autoload
 PLUGINRC := $(VIMDIR)/pluginrc.vim
 PKGS := coreutils tmux curl wget vim ssh-askpass
 LOCALDIR := $(HOME)/.local/share
-FONTDIR := $(if $(findstring mac,$(DIST)),$(HOME)/Library/Fonts,$(HOME)/.local/share/fonts)
+FONTDIR := $(if $(findstring mac,$(DIST)),/Library/Fonts,$(HOME)/.local/share/fonts)
 FONTS := $(if $(filter $(DIST),msys),,.fonts_installed)
 BRANCH := master
 VPATH := dotfiles:snippets
@@ -32,7 +32,7 @@ NERD_FONT_NAMES ?= IBMPlexMono \
 				   Mononoki \
 				   SourceCodePro
 NERD_FONT_DIR ?= $(FONTDIR)/NerdFonts/
-POWERLINE_FONT_NAMES ?= $(if $(findstring mac,$(DIST)),Consolas) SymbolNeu
+POWERLINE_FONT_NAMES ?= SymbolNeu
 POWERLINE_FONT_DIR ?= $(FONTDIR)/PowerlineFonts/
 PYMS := powerline $(if $(filter $(OS),msys),psutil) pylint
 INSTALLPYMS = $(subst powerline,powerline-status,$(foreach m,$(PYMS),$(shell python -c "import $(m)" 2> /dev/null || echo $(m))))
