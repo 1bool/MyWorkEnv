@@ -1,4 +1,4 @@
-FONTDIR := $(HOME)/Library/Fonts
+FONTDIR := /Library/Fonts
 BREW := $(shell which brew &> /dev/null || echo brew)
 PKGS := $(filter-out ssh-askpass,$(subst vim,macvim,$(PKGS))) the_silver_searcher thefuck lua llvm
 TARGETPKGS = $(filter-out $(shell brew list),$(INSTALLPKGS))
