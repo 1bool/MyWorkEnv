@@ -6,7 +6,7 @@ DIST := $(strip $(if $(findstring Darwin,$(OS)),mac,\
 	$(shell cat /etc/system-release | cut -d' ' -f1 | tr '[:upper:]' '[:lower:]')))))
 DIST_FAMILY := $(strip $(if $(filter mac msys,$(DIST)),$(DIST),\
 	$(if $(wildcard /etc/os-release),$(shell . /etc/os-release 2> /dev/null && echo $$ID_LIKE))))
-DOTFILES := vimrc vimrc.local gvimrc gvimrc.local screenrc tmux.conf bashrc profile pylintrc dircolors
+DOTFILES := vimrc vimrc.local gvimrc gvimrc.local screenrc tmux.conf bashrc profile pylintrc dircolors zprofile zshrc
 DOTFILES += $(if $(filter $(OS),WSL MSYS_NT),minttyrc)
 DESTFILES := $(addprefix $(HOME)/.,$(DOTFILES)) $(addprefix $(HOME)/.local/,$(wildcard bin/*))
 VIMDIR := $(HOME)/.vim
@@ -14,7 +14,7 @@ AUTOLOADDIR := $(VIMDIR)/autoload
 PLUGINRC := $(VIMDIR)/pluginrc.vim
 PKGS := coreutils tmux curl wget vim ssh-askpass
 LOCALDIR := $(HOME)/.local/share
-FONTDIR := $(if $(findstring mac,$(DIST)),/Library/Fonts,$(HOME)/.local/share/fonts)
+FONTDIR ?= $(HOME)/.local/share/fonts)
 FONTS := $(if $(filter $(DIST),msys),,.fonts_installed)
 BRANCH := master
 VPATH := dotfiles:snippets
