@@ -88,7 +88,11 @@ nnoremap <C-TAB> :sbnext<CR>
 nnoremap <C-S-TAB> :sbprevious<CR>
 
 " Open file explorer
-map ge :Texplore<CR>
+map ge :Lexplore<CR>
+let g:netrw_winsize = 40
+let g:netrw_liststyle = 3
+let g:netrw_browse_split = 4
+let g:netrw_banner = 0
 
 " Open buffer explorer
 map gb :BufExplorer<CR>
@@ -148,8 +152,13 @@ function! PluginSetup()
 		let g:NERDTreeChDirMode = 2
 		" let g:NERDTreeMouseMode = 2
 		let g:NERDTreeShowIgnoredStatus = 0 " for nerdtree git plugin
-		nnoremap <silent> <F6> :NERDTreeToggle<CR>
-		nnoremap tf :NERDTreeToggle<CR>
+		if exists(":NERDTreeToggleVCS")
+			nnoremap <silent> <F6> :NERDTreeToggleVCS<CR>
+			nnoremap tf :NERDTreeToggleVCS<CR>
+		else
+			nnoremap <silent> <F6> :NERDTreeToggle<CR>
+			nnoremap tf :NERDTreeToggle<CR>
+		endif
 	endif
 	if exists(":Grepper")
 		" When search with git, search from top level of the repository
