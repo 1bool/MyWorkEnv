@@ -99,8 +99,7 @@ $(HOME)/.profile: $(if $(filter $(OS),WSL MSYS_NT Darwin),auto-ssh-agent.profile
 $(HOME)/.tmux.conf: \
 	$(if $(findstring 16.04,$(UBUNTU_VER)),vi-style-2.1.tmux.conf,vi-style.tmux.conf) \
 	$(if $(filter powerline,$(INSTALLTARGETS)),$(if \
-	$(filter debian,$(DIST_FAMILY)),debian.tmux.conf), pym-powerline.tmux.conf) \
-	tpm.conf
+	$(filter debian,$(DIST_FAMILY)),debian.tmux.conf), pym-powerline.tmux.conf tpm.tmux.conf)
 
 dotfiles/dircolors: | LS_COLORS/LS_COLORS
 	ln -f $| $@
