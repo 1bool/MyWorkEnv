@@ -172,7 +172,7 @@ function! PluginSetup()
 		let g:ycm_seed_identifiers_with_syntax = 1 " Completion for programming language's keyword
 		let g:ycm_autoclose_preview_window_after_completion = 1
 		let g:ycm_autoclose_preview_window_after_insertion = 1
-		let g:ycm_key_invoke_completion = '<C-Tab>'
+		" let g:ycm_key_invoke_completion = '<C-Tab>'
 		nnoremap <C-I> :YcmCompleter GoTo<CR>
 		nnoremap <Leader>g :YcmCompleter GoToDefinition<CR>
 		nnoremap <Leader>r :YcmCompleter GoToReferences<CR>
@@ -240,7 +240,7 @@ let g:ctrlp_by_filename = 1 " Search by file name instead of full path
 
 let g:python_highlight_all = 1 " python-syntax
 
-let g:ycm_confirm_extra_conf = 0
+" let g:ycm_confirm_extra_conf = 0
 
 " grepper
 runtime plugin/grepper.vim    " initialize g:grepper with default values
@@ -271,7 +271,7 @@ if !has("gui_running")
 		let g:solarized_enable_extra_hi_groups = 1
 		let g:solarized_statusline = 'low'
 		let g:solarized_termtrans = 1
-		colorscheme solarized8
+		colorscheme solarized8_flat
 	catch /^Vim\%((\a\+)\)\=:E185/
 		" Fallback to desert
 		let g:airline_theme = 'dark'
