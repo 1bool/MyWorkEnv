@@ -20,17 +20,19 @@ BRANCH := master
 VPATH := dotfiles:snippets
 SUDOERSDIR := /etc/sudoers.d/
 SUDOERSFILE := $(if $(LOGNAME),$(SUDOERSDIR)/nopass_for_$(LOGNAME),)
-NERD_FONT_NAMES ?= IBMPlexMono \
-				   DaddyTimeMono \
-				   FantasqueSansMono \
-				   Go-Mono \
+NERD_FONT_NAMES ?= Agave \
+				   CascadiaCode \
 				   CodeNewRoman \
+				   FantasqueSansMono \
 				   FiraCode \
+				   Go-Mono \
 				   Hack \
+				   Hasklig \
 				   Iosevka \
 				   Monofur \
 				   Mononoki \
-				   SourceCodePro
+				   SourceCodePro \
+				   VictorMono
 NERD_FONT_DIR ?= $(FONTDIR)/NerdFonts/
 POWERLINE_FONT_NAMES ?= SymbolNeu
 POWERLINE_FONT_DIR ?= $(FONTDIR)/PowerlineFonts/
