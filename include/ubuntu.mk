@@ -4,7 +4,7 @@ BUNDLE := $(VIMDIR)/bundle
 PRCFILE := vim/pathogenrc.vim
 PKGS += git \
 	exuberant-ctags \
-	vim-gnome \
+	vim-gtk \
 	vim-addon-manager \
 	vim-scripts \
 	fonts-wqy-zenhei \

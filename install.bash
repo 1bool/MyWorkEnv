@@ -34,7 +34,7 @@ case "$DIST_FAMILY" in
 		;;
 	debian)
 		sudo apt-get update
-		sudo apt-get -y install $PKGS grep vim-scripts vim-addon-manager
+		sudo apt-get -y install $PKGS grep vim-scripts vim-addon-manager python3-pip
 		;;
 	msys)
 		pacman -Sy --noconfirm --needed pacman
