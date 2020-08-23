@@ -23,13 +23,11 @@ GITPLUGINS := $(shell grep -E '^[[:blank:]]*Plug[[:blank:]]+' vim/plugrc.vim $(w
 GITTOPKG := $(shell echo $(subst nerdcommenter,nerd-commenter,\
 		   $(basename $(notdir $(subst a.vim,alternate.vim,$(GITPLUGINS))))) \
 		   | tr [:upper:] [:lower:])
-ifeq ($(UBUNTU_VER),16.04)
 # vim-youcompleteme fail to work in 16.04
-VIMPKGS := $(filter-out vim-youcompleteme,$(shell apt-cache search --names-only '^vim-' | cut -d' ' -f1))
-INSTALLTARGETS += cmake python-dev python3-dev g++ gcc
-else
-VIMPKGS := $(shell apt-cache search --names-only '^vim-' | cut -d' ' -f1)
-endif
+VIMPKGS := $(if $(filter 16.04,$(UBUNTU_VER)),$(filter-out vim-youcompleteme,$(shell apt-cache search --names-only '^vim-' | cut -d' ' -f1)),$(shell apt-cache search --names-only '^vim-' | cut -d' ' -f1))
+# vim-youcompleteme compilation dependencies
+INSTALLTARGETS += $(if $(filter 16.04,$(UBUNTU_VER)),cmake python-dev python3-dev g++ gcc)
+INSTALLTARGETS += $(if $(filter 20.04,$(UBUNTU_VER)),python-is-python3)
 PLUGINPKGS := $(filter $(addprefix %,$(GITTOPKG)),$(VIMPKGS))
 VAMLIST := $(if $(and $(shell dpkg --get-selections | fgrep vim-scripts),\
 		  $(shell dpkg --get-selections | fgrep vim-addon-manager)),\
