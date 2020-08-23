@@ -17,7 +17,6 @@ PKGS += git \
 	thefuck \
 	clang \
 	tmux-plugin-manager
-PKGS += cmake lua5.2 liblua5.2-dev libncurses5-dev zlib1g-dev # for color_coded
 PKGS += dconf-cli # for Gogh
 INSTALLTARGETS := $(filter $(shell apt-cache search --names-only '.*' | cut -d' ' -f1),$(PKGS))
 GITPLUGINS := $(shell grep -E '^[[:blank:]]*Plug[[:blank:]]+' vim/plugrc.vim $(wildcard snippets/$(OS).pluginrc.vim snippets/$(DIST).pluginrc.vim) | cut -d\' -f2) pathogen
@@ -96,11 +95,11 @@ $(BUNDLE)/YouCompleteMe/: | $(TARGETPKGS)
 	@if [ -d $@/doc ]; then \
 		vim +Helptags $@/doc/*.txt +qall; fi
 
-$(BUNDLE)/color_coded/: | $(TARGETPKGS)
-	git clone -b master https://github.com/$(filter %/$(notdir $(@:/=)),$(GITPLUGINS)).git $@
-	cd $@ && rm -f CMakeCache.txt && cmake . && make && make install
-	@if [ -d $@/doc ]; then \
-		vim +Helptags $@/doc/*.txt +qall; fi
+# $(BUNDLE)/color_coded/: | $(TARGETPKGS)
+	# git clone -b master https://github.com/$(filter %/$(notdir $(@:/=)),$(GITPLUGINS)).git $@
+	# cd $@ && rm -f CMakeCache.txt && cmake . && make && make install
+	# @if [ -d $@/doc ]; then \
+		# vim +Helptags $@/doc/*.txt +qall; fi
 
 $(APT_STAMP):
 	sudo apt-get update
