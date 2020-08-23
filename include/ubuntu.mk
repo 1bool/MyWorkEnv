@@ -17,7 +17,7 @@ PKGS += git \
 	thefuck \
 	clang \
 	tmux-plugin-manager
-PKGS += dconf-cli # for Gogh
+# PKGS += dconf-cli # for Gogh
 INSTALLTARGETS := $(filter $(shell apt-cache search --names-only '.*' | cut -d' ' -f1),$(PKGS))
 GITPLUGINS := $(shell grep -E '^[[:blank:]]*Plug[[:blank:]]+' vim/plugrc.vim $(wildcard snippets/$(OS).pluginrc.vim snippets/$(DIST).pluginrc.vim) | cut -d\' -f2) pathogen
 GITTOPKG := $(shell echo $(subst nerdcommenter,nerd-commenter,\
