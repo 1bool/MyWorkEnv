@@ -1,21 +1,19 @@
+-include /etc/os-release
 SHELL := bash -e
-OS := $(if $(shell fgrep 'Microsoft@Microsoft.com' /proc/version 2> /dev/null),WSL,$(patsubst MSYS_NT%,MSYS_NT,$(shell uname -s)))
-DIST := $(strip $(if $(findstring Darwin,$(OS)),mac,\
-	$(if $(findstring MSYS_NT,$(OS)),msys,\
-	$(if $(wildcard /etc/os-release),$(shell . /etc/os-release 2> /dev/null && echo $$ID),\
-	$(shell cat /etc/system-release | cut -d' ' -f1 | tr '[:upper:]' '[:lower:]')))))
-DIST_FAMILY := $(strip $(if $(filter mac msys,$(DIST)),$(DIST),\
-	$(if $(wildcard /etc/os-release),$(shell . /etc/os-release 2> /dev/null && echo $$ID_LIKE))))
+OSTYPE := $(shell echo $$OSTYPE)
+MSYS := $(if findstring msys,$(OSTYPE),1)
+WSL := $(if $(findstring Microsoft,$(shell uname -r)),1)
+PLATFORM := $(if $(findstring linux-gnu,$(OSTYPE)),$(ID_LIKE),$(OSTYPE))
 DOTFILES := vimrc vimrc.local gvimrc gvimrc.local screenrc tmux.conf bashrc profile pylintrc dircolors zprofile zshrc
-DOTFILES += $(if $(filter $(OS),WSL MSYS_NT),minttyrc)
+DOTFILES += $(if $(MSYS),minttyrc)
 DESTFILES := $(addprefix $(HOME)/.,$(DOTFILES)) $(addprefix $(HOME)/.local/,$(wildcard bin/*))
 VIMDIR := $(HOME)/.vim
 AUTOLOADDIR := $(VIMDIR)/autoload
 PLUGINRC := $(VIMDIR)/pluginrc.vim
 PKGS := coreutils tmux curl wget vim ssh-askpass
 LOCALDIR := $(HOME)/.local/share
-FONTDIR := $(if $(findstring mac,$(DIST)),/Library/Fonts,$(HOME)/.local/share/fonts)
-FONTS := $(if $(filter $(DIST),msys),,.fonts_installed)
+FONTDIR ?= $(HOME)/.local/share/fonts
+FONTS := $(if $(MSYS),,.fonts_installed)
 BRANCH := master
 VPATH := dotfiles:snippets
 SUDOERSDIR := /etc/sudoers.d/
@@ -36,17 +34,15 @@ NERD_FONT_NAMES ?= Agave \
 NERD_FONT_DIR ?= $(FONTDIR)/NerdFonts/
 POWERLINE_FONT_NAMES ?= SymbolNeu
 POWERLINE_FONT_DIR ?= $(FONTDIR)/PowerlineFonts/
-PYMS := powerline $(if $(filter $(OS),msys),psutil) pylint
+PYMS := powerline $(if $(MSYS),,psutil) pylint
 INSTALLPYMS = $(subst powerline,powerline-status,$(foreach m,$(PYMS),$(shell python -c "import $(m)" 2> /dev/null || echo $(m))))
 
 all: install
 
 
-ifeq ($(DIST_FAMILY),debian)
-include include/ubuntu.mk
-else
+ifneq ($(ID_LIKE),debian)
 PLUGGED := $(VIMDIR)/plugged
-PKGS += ctags cmake ack
+PKGS += ctags ack
 SEOUL256 := $(PLUGGED)/vim-airline-themes/autoload/airline/themes/seoul256.vim
 
 $(AUTOLOADDIR)/plug.vim:
@@ -56,27 +52,19 @@ $(PLUGGED): $(AUTOLOADDIR)/plug.vim $(PLUGINRC)
 	vim +PlugInstall +qall
 	@touch $(PLUGGED)
 
-
-ifeq ($(DIST),mac)
-include include/mac.mk
-endif
-ifeq ($(DIST_FAMILY),rhel fedora)
-include include/redhat.mk
-endif
-ifeq ($(DIST),msys)
-include include/msys.mk
-endif
 vimplug-update:
 	vim +PlugUpgrade +PlugUpdate +qall
 
 .SECONDEXPANSION:
-$(PLUGINRC): vim/plugrc.vim $$(wildcard snippets/$$(OS).$$(@F) snippets/$$(DIST).$$(@F))
+$(PLUGINRC): vim/plugrc.vim $$(wildcard snippets/$$(OSTYPE).$$(@F))
 	mkdir -p $(dir $(PLUGINRC))
 	@echo 'let g:plug_window = "vertical botright new"' > $@
 	@echo 'call plug#begin()' >> $@
 	cat $^ >> $@
 	@echo 'call plug#end()' >> $@
 endif
+
+include include/$(PLATFORM).mk
 
 
 vpath %.ttf
@@ -96,12 +84,12 @@ INSTALLPKGS := $(filter-out $(INSTALLPYMS),$(INSTALLTARGETS))
 $(HOME)/%vimrc.local:
 	touch $@
 
-$(HOME)/.vimrc: $(if $(filter-out MSYS_NT,$(OS)),set-tmpfiles.vimrc)
-$(HOME)/.profile: $(if $(filter $(OS),WSL MSYS_NT Darwin),auto-ssh-agent.profile)
+$(HOME)/.vimrc: $(if $(MSYS),,set-tmpfiles.vimrc)
+$(HOME)/.profile: $(if $(WSL),WSL.profile)
 $(HOME)/.tmux.conf: \
 	$(if $(findstring 16.04,$(UBUNTU_VER)),vi-style-2.1.tmux.conf,vi-style.tmux.conf) \
 	$(if $(filter powerline,$(INSTALLTARGETS)),$(if \
-	$(filter debian,$(DIST_FAMILY)),debian.tmux.conf), pym-powerline.tmux.conf tpm.tmux.conf)
+	$(filter debian,$(ID_LIKE)),debian.tmux.conf), pym-powerline.tmux.conf tpm.tmux.conf)
 
 dotfiles/dircolors: | LS_COLORS/LS_COLORS
 	ln -f $| $@
@@ -123,7 +111,7 @@ snippets/pym-powerline.tmux.conf: $(filter powerline-status,$(INSTALLPYMS))
 	echo source \"$$(pip show powerline-status | fgrep Location | cut -d" " -f2)/powerline/bindings/tmux/powerline.conf\" > $@
 
 .SECONDEXPANSION:
-$(HOME)/.%: $$(wildcard snippets/$$(OS)$$(@F)) $$(wildcard snippets/$$(DIST_FAMILY)$$(@F)) $$(wildcard snippets/$$(DIST)$$(@F)) %
+$(HOME)/.%: $$(wildcard snippets/$$(OSTYPE)$$(@F)) $$(wildcard snippets/$$(ID_LIKE)$$(@F))
 	@if [ -h $@ ] || [[ -f $@ && "$$(stat -c %h -- $@ 2> /dev/null)" -gt 1 ]]; then rm -f $@; fi
 	@if [ "$(@F)" = ".$(notdir $^)" ]; then \
 		echo "ln -f $< $@"; \
@@ -195,7 +183,7 @@ install: $(DESTFILES) $(TARGETPKGS) $(PKGPLUGINTARGETS) $(PLUGINRC) $(PLUGGED) $
 install: $(SEOUL256)
 install: | /tmp/vim/
 
-update: install update-LS_COLORS vimplug-update $(if $(findstring msys,$(DIST)),,fonts-update)
+update: install update-LS_COLORS vimplug-update $(if $(MSYS),,fonts-update)
 
 uninstall:
 	-rm -fr $(DESTFILES) $(GITTARGETS) $(PLUGINRC) $(PLUGGED) $(BUNDLE) $(AUTOLOADDIR)/plug.vim $(FONTS)

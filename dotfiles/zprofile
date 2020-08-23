@@ -14,7 +14,10 @@ if [ -f "$HOME/.profile.local" ]; then
     . "$HOME/.profile.local"
 fi
 
-# Powerline
-if which powerline-daemon &> /dev/null; then
+# Powerline go first, python second
+if [ -x ~/.local/bin/powerline-go ]; then
+    export GOPATH=~/.local/
+fi
+if [ -z "$GOPATH" ] && command powerline-daemon; then
     powerline-daemon -q
 fi

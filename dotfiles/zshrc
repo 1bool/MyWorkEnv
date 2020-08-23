@@ -1,17 +1,47 @@
-export CLICOLOR=1
+# enable color support of ls and also add handy aliases
+if [ -x /usr/bin/dircolors ]; then
+  test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
+  alias ls='ls --color=auto'
+  #alias dir='dir --color=auto'
+  #alias vdir='vdir --color=auto'
 
-if [ -f ~/.zshrc.local ]; then
-  . ~/.zshrc.local
+  alias grep='grep --color=auto'
+  alias fgrep='fgrep --color=auto'
+  alias egrep='egrep --color=auto'
+else export CLICOLOR=1
 fi
 
-POWERLINE_DIR="$(pip show powerline-status 2> /dev/null | fgrep Location | cut -d" " -f2)"
-[ -z "$POWERLINE_DIR" ] && POWERLINE_DIR='.local/lib/python2.6/site-packages'
-if [ -r $POWERLINE_DIR/powerline/bindings/zsh/powerline.zsh ]; then
-	if [ -x $POWERLINE_DIR/bin/powerline ]; then
-		POWERLINE_COMMAND=$POWERLINE_DIR/bin/powerline
+if [ -f ~/.zshrc.local ]; then
+	. ~/.zshrc.local
+fi
+
+# powerline-go
+function powerline_precmd() {
+	PS1="$($GOPATH/bin/powerline-go -error $? -shell zsh)"
+}
+
+function install_powerline_precmd() {
+	for s in "${precmd_functions[@]}"; do
+		if [ "$s" = "powerline_precmd" ]; then
+			return
+		fi
+	done
+	precmd_functions+=(powerline_precmd)
+}
+
+if [ -n "$GOPATH" ] && [ "$TERM" != "linux" ]; then
+	install_powerline_precmd
+else
+	# powerline python
+	POWERLINE_DIR="$(pip show powerline-status 2> /dev/null | fgrep Location | cut -d" " -f2)"
+	[ -z "$POWERLINE_DIR" ] && POWERLINE_DIR='.local/lib/python2.6/site-packages'
+	if [ -r $POWERLINE_DIR/powerline/bindings/zsh/powerline.zsh ]; then
+		if [ -x $POWERLINE_DIR/bin/powerline ]; then
+			POWERLINE_COMMAND=$POWERLINE_DIR/bin/powerline
+		fi
+		if [ -x $POWERLINE_DIR/EGG-INFO/scripts/powerline-config ]; then
+			POWERLINE_CONFIG_COMMAND=$POWERLINE_DIR/EGG-INFO/scripts/powerline-config
+		fi
+		. $POWERLINE_DIR/powerline/bindings/zsh/powerline.zsh
 	fi
-	if [ -x $POWERLINE_DIR/EGG-INFO/scripts/powerline-config ]; then
-		POWERLINE_CONFIG_COMMAND=$POWERLINE_DIR/EGG-INFO/scripts/powerline-config
-	fi
-	. $POWERLINE_DIR/powerline/bindings/zsh/powerline.zsh
 fi

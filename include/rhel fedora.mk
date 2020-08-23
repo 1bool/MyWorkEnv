@@ -13,6 +13,7 @@ PKGS += git \
 	python-argparse \
 	pylint \
 	clang \
+	cmake \
 	the_silver_searcher
 PKGS += $(or $(shell $(PKGM) list -q python3-devel | tail -1 | cut -d' ' -f1),python2-devel)
 INSTALLTARGETS := $(PKGS)
