@@ -1,5 +1,6 @@
 DESTFILES += /usr/bin/vi
-PKGS += mintty man-pages-posix unzip diffutils gcc python2 clang libcrypt-devel python3-pip
+PKGS += mintty man-pages-posix unzip diffutils python2 python-pip
+# PKGS += mingw-w64-x86_64-go # for powerline-go
 INSTALLTARGETS := $(subst ack,perl-ack,\
 		  $(filter-out clang ssh-askpass,$(PKGS)))
 TARGETPKGS = $(filter-out $(shell pacman -Qsq),$(INSTALLPKGS))
@@ -36,6 +37,10 @@ pacman-update:
 	pacman -Sy --noconfirm
 	pacman -Su --noconfirm --needed $(INSTALLPKGS)
 
-update: pacman-update
+# powerline-go-install powerline-go-update:
+#     go get -u github.com/justjanne/powerline-go
+
+# install: powerline-go-install
+update: pacman-update # powerline-go-update
 
 # install: $(VIMDIR)/plugged/YouCompleteMe/

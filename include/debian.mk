@@ -19,7 +19,7 @@ PKGS += git \
 	tmux-plugin-manager
 # PKGS += dconf-cli # for Gogh
 INSTALLTARGETS := $(filter $(shell apt-cache search --names-only '.*' | cut -d' ' -f1),$(PKGS))
-GITPLUGINS := $(shell grep -E '^[[:blank:]]*Plug[[:blank:]]+' vim/plugrc.vim $(wildcard snippets/$(OS).pluginrc.vim snippets/$(DIST).pluginrc.vim) | cut -d\' -f2) pathogen
+GITPLUGINS := $(shell grep -E '^[[:blank:]]*Plug[[:blank:]]+' vim/plugrc.vim $(wildcard snippets/$(OSTYPE).pluginrc.vim) | cut -d\' -f2) pathogen
 GITTOPKG := $(shell echo $(subst nerdcommenter,nerd-commenter,\
 		   $(basename $(notdir $(subst a.vim,alternate.vim,$(GITPLUGINS))))) \
 		   | tr [:upper:] [:lower:])
@@ -63,7 +63,7 @@ $(PLUGINRC): $(PRCFILE)
 
 powerline: $(APT_STAMP)
 	sudo apt-get -y install $@
-ifneq ($(OS),WSL)
+ifneq ($(WSL),1)
 	systemctl --user enable powerline-daemon
 	systemctl --user start powerline-daemon
 endif
