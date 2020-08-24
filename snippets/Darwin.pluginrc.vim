@@ -1,1 +1,1 @@
-Linux.pluginrc.vim
+linux-gnu.pluginrc.vim

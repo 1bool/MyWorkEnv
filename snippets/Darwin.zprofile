@@ -1,1 +1,1 @@
-mac.profile
+Darwin.profile
