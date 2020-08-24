@@ -1,7 +1,7 @@
 -include /etc/os-release
 SHELL := bash -e
 OSTYPE := $(shell echo $$OSTYPE)
-MSYS := $(if findstring msys,$(OSTYPE),1)
+MSYS := $(if $(findstring msys,$(OSTYPE)),1)
 WSL := $(if $(findstring Microsoft,$(shell uname -r)),1)
 PLATFORM := $(if $(findstring linux-gnu,$(OSTYPE)),$(ID_LIKE),$(OSTYPE))
 DOTFILES := vimrc vimrc.local gvimrc gvimrc.local screenrc tmux.conf bashrc profile pylintrc dircolors zprofile zshrc
@@ -111,7 +111,7 @@ snippets/pym-powerline.tmux.conf: $(filter powerline-status,$(INSTALLPYMS))
 	echo source \"$$(pip show powerline-status | fgrep Location | cut -d" " -f2)/powerline/bindings/tmux/powerline.conf\" > $@
 
 .SECONDEXPANSION:
-$(HOME)/.%: $$(wildcard snippets/$$(OSTYPE)$$(@F)) $$(wildcard snippets/$$(ID_LIKE)$$(@F))
+$(HOME)/.%: $$(wildcard snippets/$$(OSTYPE)$$(@F)) $$(wildcard snippets/$$(ID_LIKE)$$(@F)) %
 	@if [ -h $@ ] || [[ -f $@ && "$$(stat -c %h -- $@ 2> /dev/null)" -gt 1 ]]; then rm -f $@; fi
 	@if [ "$(@F)" = ".$(notdir $^)" ]; then \
 		echo "ln -f $< $@"; \

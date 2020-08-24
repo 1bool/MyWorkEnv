@@ -1,4 +1,3 @@
-UBUNTU_VER := $(shell . /etc/os-release && echo $$VERSION_ID)
 APT_STAMP := '/var/lib/apt/periodic/update-success-stamp'
 BUNDLE := $(VIMDIR)/bundle
 PRCFILE := vim/pathogenrc.vim
@@ -24,10 +23,10 @@ GITTOPKG := $(shell echo $(subst nerdcommenter,nerd-commenter,\
 		   $(basename $(notdir $(subst a.vim,alternate.vim,$(GITPLUGINS))))) \
 		   | tr [:upper:] [:lower:])
 # vim-youcompleteme fail to work in 16.04
-VIMPKGS := $(if $(filter 16.04,$(UBUNTU_VER)),$(filter-out vim-youcompleteme,$(shell apt-cache search --names-only '^vim-' | cut -d' ' -f1)),$(shell apt-cache search --names-only '^vim-' | cut -d' ' -f1))
+VIMPKGS := $(if $(findstring 16.04,$(VERSION_ID)),$(filter-out vim-youcompleteme,$(shell apt-cache search --names-only '^vim-' | cut -d' ' -f1)),$(shell apt-cache search --names-only '^vim-' | cut -d' ' -f1))
 # vim-youcompleteme compilation dependencies
-INSTALLTARGETS += $(if $(filter 16.04,$(UBUNTU_VER)),cmake python-dev python3-dev g++ gcc)
-INSTALLTARGETS += $(if $(filter 20.04,$(UBUNTU_VER)),python-is-python3)
+INSTALLTARGETS += $(if $(findstring 16.04,$(VERSION_ID)),cmake python-dev python3-dev g++ gcc)
+INSTALLTARGETS += $(if $(findstring 20.04,$(VERSION_ID)),python-is-python3)
 PLUGINPKGS := $(filter $(addprefix %,$(GITTOPKG)),$(VIMPKGS))
 VAMLIST := $(if $(and $(shell dpkg --get-selections | fgrep vim-scripts),\
 		  $(shell dpkg --get-selections | fgrep vim-addon-manager)),\
