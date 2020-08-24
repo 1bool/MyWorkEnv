@@ -14,9 +14,11 @@ PKGS += git \
 	powerline \
 	language-pack-zh-hans \
 	thefuck \
-	clang \
 	tmux-plugin-manager
 # PKGS += dconf-cli # for Gogh
+PKGS += cmake clang # for ycm
+PKGS += golang-go # for powerline-go
+TARGET_POWERLINE_GO := $(HOME)/.local/bin/powerline-go
 INSTALLTARGETS := $(filter $(shell apt-cache search --names-only '.*' | cut -d' ' -f1),$(PKGS))
 GITPLUGINS := $(shell grep -E '^[[:blank:]]*Plug[[:blank:]]+' vim/plugrc.vim $(wildcard snippets/$(OSTYPE).pluginrc.vim) | cut -d\' -f2) pathogen
 GITTOPKG := $(shell echo $(subst nerdcommenter,nerd-commenter,\
@@ -25,7 +27,7 @@ GITTOPKG := $(shell echo $(subst nerdcommenter,nerd-commenter,\
 # vim-youcompleteme fail to work in 16.04
 VIMPKGS := $(if $(findstring 16.04,$(VERSION_ID)),$(filter-out vim-youcompleteme,$(shell apt-cache search --names-only '^vim-' | cut -d' ' -f1)),$(shell apt-cache search --names-only '^vim-' | cut -d' ' -f1))
 # vim-youcompleteme compilation dependencies
-INSTALLTARGETS += $(if $(findstring 16.04,$(VERSION_ID)),cmake python-dev python3-dev g++ gcc)
+INSTALLTARGETS += $(if $(findstring 16.04,$(VERSION_ID)),python-dev python3-dev g++ gcc)
 INSTALLTARGETS += $(if $(findstring 20.04,$(VERSION_ID)),python-is-python3)
 PLUGINPKGS := $(filter $(addprefix %,$(GITTOPKG)),$(VIMPKGS))
 VAMLIST := $(if $(and $(shell dpkg --get-selections | fgrep vim-scripts),\
@@ -85,7 +87,7 @@ $(BUNDLE)/%/:
 	@if [ -d $@/doc ]; then \
 		vim +Helptags $@/doc/*.txt +qall; fi
 
-$(BUNDLE)/YouCompleteMe/: | $(TARGETPKGS)
+$(BUNDLE)/YouCompleteMe/: | $(filter git cmake clang python,$(TARGETPKGS))
 	git clone -b master https://github.com/$(filter %/$(notdir $(@:/=)),$(GITPLUGINS)).git $@
 	cd $@ && git submodule update --init --recursive
 	cd $@ && ./install.py --clang-completer
@@ -97,6 +99,9 @@ $(BUNDLE)/YouCompleteMe/: | $(TARGETPKGS)
 	# cd $@ && rm -f CMakeCache.txt && cmake . && make && make install
 	# @if [ -d $@/doc ]; then \
 		# vim +Helptags $@/doc/*.txt +qall; fi
+
+$(TARGET_POWERLINE_GO): $(filter golang-go,$(TARGETPKGS)) | $(HOME)/.local/bin/
+	GOPATH=$(HOME)/.local go get -u github.com/justjanne/powerline-go
 
 $(APT_STAMP):
 	sudo apt-get update

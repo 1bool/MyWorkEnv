@@ -1,3 +1,5 @@
+TARGETS := $(TARGET_POWERLINE_GO)
+
 -include /etc/os-release
 SHELL := bash -e
 OSTYPE := $(shell echo $$OSTYPE)
@@ -182,6 +184,7 @@ install: $(SUDOERSFILE)
 install: $(DESTFILES) $(TARGETPKGS) $(PKGPLUGINTARGETS) $(PLUGINRC) $(PLUGGED) $(INSTALLPYMS) $(FONTS)
 install: $(SEOUL256)
 install: | /tmp/vim/
+install: $(TARGET_POWERLINE_GO)
 
 update: install update-LS_COLORS vimplug-update $(if $(MSYS),,fonts-update)
 
