@@ -16,8 +16,7 @@ fi
 
 # Powerline go first, python second
 if [ -x ~/.local/bin/powerline-go ]; then
-    export GOPATH=~/.local/
-fi
-if [ -z "$GOPATH" ] && command powerline-daemon; then
+    export GOPATH=~/.local
+elif command powerline-daemon && ! pgrep -f powerline-daemon 2> /dev/null; then
     powerline-daemon -q
 fi
