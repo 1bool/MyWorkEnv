@@ -180,7 +180,7 @@ endif
 del-bash_profile:
 	mv -iv $(HOME)/.bash_profile $(HOME)/.bash_profile.old
 
-install: $(SUDOERSFILE)
+install: $(if $(MSYS),,$(SUDOERSFILE))
 install: $(DESTFILES) $(TARGETPKGS) $(PKGPLUGINTARGETS) $(PLUGINRC) $(PLUGGED) $(INSTALLPYMS) $(FONTS)
 install: $(SEOUL256)
 install: | /tmp/vim/
