@@ -18,7 +18,7 @@ PKGS += git \
 # PKGS += dconf-cli # for Gogh
 PKGS += cmake clang # for ycm
 PKGS += golang-go # for powerline-go
-TARGET_POWERLINE_GO := $(HOME)/.local/bin/powerline-go
+TARGET_POWERLINE_GO := $(if $(findstring x86_64,$(shell uname -m)),$(HOME)/.local/bin/powerline-go) # 64bit only
 INSTALLTARGETS := $(filter $(shell apt-cache search --names-only '.*' | cut -d' ' -f1),$(PKGS))
 GITPLUGINS := $(shell grep -E '^[[:blank:]]*Plug[[:blank:]]+' vim/plugrc.vim $(wildcard snippets/$(OSTYPE).pluginrc.vim) | cut -d\' -f2) pathogen
 GITTOPKG := $(shell echo $(subst nerdcommenter,nerd-commenter,\
@@ -100,8 +100,9 @@ $(BUNDLE)/YouCompleteMe/: | $(filter git cmake clang python,$(TARGETPKGS))
 	# @if [ -d $@/doc ]; then \
 		# vim +Helptags $@/doc/*.txt +qall; fi
 
-$(TARGET_POWERLINE_GO): $(filter golang-go,$(TARGETPKGS)) | $(HOME)/.local/bin/
-	GOPATH=$(HOME)/.local go get -u github.com/justjanne/powerline-go
+$(TARGET_POWERLINE_GO): | $(HOME)/.local/bin/
+	curl -LSso $@ https://github.com/justjanne/powerline-go/releases/download/v1.17.0/powerline-go-windows-amd64
+	chmod a+x $@
 
 $(APT_STAMP):
 	sudo apt-get update
