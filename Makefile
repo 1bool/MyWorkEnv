@@ -1,8 +1,9 @@
-TARGETS := $(TARGET_POWERLINE_GO)
+TARGETS := $(TARGET_POWERLINE_GO) zsh
 
 -include /etc/os-release
 SHELL := bash -e
 OSTYPE := $(shell echo $$OSTYPE)
+OSTYPESIMP := $(subst linux-gnu,linux,$(subst msys,windows,$(OSTYPE)))
 MSYS := $(if $(findstring msys,$(OSTYPE)),1)
 WSL := $(if $(findstring Microsoft,$(shell uname -r)),1)
 PLATFORM := $(if $(findstring linux-gnu,$(OSTYPE)),$(ID_LIKE),$(or $(findstring darwin,$(OSTYPE)),$(OSTYPE)))
@@ -12,7 +13,7 @@ DESTFILES := $(addprefix $(HOME)/.,$(DOTFILES)) $(addprefix $(HOME)/.local/,$(wi
 VIMDIR := $(HOME)/.vim
 AUTOLOADDIR := $(VIMDIR)/autoload
 PLUGINRC := $(VIMDIR)/pluginrc.vim
-PKGS := coreutils tmux curl wget vim ssh-askpass
+PKGS := coreutils tmux curl wget vim ssh-askpass zsh
 LOCALDIR := $(HOME)/.local/share
 FONTDIR ?= $(HOME)/.local/share/fonts
 FONTS := $(if $(MSYS),,.fonts_installed)
@@ -38,6 +39,8 @@ POWERLINE_FONT_NAMES ?= SymbolNeu
 POWERLINE_FONT_DIR ?= $(FONTDIR)/PowerlineFonts/
 PYMS := powerline $(if $(MSYS),,psutil) pylint
 INSTALLPYMS = $(subst powerline,powerline-status,$(foreach m,$(PYMS),$(shell python -c "import $(m)" 2> /dev/null || echo $(m))))
+# PKGS += golang-go # for powerline-go update
+TARGET_POWERLINE_GO := $(if $(findstring x86_64,$(shell uname -m)),$(HOME)/.local/bin/powerline-go) # 64bit only
 
 all: install
 
@@ -111,6 +114,10 @@ $(SEOUL256): | $(or $(filter %airline-themes,$(PKGPLUGINTARGETS) $(GITTARGETS)),
  
 snippets/pym-powerline.tmux.conf: $(filter powerline-status,$(INSTALLPYMS))
 	echo source \"$$(pip show powerline-status | fgrep Location | cut -d" " -f2)/powerline/bindings/tmux/powerline.conf\" > $@
+
+$(TARGET_POWERLINE_GO): | $(HOME)/.local/bin/
+	curl -LSso $@ https://github.com/justjanne/powerline-go/releases/download/v1.17.0/powerline-go-$(OSTYPESIMP)-amd64 || rm -f $@
+	chmod a+x $@
 
 .SECONDEXPANSION:
 $(HOME)/.%: $$(wildcard snippets/$$(OSTYPE)$$(@F)) $$(wildcard snippets/$$(ID_LIKE)$$(@F)) %
