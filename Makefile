@@ -90,7 +90,6 @@ $(HOME)/%vimrc.local:
 	touch $@
 
 $(HOME)/.vimrc: $(if $(MSYS),,set-tmpfiles.vimrc)
-$(HOME)/.profile: $(if $(WSL),WSL.profile)
 $(HOME)/.tmux.conf: \
 	$(if $(findstring 16.04,$(UBUNTU_VER)),vi-style-2.1.tmux.conf,vi-style.tmux.conf) \
 	$(if $(filter powerline,$(INSTALLTARGETS)),$(if \
@@ -120,7 +119,7 @@ $(TARGET_POWERLINE_GO): | $(HOME)/.local/bin/
 	chmod a+x $@
 
 .SECONDEXPANSION:
-$(HOME)/.%: $$(wildcard snippets/$$(OSTYPE)$$(@F)) $$(wildcard snippets/$$(ID_LIKE)$$(@F)) %
+$(HOME)/.%: $$(wildcard snippets/$$(OSTYPE)$$(@F)) $$(wildcard snippets/$$(ID_LIKE)$$(@F)) % $$(if $$(WSL),$$(wildcard snippets/WSL$$(@F)))
 	@if [ -h $@ ] || [[ -f $@ && "$$(stat -c %h -- $@ 2> /dev/null)" -gt 1 ]]; then rm -f $@; fi
 	@if [ "$(@F)" = ".$(notdir $^)" ]; then \
 		echo "ln -f $< $@"; \
