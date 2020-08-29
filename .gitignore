@@ -4,6 +4,7 @@ fonts/nerd-fonts
 fonts/
 fonts
 .fonts_installed
-snippets/pym-powerline.tmux.conf
+snippets/powerline.tmux.conf
+snippets/tpm.tmux.conf
 LS_COLORS
 dotfiles/dircolors

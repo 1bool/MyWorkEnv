@@ -45,39 +45,7 @@ TARGET_POWERLINE_GO := $(if $(findstring x86_64,$(shell uname -m)),$(HOME)/.loca
 all: install
 
 
-ifneq ($(ID_LIKE),debian)
-PLUGGED := $(VIMDIR)/plugged
-PKGS += ctags ack
-SEOUL256 := $(PLUGGED)/vim-airline-themes/autoload/airline/themes/seoul256.vim
-
-$(AUTOLOADDIR)/plug.vim:
-	curl -fLo $@ --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
-
-$(PLUGGED): $(AUTOLOADDIR)/plug.vim $(PLUGINRC)
-	vim +PlugInstall +qall
-	@touch $(PLUGGED)
-
-vimplug-update:
-	vim +PlugUpgrade +PlugUpdate +qall
-
-.SECONDEXPANSION:
-$(PLUGINRC): vim/plugrc.vim $$(wildcard snippets/$$(OSTYPE).$$(@F))
-	mkdir -p $(dir $(PLUGINRC))
-	@echo 'let g:plug_window = "vertical botright new"' > $@
-	@echo 'call plug#begin()' >> $@
-	cat $^ >> $@
-	@echo 'call plug#end()' >> $@
-endif
-
-include include/$(PLATFORM).mk
-
-
 vpath %.ttf
-
-
-$(PIPINSTALL):
-	curl 'https://bootstrap.pypa.io/get-pip.py' -o /tmp/get-pip.py
-	python /tmp/get-pip.py --user
 
 $(INSTALLPYMS): install-pyms
 
@@ -86,14 +54,12 @@ install-pyms: $(TARGETPKGS) $(PIPINSTALL)
 
 INSTALLPKGS := $(filter-out $(INSTALLPYMS),$(INSTALLTARGETS))
 
+$(PIPINSTALL):
+	curl 'https://bootstrap.pypa.io/get-pip.py' -o /tmp/get-pip.py
+	python /tmp/get-pip.py --user
+
 $(HOME)/%vimrc.local:
 	touch $@
-
-$(HOME)/.vimrc: $(if $(MSYS),,set-tmpfiles.vimrc)
-$(HOME)/.tmux.conf: \
-	$(if $(findstring 16.04,$(UBUNTU_VER)),vi-style-2.1.tmux.conf,vi-style.tmux.conf) \
-	$(if $(filter powerline,$(INSTALLTARGETS)),$(if \
-	$(filter debian,$(ID_LIKE)),debian.tmux.conf), pym-powerline.tmux.conf tpm.tmux.conf)
 
 dotfiles/dircolors: | LS_COLORS/LS_COLORS
 	ln -f $| $@
@@ -111,21 +77,15 @@ update-LS_COLORS:
 $(SEOUL256): | $(or $(filter %airline-themes,$(PKGPLUGINTARGETS) $(GITTARGETS)),$(PLUGGED))
 	wget -cP $(@D) https://gist.github.com/jbkopecky/a2f66baa8519747b388f2a1617159c07/raw/f73313795a9b3135ea23735b3e6d4a1969da3cfe/seoul256.vim
  
-snippets/pym-powerline.tmux.conf: $(filter powerline-status,$(INSTALLPYMS))
+snippets/powerline.tmux.conf: $(filter powerline-status,$(INSTALLPYMS))
 	echo source \"$$(pip show powerline-status | fgrep Location | cut -d" " -f2)/powerline/bindings/tmux/powerline.conf\" > $@
+
+snippets/tpm.tmux.conf:
+	echo "run -b '~/.tmux/plugins/tpm/tpm'" > $@
 
 $(TARGET_POWERLINE_GO): | $(HOME)/.local/bin/
 	curl -LSso $@ https://github.com/justjanne/powerline-go/releases/download/v1.17.0/powerline-go-$(OSTYPESIMP)-amd64 || rm -f $@
 	chmod a+x $@
-
-.SECONDEXPANSION:
-$(HOME)/.%: $$(wildcard snippets/$$(OSTYPE)$$(@F)) $$(wildcard snippets/$$(ID_LIKE)$$(@F)) % $$(if $$(WSL),$$(wildcard snippets/WSL$$(@F)))
-	@if [ -h $@ ] || [[ -f $@ && "$$(stat -c %h -- $@ 2> /dev/null)" -gt 1 ]]; then rm -f $@; fi
-	@if [ "$(@F)" = ".$(notdir $^)" ]; then \
-		echo "ln -f $< $@"; \
-		ln -f $< $@; else \
-		echo "cat $^ > $@"; \
-		cat $^ > $@; fi
 
 $(HOME)/.local/bin/:
 	install -m 0755 -d $@
@@ -176,6 +136,49 @@ $(FONTS): $(POWERLINE_FONT_DIR) $(NERD_FONT_DIR)
 fonts-update: nerd-update powerline-update
 	@if [ -f .fonts_updated ]; then \
 		fc-cache -vf "$(FONTDIR)" && rm -f .fonts_updated; fi
+
+include include/$(PLATFORM).mk
+
+
+
+ifneq ($(ID_LIKE),debian)
+PLUGGED := $(VIMDIR)/plugged
+PKGS += ctags ack
+SEOUL256 := $(PLUGGED)/vim-airline-themes/autoload/airline/themes/seoul256.vim
+
+$(AUTOLOADDIR)/plug.vim:
+	curl -fLo $@ --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+
+$(PLUGGED): $(AUTOLOADDIR)/plug.vim $(PLUGINRC)
+	vim +PlugInstall +qall
+	@touch $(PLUGGED)
+
+vimplug-update:
+	vim +PlugUpgrade +PlugUpdate +qall
+
+.SECONDEXPANSION:
+$(PLUGINRC): vim/plugrc.vim $$(wildcard snippets/$$(OSTYPE).$$(@F))
+	mkdir -p $(dir $(PLUGINRC))
+	@echo 'let g:plug_window = "vertical botright new"' > $@
+	@echo 'call plug#begin()' >> $@
+	cat $^ >> $@
+	@echo 'call plug#end()' >> $@
+endif
+
+$(HOME)/.vimrc: $(if $(MSYS),,set-tmpfiles.vimrc)
+$(HOME)/.tmux.conf: \
+	$(if $(filter $(UBUNTU_VER),16.04),vi-style-2.1.tmux.conf,vi-style.tmux.conf) \
+	$(if $(filter powerline,$(INSTALLTARGETS)),powerline.tmux.conf) \
+	tpm.tmux.conf
+
+.SECONDEXPANSION:
+$(HOME)/.%: $$(wildcard snippets/$$(OSTYPE)$$(@F)) $$(wildcard snippets/$$(ID_LIKE)$$(@F)) % $$(if $$(WSL),$$(wildcard snippets/WSL$$(@F)))
+	@if [ -h $@ ] || [[ -f $@ && "$$(stat -c %h -- $@ 2> /dev/null)" -gt 1 ]]; then rm -f $@; fi
+	@if [ "$(@F)" = ".$(notdir $^)" ]; then \
+		echo "ln -f $< $@"; \
+		ln -f $< $@; else \
+		echo "cat $^ > $@"; \
+		cat $^ > $@; fi
 
 $(TARGETPKGS): install-pkgs
 

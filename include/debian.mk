@@ -97,6 +97,12 @@ $(BUNDLE)/YouCompleteMe/: | $(filter git cmake clang python,$(TARGETPKGS))
 	# cd $@ && rm -f CMakeCache.txt && cmake . && make && make install
 	# @if [ -d $@/doc ]; then \
 		# vim +Helptags $@/doc/*.txt +qall; fi
+ 
+snippets/powerline.tmux.conf: $(filter powerline-status,$(INSTALLPYMS))
+	echo 'source /usr/share/powerline/bindings/tmux/powerline.conf' > $@
+
+snippets/tpm.tmux.conf:
+	echo "run -b '/usr/share/tmux-plugin-manager/tpm'" > $@
 
 $(APT_STAMP):
 	sudo apt-get update
