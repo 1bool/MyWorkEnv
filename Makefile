@@ -77,8 +77,11 @@ update-LS_COLORS:
 $(SEOUL256): | $(or $(filter %airline-themes,$(PKGPLUGINTARGETS) $(GITTARGETS)),$(PLUGGED))
 	wget -cP $(@D) https://gist.github.com/jbkopecky/a2f66baa8519747b388f2a1617159c07/raw/f73313795a9b3135ea23735b3e6d4a1969da3cfe/seoul256.vim
  
-snippets/powerline.tmux.conf: $(filter powerline-status,$(INSTALLPYMS))
+snippets/powerline.tmux.conf: $(filter powerline-status,$(INSTALLPYMS)) $(HOME)/.tmux/plugins/tpm/
 	echo source \"$$(pip show powerline-status | fgrep Location | cut -d" " -f2)/powerline/bindings/tmux/powerline.conf\" > $@
+
+$(HOME)/.tmux/plugins/tpm/:
+	git clone https://github.com/tmux-plugins/tpm $@
 
 snippets/tpm.tmux.conf:
 	echo "run -b '~/.tmux/plugins/tpm/tpm'" > $@
@@ -168,7 +171,7 @@ endif
 $(HOME)/.vimrc: $(if $(MSYS),,set-tmpfiles.vimrc)
 $(HOME)/.tmux.conf: \
 	$(if $(filter $(UBUNTU_VER),16.04),vi-style-2.1.tmux.conf,vi-style.tmux.conf) \
-	$(if $(filter powerline,$(INSTALLTARGETS)),powerline.tmux.conf) \
+	$(if $(filter powerline,$(PYMS)),powerline.tmux.conf) \
 	tpm.tmux.conf
 
 .SECONDEXPANSION:
