@@ -1,6 +1,6 @@
 FONTDIR := /Library/Fonts
 BREW := $(shell which brew &> /dev/null || echo brew)
-PKGS := $(filter-out ssh-askpass,$(subst vim,macvim,$(PKGS))) the_silver_searcher thefuck lua llvm cmake
+INSTALLTARGETS := $(filter-out zsh ssh-askpass,$(subst vim,macvim,$(PKGS))) the_silver_searcher thefuck lua llvm cmake powerline-go
 TARGETPKGS = $(filter-out $(shell brew list),$(INSTALLPKGS))
 PKGUPDATE := brew-update
 MACVIM_APP := /Applications/MacVim.app
@@ -13,6 +13,7 @@ PIPINSTALL := $(shell command -v pip &> /dev/null || echo pip)
 # FONTS := $(INPUT_FONTS) $(TARGET_CASK_PKGS)
 # POWERLINE_FONT_DIR :=
 # NERD_FONT_DIR :=
+TARGET_POWERLINE_GO := # installed by brew
 
 $(BREW):
 	-xcode-select --install
