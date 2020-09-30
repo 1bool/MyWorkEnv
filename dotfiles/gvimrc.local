@@ -4,7 +4,7 @@ if has("gui_win32")
 	set langmenu=zh_CN.utf-8
 	runtime! delmenu.vim
 	runtime! menu.vim
-	set guifont=NovaMono_for_Powerline:h11:cANSI,InputMonoCondensed:h12:cANSI
+	set guifont=NovaMono_for_Powerline:h11:cANSI
 endif
 
 colorscheme solarized8
