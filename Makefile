@@ -41,6 +41,7 @@ PYMS := powerline $(if $(MSYS),,psutil) pylint
 INSTALLPYMS = $(subst powerline,powerline-status,$(foreach m,$(PYMS),$(shell python -c "import $(m)" 2> /dev/null || echo $(m))))
 # PKGS += golang-go # for powerline-go update
 TARGET_POWERLINE_GO := $(if $(findstring x86_64,$(shell uname -m)),$(HOME)/.local/bin/powerline-go) # 64bit only
+PIP ?= $(or $(shell command -v pip),$(shell command -v pip3),$(shell command -v pip2),pip)
 
 all: install
 
@@ -50,7 +51,7 @@ vpath %.ttf
 $(INSTALLPYMS): install-pyms
 
 install-pyms: $(TARGETPKGS) $(PIPINSTALL)
-	pip install $(if $(shell pip install --help | fgrep -e '--user'),--user,--prefix ~/.local) $(INSTALLPYMS)
+	$(PIP) install $(if $(shell $(PIP) install --help | fgrep -e '--user'),--user,--prefix ~/.local) $(INSTALLPYMS)
 
 INSTALLPKGS := $(filter-out $(INSTALLPYMS),$(INSTALLTARGETS))
 
@@ -78,7 +79,7 @@ $(SEOUL256): | $(or $(filter %airline-themes,$(PKGPLUGINTARGETS) $(GITTARGETS)),
 	wget -cP $(@D) https://gist.github.com/jbkopecky/a2f66baa8519747b388f2a1617159c07/raw/f73313795a9b3135ea23735b3e6d4a1969da3cfe/seoul256.vim
  
 snippets/powerline.tmux.conf: $(filter powerline-status,$(INSTALLPYMS)) $(HOME)/.tmux/plugins/tpm/
-	echo source \"$$(pip show powerline-status | fgrep Location | cut -d" " -f2)/powerline/bindings/tmux/powerline.conf\" > $@
+	echo source \"$$($(PIP) show powerline-status | fgrep Location | cut -d" " -f2)/powerline/bindings/tmux/powerline.conf\" > $@
 
 $(HOME)/.tmux/plugins/tpm/:
 	git clone https://github.com/tmux-plugins/tpm $@
