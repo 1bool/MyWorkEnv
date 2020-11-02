@@ -5,7 +5,7 @@ SHELL := bash -e
 OSTYPE := $(shell echo $$OSTYPE)
 OSTYPESIMP := $(subst linux-gnu,linux,$(subst msys,windows,$(OSTYPE)))
 MSYS := $(if $(findstring msys,$(OSTYPE)),1)
-WSL := $(if $(findstring Microsoft,$(shell uname -r)),1)
+WSL := $(if $(findstring icrosoft,$(shell uname -r)),1)
 PLATFORM := $(if $(findstring linux-gnu,$(OSTYPE)),$(ID_LIKE),$(or $(findstring darwin,$(OSTYPE)),$(OSTYPE)))
 DOTFILES := vimrc vimrc.local gvimrc gvimrc.local screenrc tmux.conf bashrc profile pylintrc dircolors zprofile zshrc
 DOTFILES += $(if $(MSYS),minttyrc)
@@ -88,7 +88,7 @@ snippets/tpm.tmux.conf:
 	echo "run -b '~/.tmux/plugins/tpm/tpm'" > $@
 
 $(TARGET_POWERLINE_GO): | $(HOME)/.local/bin/
-	curl -LSso $@ https://github.com/justjanne/powerline-go/releases/download/v1.17.0/powerline-go-$(OSTYPESIMP)-amd64 || rm -f $@
+	curl -LSso $@ https://github.com/justjanne/powerline-go/releases/download/v1.18.0/powerline-go-$(OSTYPESIMP)-amd64 || rm -f $@
 	chmod a+x $@
 
 $(HOME)/.local/bin/:
