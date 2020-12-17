@@ -75,9 +75,6 @@ $(SUDOERSFILE):
 update-LS_COLORS:
 	cd $(@:update-%=%) && git pull origin $(BRANCH)
 
-$(SEOUL256): | $(or $(filter %airline-themes,$(PKGPLUGINTARGETS) $(GITTARGETS)),$(PLUGGED))
-	wget -cP $(@D) https://gist.github.com/jbkopecky/a2f66baa8519747b388f2a1617159c07/raw/f73313795a9b3135ea23735b3e6d4a1969da3cfe/seoul256.vim
- 
 snippets/powerline.tmux.conf: $(filter powerline-status,$(INSTALLPYMS)) $(HOME)/.tmux/plugins/tpm/
 	echo source \"$$($(PIP) show powerline-status | fgrep Location | cut -d" " -f2)/powerline/bindings/tmux/powerline.conf\" > $@
 
@@ -148,7 +145,6 @@ include include/$(PLATFORM).mk
 ifneq ($(ID_LIKE),debian)
 PLUGGED := $(VIMDIR)/plugged
 PKGS += ctags ack
-SEOUL256 := $(PLUGGED)/vim-airline-themes/autoload/airline/themes/seoul256.vim
 
 $(AUTOLOADDIR)/plug.vim:
 	curl -fLo $@ --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
@@ -195,7 +191,6 @@ del-bash_profile:
 
 install: $(if $(MSYS),,$(SUDOERSFILE))
 install: $(DESTFILES) $(TARGETPKGS) $(PKGPLUGINTARGETS) $(PLUGINRC) $(PLUGGED) $(INSTALLPYMS) $(FONTS)
-install: $(SEOUL256)
 install: | /tmp/vim/
 install: $(TARGET_POWERLINE_GO)
 
