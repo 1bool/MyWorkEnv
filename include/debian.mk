@@ -51,7 +51,6 @@ GITTARGETS := $(addprefix $(BUNDLE)/,$(filter-out \
 			 $(addsuffix .vim,$(PKGTOGIT)),$(filter-out \
 			 $(addprefix vim-,$(PKGTOGIT)),$(notdir $(GITPLUGINS))))))
 UPDATE-GITTARGETS := $(addprefix update-,$(GITTARGETS))
-SEOUL256 := $(if $(filter airline-themes,$(GITTARGETS)),$(BUNDLE)/vim-airline-themes,$(VIMDIR))/autoload/airline/themes/seoul256.vim
 
 $(VIMDIR)/:
 	mkdir -p $(VIMDIR)
