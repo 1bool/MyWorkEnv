@@ -29,7 +29,9 @@ NERD_FONT_NAMES ?= Agave \
 				   Go-Mono \
 				   Hack \
 				   Hasklig \
+				   Inconsolata \
 				   Iosevka \
+				   Lilex \
 				   Monofur \
 				   Mononoki \
 				   SourceCodePro \
