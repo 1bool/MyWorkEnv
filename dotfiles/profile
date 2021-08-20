@@ -29,7 +29,7 @@ if command -v powerline-daemon &> /dev/null && ! pgrep -f powerline-daemon &> /d
     powerline-daemon -q
 fi
 
-[ $(runlevel 2> /dev/null | cut -d' ' -f2) != 5 ] && auto-ssh-agent.sh
+[ "$(runlevel 2> /dev/null | cut -d' ' -f2)" != 5 ] && auto-ssh-agent.sh
 
 # if running bash
 if [ -n "$BASH_VERSION" ]; then
