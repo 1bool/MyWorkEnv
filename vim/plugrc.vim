@@ -5,6 +5,7 @@ Plug 'scrooloose/syntastic'
 Plug 'vim-scripts/a.vim', { 'for': ['c', 'h', 'cpp', 'hpp'] }
 Plug 'jlanzarotta/bufexplorer'
 Plug 'vim-airline/vim-airline'
+Plug 'vim-airline/vim-airline-themes'
 Plug 'tpope/vim-fugitive'
 Plug 'tpope/vim-surround'
 Plug 'mhinz/vim-grepper'
