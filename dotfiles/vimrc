@@ -42,7 +42,7 @@ set wildmenu
 set autoindent
 set smartindent
 set smarttab
-set expandtab
+" set expandtab
 
 " termguicolors not working
 " if (has("termguicolors"))
@@ -122,9 +122,11 @@ nnoremap <X2Mouse> <C-I>
 
 if has("autocmd")
 	autocmd BufEnter,BufWrite,FileType c,cpp,python,sh,java,javascript,perl,ruby,php,make,vim,go
-				\ setlocal number | setlocal cursorline
+				\ setlocal number | setlocal cursorline expandtab shiftwidth=4 softtabstop=4
+	autocmd FileType c,cpp,python,sh,java,javascript,perl,ruby,php,vim,go
+				\ setlocal expandtab shiftwidth=4 softtabstop=4
 	autocmd VimEnter,FileType * call PluginSetup()
-	" autocmd BufEnter,FileType c,cpp,python,sh,java,javascript,perl,ruby,php,vim nested TagbarOpen
+	" autocmd BufEnter,FileType c,cpp,python,sh,java,javascript,perl,ruby,php,vim,go nested TagbarOpen
 	" autocmd FilterWritePre * nested if &diff | TagbarClose
 	autocmd BufReadPost * DetectIndent 
 endif
@@ -190,9 +192,11 @@ function! PluginSetup()
 		" nmap <silent> <Leader>i <Plug>IndentGuidesToggle
 	" endif
 	if exists(":IndentLinesToggle")
+		" let g:indentLine_defaultGroup = 'SpecialKey'
+		" let g:indentLine_setColors = 0
 		let g:indentLine_fileType = [ 'c', 'cpp', 'python', 'go', 'sh', 'make', 'spec', 'vim', 'yaml', 'json',
 					\ 'perl', 'java', 'javascript', 'lua', 'php', 'tcl', 'ruby' ]
-		let g:indentLine_char = '┊'
+		let g:indentLine_char_list = ['|', '¦', '┆', '┊']
 		let g:indentLine_bufTypeExclude = ['help', 'terminal', 'quickfix']
 		let g:indentLine_bufNameExclude = ['_.*', 'NERD_tree.*']
 		nmap <silent> <Leader>i :IndentLinesToggle<CR>
