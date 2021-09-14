@@ -1,5 +1,5 @@
 DESTFILES += $(HOME)/.minttyrc /usr/bin/vi
-PKGS += man-pages-posix unzip diffutils gcc python2
+PKGS += man-pages-posix unzip diffutils gcc python2 clang
 INSTALLTARGETS := $(subst ack,perl-ack,\
 	      $(subst python-setuptools,python3-setuptools,\
 		  $(subst clang,clang-svn,$(PKGS))))

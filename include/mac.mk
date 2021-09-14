@@ -1,8 +1,8 @@
 FONTDIR := $(HOME)/Library/Fonts
 BREW := $(shell which brew &> /dev/null || echo brew)
-PKGS += macvim the_silver_searcher thefuck
+PKGS += macvim the_silver_searcher thefuck lua llvm
 INSTALLTARGETS := $(filter-out python-setuptools,$(PKGS))
-TARGETPKGS := $(filter-out $(shell brew cask list),$(filter-out $(shell brew list),$(INSTALLPKGS)))
+TARGETPKGS = $(filter-out $(shell brew cask list),$(filter-out $(shell brew list),$(INSTALLPKGS)))
 PKGUPDATE := brew-update
 
 $(EZINSTALL):
@@ -20,8 +20,7 @@ $(filter-out macvim,$(INSTALLPKGS)): $(BREW)
 macvim: $(BREW)
 	brew cask install $@
 
-install-pkgs:
-	brew cask install $@
+install-pkgs: $(filter macvim,$(TARGETPKGS))
 	brew install $(filter-out macvim,$(TARGETPKGS))
 
 brew-update:

@@ -9,7 +9,8 @@ PKGS += git \
 	python-psutil \
 	python-argparse \
 	pylint \
-	wqy-zenhei-fonts
+	wqy-zenhei-fonts \
+	clang
 PKGS += $(if $(shell fgrep ' 6.' /etc/redhat-release),\
 	python34-devel,\
 	python3-devel \
