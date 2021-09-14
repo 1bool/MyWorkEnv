@@ -9,3 +9,4 @@
 	" set shell=/D/msys64/msys2_shell.cmd\ -defterm\ -here\ -no-start\ -msys\ -shell\ zsh
 " endif
 set encoding=utf-8
+map te :ter ++close ++rows=12 D:\msys64\msys2_shell.cmd -defterm -here -no-start -mingw32<CR>
