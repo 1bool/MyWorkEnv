@@ -1,6 +1,6 @@
 set guioptions-=T  "remove toolbar
 set guioptions-=m  "remove menu bar
-" set guioptions-=r  "remove right-hand scroll bar
+set guioptions-=r  "remove right-hand scroll bar
 set guioptions-=L  "remove left-hand scroll bar
 nnoremap <C-F1> :if &go=~#'m'<Bar>set go-=m<Bar>else<Bar>set go+=m<Bar>endif<CR>
 nnoremap <C-F2> :if &go=~#'T'<Bar>set go-=T<Bar>else<Bar>set go+=T<Bar>endif<CR>
@@ -37,9 +37,9 @@ let g:airline_right_alt_sep = ''
 let g:airline_symbols.branch = ''
 let g:airline_symbols.readonly = ''
 let g:airline_symbols.linenr = ''
-" powerline theme
-let g:airline_theme = 'one'
+let g:airline_theme = 'papercolor'
 
-colorscheme one
+colorscheme PaperColor
+set guifont=FiraCode\ Nerd\ Font\ Mono\ 12
 
 source $HOME/.gvimrc.local
