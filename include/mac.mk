@@ -5,6 +5,7 @@ INSTALLTARGETS := $(filter-out python-setuptools,$(PKGS))
 TARGETPKGS = $(filter-out $(shell brew cask list),$(filter-out $(shell brew list),$(INSTALLPKGS)))
 PKGUPDATE := brew-update
 MACVIM_APP := /Applications/MacVim.app
+SUDOERSDIR := /private/etc/sudoers.d/
 
 $(EZINSTALL):
 	xcode-select --install
@@ -24,8 +25,8 @@ install-pkgs:
 install: $(MACVIM_APP)/Contents/
 
 $(MACVIM_APP)/Contents/: $(MACVIM_APP)/ $(filter macvim,$(TARGETPKGS))
-	ln -Fs $$(find /usr/local -name "MacVim.app")/Contents /Applications/MacVim.app/
-	touch $@
+	sudo ln -Fs $$(find /usr/local -name "MacVim.app")/Contents /Applications/MacVim.app/
+	sudo touch $@
 
 $(MACVIM_APP)/:
 	mkdir $@
@@ -33,7 +34,7 @@ $(MACVIM_APP)/:
 brew-update:
 	brew update
 	-brew upgrade
-	ln -Fs $(find /usr/local -name "MacVim.app")/Contents /Applications/MacVim.app/
+	sudo ln -Fs $(find /usr/local -name "MacVim.app")/Contents /Applications/MacVim.app/
 
 update: brew-update
 
