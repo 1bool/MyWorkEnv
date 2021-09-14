@@ -61,9 +61,6 @@ $(PIPINSTALL):
 	curl 'https://bootstrap.pypa.io/get-pip.py' -o /tmp/get-pip.py
 	python /tmp/get-pip.py --user
 
-$(HOME)/.%rc.local: dotfiles/%rc.local
-	cat $^ > $@
-
 dotfiles/dircolors: | LS_COLORS/LS_COLORS
 	ln -f $| $@
 
