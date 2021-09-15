@@ -152,8 +152,6 @@ function! PluginSetup()
 		let g:NERDTreeAutoCenterThreshold = 8
 		let g:NERDTreeNaturalSort = 1
 		let g:NERDTreeChDirMode = 3
-		" let g:NERDTreeMouseMode = 2
-		let g:NERDTreeShowIgnoredStatus = 0 " for nerdtree git plugin
 		if exists(":NERDTreeToggleVCS")
 			nnoremap <silent> <F6> :NERDTreeToggleVCS<CR>
 			nnoremap tf :NERDTreeToggleVCS<CR>
