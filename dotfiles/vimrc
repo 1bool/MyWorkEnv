@@ -174,7 +174,7 @@ function! PluginSetup()
 		let g:ycm_autoclose_preview_window_after_insertion = 1
 		" let g:ycm_key_invoke_completion = '<C-Tab>'
 		nnoremap <C-I> :YcmCompleter GoTo<CR>
-		nnoremap <Leader>g :YcmCompleter GoToDefinition<CR>
+		nnoremap <Leader>] :YcmCompleter GoToDefinition<CR>
 		nnoremap <Leader>r :YcmCompleter GoToReferences<CR>
 		nnoremap <Leader>h :YcmCompleter GoToInclude<CR>
 		nnoremap <Leader>t :YcmCompleter GetType<CR>
@@ -200,6 +200,10 @@ function! PluginSetup()
 		nmap <silent> <Leader>i :IndentLinesToggle<CR>
 		nmap <silent> <Leader>l :LeadingSpaceToggle<CR>
 	endif
+	if exists(":Git")
+		nmap <silent> <Leader>g :Git<CR>
+		nmap <silent> <Leader>d :Gdiffsplit<CR>
+	endif
 endfunction
 
 
@@ -207,9 +211,6 @@ endfunction
 let g:airline_powerline_fonts = 1
 "let g:Powerline_symbols = 'fancy'
 let g:airline#extensions#tabline#enabled = 1
-
-"set statusline=%{fugitive#statusline()} " fugitive status
-command! Gtdiff tabedit %|Gvdiff " git diff in tab
 
 " syntastic
 set statusline+=%#warningmsg#

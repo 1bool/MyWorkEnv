@@ -4,8 +4,7 @@
 " endif
 " Use msys for terminal in win32
 " if has("win32")
-"     map te :ter ++close ++rows=24 D:\msys64\msys2_shell.cmd -defterm -here -no-start -msys<CR>
+"     map te :ter ++close ++rows=12 D:\msys64\msys2_shell.cmd -defterm -here -no-start -msys<CR>
 " elseif has("win32unix")
 	" set shell=/D/msys64/msys2_shell.cmd\ -defterm\ -here\ -no-start\ -msys\ -shell\ zsh
 " endif
-set encoding=utf-8
