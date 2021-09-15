@@ -7,7 +7,7 @@ if has("gui_win32")
 	set guifont=NovaMono_for_Powerline:h11:cANSI
 endif
 
-" let g:airline_theme = 'papercolor'
-" colorscheme PaperColor
-" set guifont=FiraCode\ Nerd\ Font\ Mono\ 12
-" set background=light
+let g:airline_theme = 'solarized'
+colorscheme solarized8
+set guifont=FiraCode_NF:h12:cANSI:qDRAFT
+set background=light
