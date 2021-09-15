@@ -84,7 +84,7 @@ snippets/tpm.tmux.conf:
 	echo "run -b '~/.tmux/plugins/tpm/tpm'" > $@
 
 $(TARGET_POWERLINE_GO): | $(HOME)/.local/bin/
-	curl -LSso $@ https://github.com/justjanne/powerline-go/releases/download/v1.18.0/powerline-go-$(OSTYPESIMP)-amd64 || rm -f $@
+	curl -LSso $@ https://github.com/justjanne/powerline-go/releases/latest/download/powerline-go-$(OSTYPESIMP)-amd64 || rm -f $@
 	chmod a+x $@
 
 $(HOME)/.local/bin/:

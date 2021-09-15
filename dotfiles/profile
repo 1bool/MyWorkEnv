@@ -24,8 +24,12 @@ if [ -f "$HOME/.profile.local" ]; then
     . "$HOME/.profile.local"
 fi
 
-# Powerline
-if command -v powerline-daemon &> /dev/null && ! pgrep -f powerline-daemon &> /dev/null; then
+# Powerline go first, python second
+if [ -x ~/.local/bin/powerline-go ]; then
+    export GOPATH=~/.local
+elif [ -x /usr/local/bin/powerline-go ]; then
+    export GOPATH=/usr/local
+elif command powerline-daemon && ! pgrep -f powerline-daemon 2> /dev/null; then
     powerline-daemon -q
 fi
 

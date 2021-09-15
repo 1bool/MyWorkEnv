@@ -47,36 +47,43 @@ else export CLICOLOR=1
 fi
 
 if [ -f ~/.zshrc.local ]; then
-	. ~/.zshrc.local
+  . ~/.zshrc.local
 fi
 
 # powerline-go
 function powerline_precmd() {
-	PS1="$($GOPATH/bin/powerline-go -east-asian-width -hostname-only-if-ssh -error $? -shell zsh)"
+  PS1="$($GOPATH/bin/powerline-go -east-asian-width -hostname-only-if-ssh -error $? -jobs ${${(%):%j}:-0})"
+
+  # Uncomment the following line to automatically clear errors after showing
+  # them once. This not only clears the error for powerline-go, but also for
+  # everything else you run in that shell. Don't enable this if you're not
+  # sure this is what you want.
+
+  #set "?"
 }
 
 function install_powerline_precmd() {
-	for s in "${precmd_functions[@]}"; do
-		if [ "$s" = "powerline_precmd" ]; then
-			return
-		fi
-	done
-	precmd_functions+=(powerline_precmd)
+  for s in "${precmd_functions[@]}"; do
+    if [ "$s" = "powerline_precmd" ]; then
+      return
+    fi
+  done
+  precmd_functions+=(powerline_precmd)
 }
 
 if [ -x $GOPATH/bin/powerline-go ] && [ "$TERM" != "linux" ]; then
-	install_powerline_precmd
+  install_powerline_precmd
 else
-	# powerline python
-	POWERLINE_DIR="$(pip show powerline-status 2> /dev/null | fgrep Location | cut -d" " -f2)"
-	[ -z "$POWERLINE_DIR" ] && POWERLINE_DIR='.local/lib/python2.6/site-packages'
-	if [ -r $POWERLINE_DIR/powerline/bindings/zsh/powerline.zsh ]; then
-		if [ -x $POWERLINE_DIR/bin/powerline ]; then
-			POWERLINE_COMMAND=$POWERLINE_DIR/bin/powerline
-		fi
-		if [ -x $POWERLINE_DIR/EGG-INFO/scripts/powerline-config ]; then
-			POWERLINE_CONFIG_COMMAND=$POWERLINE_DIR/EGG-INFO/scripts/powerline-config
-		fi
-		. $POWERLINE_DIR/powerline/bindings/zsh/powerline.zsh
-	fi
+  # powerline python
+  POWERLINE_DIR="$(pip show powerline-status 2> /dev/null | fgrep Location | cut -d" " -f2)"
+  [ -z "$POWERLINE_DIR" ] && POWERLINE_DIR='.local/lib/python2.6/site-packages'
+  if [ -r $POWERLINE_DIR/powerline/bindings/zsh/powerline.zsh ]; then
+    if [ -x $POWERLINE_DIR/bin/powerline ]; then
+      POWERLINE_COMMAND=$POWERLINE_DIR/bin/powerline
+    fi
+    if [ -x $POWERLINE_DIR/EGG-INFO/scripts/powerline-config ]; then
+      POWERLINE_CONFIG_COMMAND=$POWERLINE_DIR/EGG-INFO/scripts/powerline-config
+    fi
+    . $POWERLINE_DIR/powerline/bindings/zsh/powerline.zsh
+  fi
 fi
