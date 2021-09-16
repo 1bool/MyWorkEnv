@@ -164,14 +164,20 @@ $(PLUGINRC): vim/plugrc.vim $$(wildcard snippets/$$(OSTYPE).$$(@F))
 	@echo 'call plug#end()' >> $@
 endif
 
-$(HOME)/.vimrc: $(if $(MSYS),,set-tmpfiles.vimrc)
+$(HOME)/.vimrc: $(if $(MSYS),,set-tmpfiles.vimrc) local.vimrc
+$(HOME)/.gvimrc: local.gvimrc
+$(HOME)/.bashrc: local.bashrc
+$(HOME)/.zshrc: local.zshrc
+$(HOME)/.profile: local.profile
+$(HOME)/.zprofile: local.zprofile
 $(HOME)/.tmux.conf: \
 	$(if $(filter $(UBUNTU_VER),16.04),vi-style-2.1.tmux.conf,vi-style.tmux.conf) \
 	$(if $(filter powerline,$(PYMS)),powerline.tmux.conf) \
 	tpm.tmux.conf
 
 .SECONDEXPANSION:
-$(HOME)/.%: % $$(wildcard snippets/$$(OSTYPE)$$(@F)) $$(wildcard snippets/$$(ID_LIKE)$$(@F)) $$(if $$(WSL),$$(wildcard snippets/WSL$$(@F))) $$(wildcard snippets/local$(@F))
+$(HOME)/.%: % $$(wildcard snippets/$$(OSTYPE)$$(@F)) $$(wildcard snippets/$$(ID_LIKE)$$(@F)) $$(if $$(WSL),$$(wildcard snippets/WSL$$(@F)))
+>>>>>>> 3a7210c9fc35e39e7e1c06a01400d8665f3a5a31
 	@if [ -h $@ ] || [[ -f $@ && "$$(stat -c %h -- $@ 2> /dev/null)" -gt 1 ]]; then rm -f $@; fi
 	@if [ "$(@F)" = ".$(notdir $^)" ]; then \
 		echo "ln -f $< $@"; \

@@ -45,6 +45,10 @@ if [ -x /usr/bin/dircolors ]; then
 else export CLICOLOR=1
 fi
 
+if [ -r /usr/share/powerlevel9k/powerlevel9k.zsh-theme ]; then
+  source /usr/share/powerlevel9k/powerlevel9k.zsh-theme
+fi
+
 # powerline-go
 function powerline_precmd() {
   PS1="$($GOPATH/bin/powerline-go -east-asian-width -hostname-only-if-ssh -error $? -jobs ${${(%):%j}:-0})"
