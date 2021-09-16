@@ -7,7 +7,7 @@ OSTYPESIMP := $(subst linux-gnu,linux,$(subst msys,windows,$(OSTYPE)))
 MSYS := $(if $(findstring msys,$(OSTYPE)),1)
 WSL := $(if $(findstring icrosoft,$(shell uname -r)),1)
 PLATFORM := $(if $(findstring linux-gnu,$(OSTYPE)),$(ID_LIKE),$(or $(findstring darwin,$(OSTYPE)),$(OSTYPE)))
-DOTFILES := vimrc vimrc.local gvimrc screenrc tmux.conf bashrc profile pylintrc dircolors zprofile zshrc quiltrc
+DOTFILES := vimrc vimrc.local gvimrc gvimrc.local screenrc tmux.conf bashrc profile pylintrc dircolors zprofile zshrc quiltrc
 DOTFILES += $(if $(MSYS),minttyrc)
 DESTFILES := $(addprefix $(HOME)/.,$(DOTFILES)) $(addprefix $(HOME)/.local/,$(wildcard bin/*))
 VIMDIR := $(HOME)/.vim
@@ -178,6 +178,9 @@ $(HOME)/.%: $$(wildcard snippets/$$(OSTYPE)$$(@F)) $$(wildcard snippets/$$(ID_LI
 		ln -f $< $@; else \
 		echo "cat $^ > $@"; \
 		cat $^ > $@; fi
+
+$(HOME)/%.local:
+	touch $@
 
 $(TARGETPKGS): install-pkgs
 

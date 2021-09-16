@@ -109,17 +109,6 @@ if [ -f ~/.bash_aliases ]; then
   . ~/.bash_aliases
 fi
 
-# enable programmable completion features (you don't need to enable
-# this, if it's already enabled in /etc/bash.bashrc and /etc/profile
-# sources /etc/bash.bashrc).
-if ! shopt -oq posix; then
-  if [ -f /usr/share/bash-completion/bash_completion ]; then
-    . /usr/share/bash-completion/bash_completion
-  elif [ -f /etc/bash_completion ]; then
-    . /etc/bash_completion
-  fi
-fi
-
 function _update_ps1() {
     PS1="$($GOPATH/bin/powerline-go -east-asian-width -hostname-only-if-ssh -error $? -jobs $(jobs -p | wc -l) -shell bash)"
 
@@ -153,4 +142,8 @@ else
       . $POWERLINE_DIR/powerline/bindings/bash/powerline.sh
     fi
   fi
+fi
+
+if [ -f ~/.bashrc.local ]; then
+  . ~/.bashrc.local
 fi
