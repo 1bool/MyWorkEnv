@@ -45,8 +45,8 @@ if [ -x /usr/bin/dircolors ]; then
 else export CLICOLOR=1
 fi
 
-if [ -f ~/.zshrc.local ]; then
-  . ~/.zshrc.local
+if [ -r /usr/share/powerlevel9k/powerlevel9k.zsh-theme ]; then
+  source /usr/share/powerlevel9k/powerlevel9k.zsh-theme
 fi
 
 # powerline-go

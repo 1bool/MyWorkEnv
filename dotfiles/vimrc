@@ -1,3 +1,13 @@
+if has("win32")
+	" Make windows use ~/.vim too, I don't want to use _vimfiles
+	set runtimepath^=~/.vim,$VIMRUNTIME
+	" Use msys for terminal in win32
+	map te :ter ++close ++rows=12 D:\msys64\msys2_shell.cmd -defterm -here -no-start -msys<CR>
+" elseif has("win32unix")
+	" set shell=/D/msys64/msys2_shell.cmd\ -defterm\ -here\ -no-start\ -msys\ -shell\ zsh
+else
+	map te :ter ++close ++rows=12<CR>
+endif
 runtime! pluginrc.vim
 
 syntax on
@@ -277,5 +287,3 @@ if !has("gui_running")
 		colorscheme desert
 	endtry
 endif
-
-source $HOME/.vimrc.local
