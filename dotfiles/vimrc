@@ -60,7 +60,7 @@ if !&sidescrolloff
 endif
 set display+=lastline
 
-set fencs=ucs-bom,utf-8,default,latin1,gb18030,cp936,big5
+set fencs=utf-8,default,ucs-bom,latin1,gb18030,cp936,big5
 
 " Use system clipboard
 vnoremap <S-Del> "+x
