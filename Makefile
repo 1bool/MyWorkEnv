@@ -177,7 +177,6 @@ $(HOME)/.tmux.conf: \
 
 .SECONDEXPANSION:
 $(HOME)/.%: % $$(wildcard snippets/$$(OSTYPE)$$(@F)) $$(wildcard snippets/$$(ID_LIKE)$$(@F)) $$(if $$(WSL),$$(wildcard snippets/WSL$$(@F)))
->>>>>>> 3a7210c9fc35e39e7e1c06a01400d8665f3a5a31
 	@if [ -h $@ ] || [[ -f $@ && "$$(stat -c %h -- $@ 2> /dev/null)" -gt 1 ]]; then rm -f $@; fi
 	@if [ "$(@F)" = ".$(notdir $^)" ]; then \
 		echo "ln -f $< $@"; \
