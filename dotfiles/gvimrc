@@ -40,7 +40,14 @@ let g:airline_symbols.linenr = ''
 let g:airline_theme = 'solarized'
 
 colorscheme solarized8
-set guifont=FiraCode\ Nerd\ Font\ Mono\ 12
 set background=light
-
-source $HOME/.gvimrc.local
+if has("gui_win32")
+	set formatoptions+=mM
+	language messages zh_CN.utf-8
+	set langmenu=zh_CN.utf-8
+	runtime! delmenu.vim
+	runtime! menu.vim
+	set guifont=FiraCode_NF:h12:cANSI:qDRAFT
+else
+	set guifont=FiraCode\ Nerd\ Font\ Mono\ 12
+endif

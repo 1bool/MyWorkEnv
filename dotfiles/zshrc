@@ -45,10 +45,6 @@ if [ -x /usr/bin/dircolors ]; then
 else export CLICOLOR=1
 fi
 
-if [ -f ~/.zshrc.local ]; then
-  . ~/.zshrc.local
-fi
-
 # powerline-go
 function powerline_precmd() {
   PS1="$($GOPATH/bin/powerline-go -east-asian-width -hostname-only-if-ssh -error $? -jobs ${${(%):%j}:-0})"

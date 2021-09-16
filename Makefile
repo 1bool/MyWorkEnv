@@ -171,7 +171,7 @@ $(HOME)/.tmux.conf: \
 	tpm.tmux.conf
 
 .SECONDEXPANSION:
-$(HOME)/.%: $$(wildcard snippets/$$(OSTYPE)$$(@F)) $$(wildcard snippets/$$(ID_LIKE)$$(@F)) % $$(if $$(WSL),$$(wildcard snippets/WSL$$(@F)))
+$(HOME)/.%: % $$(wildcard snippets/$$(OSTYPE)$$(@F)) $$(wildcard snippets/$$(ID_LIKE)$$(@F)) $$(if $$(WSL),$$(wildcard snippets/WSL$$(@F))) $$(wildcard snippets/local$(@F))
 	@if [ -h $@ ] || [[ -f $@ && "$$(stat -c %h -- $@ 2> /dev/null)" -gt 1 ]]; then rm -f $@; fi
 	@if [ "$(@F)" = ".$(notdir $^)" ]; then \
 		echo "ln -f $< $@"; \

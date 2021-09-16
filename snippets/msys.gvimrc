@@ -1,10 +1,6 @@
+" ycm for win
+" if !has("gui_running")
+	" let g:ycm_server_python_interpreter = '/c/Program Files/Python37/python.exe'
+" endif
 set encoding=utf-8
 set guioptions-=r  "remove right-hand scroll bar
-if has("gui_win32")
-	set formatoptions+=mM
-	language messages zh_CN.utf-8
-	set langmenu=zh_CN.utf-8
-	runtime! delmenu.vim
-	runtime! menu.vim
-	set guifont=FiraCode_NF:h12:cANSI:qDRAFT
-endif
