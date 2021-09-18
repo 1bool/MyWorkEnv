@@ -39,7 +39,7 @@ let g:airline_symbols.readonly = ''
 let g:airline_symbols.linenr = ''
 let g:airline_theme = 'solarized'
 
-colorscheme solarized8
+colorscheme solarized
 set background=light
 if has("gui_win32")
 	set formatoptions+=mM
