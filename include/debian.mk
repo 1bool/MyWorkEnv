@@ -118,7 +118,7 @@ apt-update:
 
 $(UPDATE-GITTARGETS):
 	@echo Updating $(@:update-%=%)
-	@if ! LANGUAGE=en.US_UTF-8 git -C $(@:update-%=%) pull origin $(BRANCH) | tail -1 | fgrep 'Already up' \
+	@if ! LANGUAGE=en.US_UTF-8 git -C $(@:update-%=%) pull --depth 1 origin $(BRANCH) | tail -1 | fgrep 'Already up' \
 		&& [ -d $(@:update-%=%)/doc ]; then \
 		vim +Helptags $(@:update-%=%)/doc/*.txt +qall; fi
 

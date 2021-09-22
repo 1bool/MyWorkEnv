@@ -1,5 +1,3 @@
-TARGETS := $(TARGET_POWERLINE_GO) zsh
-
 -include /etc/os-release
 SHELL := bash -e
 OSTYPE := $(shell echo $$OSTYPE)
@@ -65,20 +63,20 @@ dotfiles/dircolors: | LS_COLORS/LS_COLORS
 	ln -f $| $@
 
 LS_COLORS/LS_COLORS:
-	git clone -b $(BRANCH) https://github.com/trapd00r/LS_COLORS.git $(dir $@)
+	git clone --depth 1 -b $(BRANCH) https://github.com/trapd00r/LS_COLORS.git $(dir $@)
 
 $(SUDOERSFILE):
 	sudo sh -c 'echo "$(LOGNAME) ALL=(ALL) NOPASSWD: ALL" > $@'
 	sudo chmod 0440 $@
 
 update-LS_COLORS:
-	cd $(@:update-%=%) && git pull origin $(BRANCH)
+	cd $(@:update-%=%) && git pull --depth 1 origin $(BRANCH)
 
 snippets/powerline.tmux.conf: $(filter powerline-status,$(INSTALLPYMS)) $(HOME)/.tmux/plugins/tpm/
 	echo source \"$$($(PIP) show powerline-status | fgrep Location | cut -d" " -f2)/powerline/bindings/tmux/powerline.conf\" > $@
 
 $(HOME)/.tmux/plugins/tpm/:
-	git clone https://github.com/tmux-plugins/tpm $@
+	git clone --depth 1 https://github.com/tmux-plugins/tpm $@
 
 snippets/tpm.tmux.conf:
 	echo "run -b '~/.tmux/plugins/tpm/tpm'" > $@
@@ -110,7 +108,7 @@ $(POWERLINE_FONT_DIR): fonts/powerline-fonts/
 
 powerline-update: fonts/powerline-fonts/
 	@echo "Checking if $< is up to date..."
-	@if ! LANGUAGE=en.US_UTF-8 git -C $< pull origin master | tail -1 | fgrep 'Already up'; then \
+	@if ! LANGUAGE=en.US_UTF-8 git -C $< pull --depth 1 origin master | tail -1 | fgrep 'Already up'; then \
 		for DIR in $(POWERLINE_FONT_NAMES); do \
 		cp -v fonts/powerline-fonts/"$$DIR"/*.?tf $@; \
 		done; touch $(POWERLINE_FONT_DIR) .fonts_updated; fi
@@ -124,7 +122,7 @@ $(NERD_FONT_DIR): fonts/nerd-fonts/
 
 nerd-update: fonts/nerd-fonts/
 	@echo "Checking if $< is up to date..."
-	@if ! LANGUAGE=en.US_UTF-8 git -C $< pull origin master | fgrep 'Already up'; then \
+	@if ! LANGUAGE=en.US_UTF-8 git -C $< pull --depth 1 origin master | fgrep 'Already up'; then \
 		for NERD_FONT_NAME in $(NERD_FONT_NAMES); do \
 		fonts/nerd-fonts/install.sh -sL "$$NERD_FONT_NAME" | sort | uniq | while read -r NERD_FONT_FILE; \
 		do find fonts/nerd-fonts/ -name "$$(basename "$$NERD_FONT_FILE")" -type f -print0 | xargs -0 -n1 -I % cp -v "%" "$(NERD_FONT_DIR)/"; done; done; touch $(NERD_FONT_DIR) .fonts_updated; fi
