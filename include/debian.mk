@@ -114,7 +114,7 @@ update: apt-update
 
 apt-update:
 	sudo apt-get -y update
-	sudo apt-get -y install $(INSTALLPKGS)
+	sudo apt-get -y install $(INSTALLTARGETS)
 
 $(UPDATE-GITTARGETS):
 	@echo Updating $(@:update-%=%)
