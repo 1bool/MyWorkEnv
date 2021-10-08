@@ -48,8 +48,6 @@ all: install
 
 vpath %.ttf
 
-$(INSTALLPYMS): install-pyms
-
 install-pyms: $(TARGETPKGS) $(PIPINSTALL)
 	$(PIP) install $(if $(shell $(PIP) install --help | fgrep -e '--user'),--user,--prefix ~/.local) $(INSTALLPYMS)
 
@@ -193,6 +191,8 @@ endif
 
 del-bash_profile:
 	mv -iv $(HOME)/.bash_profile $(HOME)/.bash_profile.old
+
+$(INSTALLPYMS): install-pyms
 
 install: $(if $(MSYS),,$(SUDOERSFILE))
 install: $(DESTFILES) $(TARGETPKGS) $(PKGPLUGINTARGETS) $(PLUGINRC) $(PLUGGED) $(INSTALLPYMS) $(FONTS)
