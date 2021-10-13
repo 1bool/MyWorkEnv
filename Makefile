@@ -51,7 +51,7 @@ vpath %.ttf
 install-pyms: $(TARGETPKGS) $(PIPINSTALL)
 	$(PIP) install $(if $(shell $(PIP) install --help | fgrep -e '--user'),--user,--prefix ~/.local) $(INSTALLPYMS)
 
-INSTALLPKGS := $(filter-out $(INSTALLPYMS),$(INSTALLTARGETS))
+INSTALLPKGS = $(filter-out $(INSTALLPYMS),$(INSTALLTARGETS))
 
 $(PIPINSTALL):
 	curl 'https://bootstrap.pypa.io/get-pip.py' -o /tmp/get-pip.py
