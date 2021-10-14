@@ -1,5 +1,5 @@
 DESTFILES += /usr/bin/vi
-PKGS += mintty man-pages-posix unzip diffutils python2 python-pip
+PKGS += mintty man-pages-posix unzip diffutils python-pip
 PYMS += mintty-colors
 INSTALLTARGETS := $(subst ack,perl-ack,\
 		  $(filter-out clang ssh-askpass,$(PKGS)))
