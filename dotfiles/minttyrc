@@ -1,5 +1,5 @@
 BoldAsFont=yes
-Font=agave NF
+Font=CaskaydiaCove NF
 FontHeight=12
 FontIsBold=no
 Term=xterm-256color
