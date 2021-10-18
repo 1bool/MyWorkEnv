@@ -16,7 +16,6 @@ PKGS += git \
 	thefuck \
 	tmux-plugin-manager
 # PKGS += dconf-cli # for Gogh
-PKGS += cmake clang # for ycm
 INSTALLTARGETS := $(filter $(shell apt-cache search --names-only '.*' | cut -d' ' -f1),$(PKGS))
 GITPLUGINS := $(shell grep -E '^[[:blank:]]*Plug[[:blank:]]+' vim/plugrc.vim $(wildcard snippets/$(OSTYPE).pluginrc.vim) | cut -d\' -f2) pathogen
 GITTOPKG := $(shell echo $(subst nerdcommenter,nerd-commenter,\
@@ -25,7 +24,7 @@ GITTOPKG := $(shell echo $(subst nerdcommenter,nerd-commenter,\
 # vim-youcompleteme fail to work in 16.04
 VIMPKGS := $(if $(findstring 16.04,$(VERSION_ID)),$(filter-out vim-youcompleteme,$(shell apt-cache search --names-only '^vim-' | cut -d' ' -f1)),$(shell apt-cache search --names-only '^vim-' | cut -d' ' -f1))
 # vim-youcompleteme compilation dependencies
-INSTALLTARGETS += $(if $(findstring 16.04,$(VERSION_ID)),python-dev python3-dev g++ gcc)
+INSTALLTARGETS += $(if $(findstring 16.04,$(VERSION_ID)),python-dev python3-dev g++ gcc clang cmake)
 INSTALLTARGETS += $(if $(findstring 20.04,$(VERSION_ID)),python-is-python3)
 PLUGINPKGS := $(filter $(addprefix %,$(GITTOPKG)),$(VIMPKGS))
 VAMLIST := $(if $(and $(shell dpkg --get-selections | fgrep vim-scripts),\

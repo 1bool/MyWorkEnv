@@ -1,7 +1,7 @@
 DESTFILES += /usr/bin/vi
 PKGS += mintty man-pages-posix unzip diffutils python-pip
+PKGS += gcc cmake libcrypt-devel # for ycm compiling
 PYMS += mintty-colors
-PYMS += gcc libcrypt-devel # for ycm compiling
 INSTALLTARGETS := $(subst ack,perl-ack,\
 		  $(filter-out clang ssh-askpass,$(PKGS)))
 TARGETPKGS = $(filter-out $(shell pacman -Qsq),$(INSTALLPKGS))
