@@ -48,6 +48,10 @@ if has("gui_win32")
 	runtime! delmenu.vim
 	runtime! menu.vim
 	set guifont=FiraCode_NF:h12:cANSI:qDRAFT
+	" 按 F11 切换全屏 gvim_fullscreen.dll
+	noremap <f11> <esc>:call libcallnr('gvim_fullscreen.dll', 'ToggleFullscreen', 0)<cr>
+	" 按 F12 切换窗口透明度
+	noremap <f12> <esc>:call libcallnr('gvim_fullscreen.dll', 'ToggleTransparency', "247,180")<cr>
 else
 	set guifont=FiraCode\ Nerd\ Font\ Mono\ 12
 endif
