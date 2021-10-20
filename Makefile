@@ -11,7 +11,7 @@ DESTFILES := $(addprefix $(HOME)/.,$(DOTFILES)) $(addprefix $(HOME)/.local/,$(wi
 VIMDIR := $(HOME)/.vim
 AUTOLOADDIR := $(VIMDIR)/autoload
 PLUGINRC := $(VIMDIR)/pluginrc.vim
-PKGS := coreutils tmux curl wget vim ssh-askpass zsh
+PKGS := coreutils tmux curl wget vim ssh-askpass zsh ctags
 LOCALDIR := $(HOME)/.local/share
 FONTDIR ?= $(HOME)/.local/share/fonts
 FONTS := $(if $(MSYS),,.fonts_installed)
@@ -66,8 +66,8 @@ $(SUDOERSFILE):
 	sudo chmod 0440 $@
 
 update-LS_COLORS:
-	@echo "Checking if $(@:update-%=%) needs update"
-	cd $(@:update-%=%) && git fetch --depth 1 && \
+	@echo "Checking if $(@:update-%=%) needs update..."
+	@cd $(@:update-%=%) && git fetch --depth 1 && \
 		if [ $$(git rev-list HEAD...origin/$(BRANCH) --count) -gt 0 ]; then \
 		git reset --hard origin/$(BRANCH); fi
 
@@ -127,7 +127,7 @@ include include/$(PLATFORM).mk
 
 ifneq ($(ID_LIKE),debian)
 PLUGGED := $(VIMDIR)/plugged
-PKGS += ctags ack
+PKGS += ack
 
 $(AUTOLOADDIR)/plug.vim:
 	curl -fLo $@ --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
