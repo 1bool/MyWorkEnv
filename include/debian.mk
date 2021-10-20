@@ -117,9 +117,11 @@ apt-update:
 
 $(UPDATE-GITTARGETS):
 	@echo Updating $(@:update-%=%)
-	@if ! LANGUAGE=en.US_UTF-8 git -C $(@:update-%=%) pull --depth 1 origin $(BRANCH) | tail -1 | fgrep 'Already up' \
-		&& [ -d $(@:update-%=%)/doc ]; then \
-		vim +Helptags $(@:update-%=%)/doc/*.txt +qall; fi
+	@cd $(@:update-%=%) && \
+		git fetch --depth 1 && \
+		if [ "$$(git rev-list HEAD...origin/$(BRANCH) --count)" -gt 0 ]; then \
+		git reset --hard origin/$(BRANCH) && \
+		if [ -d doc ]; then vim +Helptags doc/*.txt +qall; fi; fi
 
 vimplug-update: $(UPDATE-GITTARGETS)
 

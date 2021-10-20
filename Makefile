@@ -35,8 +35,6 @@ NERD_FONT_NAMES ?= Agave \
 				   SourceCodePro \
 				   VictorMono
 NERD_FONT_DIR ?= $(FONTDIR)/NerdFonts/
-POWERLINE_FONT_NAMES ?= SymbolNeu
-POWERLINE_FONT_DIR ?= $(FONTDIR)/PowerlineFonts/
 PYMS := powerline $(if $(MSYS),,psutil) pylint
 INSTALLPYMS = $(filter-out $(shell pip list | tail +3 | cut -d' ' -f1),$(subst powerline,powerline-status,$(PYMS)))
 # PKGS += golang-go # for powerline-go update
@@ -68,7 +66,10 @@ $(SUDOERSFILE):
 	sudo chmod 0440 $@
 
 update-LS_COLORS:
-	cd $(@:update-%=%) && git pull --depth 1 origin $(BRANCH)
+	@echo "Checking if $(@:update-%=%) needs update"
+	cd $(@:update-%=%) && git fetch --depth 1 && \
+		if [ $$(git rev-list HEAD...origin/$(BRANCH) --count) -gt 0 ]; then \
+		git reset --hard origin/$(BRANCH); fi
 
 snippets/powerline.tmux.conf: $(filter powerline-status,$(INSTALLPYMS)) $(HOME)/.tmux/plugins/tpm/
 	echo source \"$$($(PIP) show powerline-status | fgrep Location | cut -d" " -f2)/powerline/bindings/tmux/powerline.conf\" > $@
@@ -89,27 +90,11 @@ $(HOME)/.local/bin/:
 $(HOME)/.local/bin/%: bin/% | $(HOME)/.local/bin/
 	install -m 0755 $< $@
 
-fonts/powerline-fonts/:
-	git clone --depth 1 -b master https://github.com/powerline/fonts.git $@
-
 fonts/nerd-fonts/:
 	git clone --depth 1 -b master https://github.com/ryanoasis/nerd-fonts.git $@
 
 $(FONTDIR)/ /tmp/vim/:
 	mkdir -p $@
-
-$(POWERLINE_FONT_DIR): fonts/powerline-fonts/
-	mkdir -p $@
-	@for DIR in $(POWERLINE_FONT_NAMES); do \
-		cp -v fonts/powerline-fonts/"$$DIR"/*.?tf $@; done
-	touch $@
-
-powerline-update: fonts/powerline-fonts/
-	@echo "Checking if $< is up to date..."
-	@if ! LANGUAGE=en.US_UTF-8 git -C $< pull --depth 1 origin master | tail -1 | fgrep 'Already up'; then \
-		for DIR in $(POWERLINE_FONT_NAMES); do \
-		cp -v fonts/powerline-fonts/"$$DIR"/*.?tf $@; \
-		done; touch $(POWERLINE_FONT_DIR) .fonts_updated; fi
 
 $(NERD_FONT_DIR): fonts/nerd-fonts/
 	mkdir -p $@
@@ -120,16 +105,19 @@ $(NERD_FONT_DIR): fonts/nerd-fonts/
 
 nerd-update: fonts/nerd-fonts/
 	@echo "Checking if $< is up to date..."
-	@if ! LANGUAGE=en.US_UTF-8 git -C $< pull --depth 1 origin master | fgrep 'Already up'; then \
+	@cd $< && \
+		git fetch --depth 1 && \
+		if [ "$$(git rev-list HEAD...origin/$(BRANCH) --count)" -gt 0 ]; then \
+		git reset --hard origin/$(BRANCH); \
 		for NERD_FONT_NAME in $(NERD_FONT_NAMES); do \
 		fonts/nerd-fonts/install.sh -sL "$$NERD_FONT_NAME" | sort | uniq | while read -r NERD_FONT_FILE; \
 		do find fonts/nerd-fonts/ -name "$$(basename "$$NERD_FONT_FILE")" -type f -print0 | xargs -0 -n1 -I % cp -v "%" "$(NERD_FONT_DIR)/"; done; done; touch $(NERD_FONT_DIR) .fonts_updated; fi
 
-$(FONTS): $(POWERLINE_FONT_DIR) $(NERD_FONT_DIR)
+$(FONTS): $(NERD_FONT_DIR)
 	fc-cache -vf "$(FONTDIR)"
 	touch $@
 
-fonts-update: nerd-update powerline-update
+fonts-update: nerd-update
 	@if [ -f .fonts_updated ]; then \
 		fc-cache -vf "$(FONTDIR)" && rm -f .fonts_updated; fi
 
@@ -205,5 +193,5 @@ uninstall:
 	-rm -fr $(DESTFILES) $(GITTARGETS) $(PLUGINRC) $(PLUGGED) $(BUNDLE) $(AUTOLOADDIR)/plug.vim $(FONTS)
 
 .PHONY: all install install-pkgs install-pyms uninstall update del-bash_profile \
-	vimplug-update fonts-update nerd-update powerline-update \
+	vimplug-update fonts-update nerd-update \
 	$(PKGS) $(PYMS)

@@ -6,13 +6,6 @@ PKGUPDATE := brew-update
 MACVIM_APP := /Applications/MacVim.app
 SUDOERSDIR := /private/etc/sudoers.d/
 PIPINSTALL := $(shell command -v pip &> /dev/null || echo pip)
-# brew install font doesn't work for multiple user
-# POWERLINE_FONT_PKGS := $(patsubst %-symbolneu-for-powerline,%-powerline-symbols,$(addprefix font-,$(addsuffix -for-powerline,$(shell echo $(POWERLINE_FONT_NAMES) | tr A-Z a-z))))
-# NERD_FONT_PKGS := $(addprefix font-,$(addsuffix -nerd-font-mono,$(shell echo $(NERD_FONT_NAMES) | tr A-Z a-z)))
-# TARGET_CASK_PKGS := $(filter-out $(shell brew cask list),$(POWERLINE_FONT_PKGS) $(NERD_FONT_PKGS))
-# FONTS := $(INPUT_FONTS) $(TARGET_CASK_PKGS)
-# POWERLINE_FONT_DIR :=
-# NERD_FONT_DIR :=
 TARGET_POWERLINE_GO := # installed by brew
 
 $(BREW):
@@ -26,9 +19,6 @@ $(filter-out macvim,$(INSTALLPKGS)): $(BREW)
 	brew install $@
 
 $(TARGET_CASK_PKGS): install-cask-pkgs
-
-$(POWERLINE_FONT_PKGS) $(NERD_FONT_PKGS): $(BREW)
-	brew cask install $@
 
 install-pkgs:
 	brew install $(TARGETPKGS)
