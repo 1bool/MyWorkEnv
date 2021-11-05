@@ -29,8 +29,6 @@ elif command powerline-daemon && ! pgrep -f powerline-daemon 2> /dev/null; then
     powerline-daemon -q
 fi
 
-[ "$(runlevel 2> /dev/null | cut -d' ' -f2)" != 5 ] && auto-ssh-agent.sh
-
 # if running bash
 if [ -n "$BASH_VERSION" ]; then
     # include .bashrc if it exists
