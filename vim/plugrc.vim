@@ -41,4 +41,5 @@ Plug 'itchyny/landscape.vim'
 Plug 'jonathanfilip/vim-lucius'
 Plug 'rakr/vim-one'
 " Plug 'sonph/onehalf', { 'rtp': 'vim' }
+Plug 'chriskempson/vim-tomorrow-theme'
 Plug 'ryanoasis/vim-devicons'
