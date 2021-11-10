@@ -14,7 +14,7 @@ runtime! pluginrc.vim
 syntax on
 " If using a dark background within the editing area and syntax highlighting
 " turn on this option as well
-set background=dark
+" set background=dark
 
 " Uncomment the following to have Vim jump to the last position when
 " reopening a file
@@ -260,8 +260,8 @@ let g:detectindent_preferred_indent = 4 " specify a preferred indent level when 
 
 let g:onedark_terminal_italics = 1
 
-if !has("gui_running")
-	try
+" if !has("gui_running")
+	" try
 		" let g:PaperColor_Theme_Options = {
 		"             \   'theme': {
 		"             \     'default': {
@@ -271,14 +271,14 @@ if !has("gui_running")
 		"             \ }
 		" let g:airline_theme = 'papercolor'
 		" colorscheme PaperColor
-		let g:airline_theme = 'solarized'
-		let g:solarized_enable_extra_hi_groups = 1
-		let g:solarized_statusline = 'low'
-		let g:solarized_termtrans = 1
-		colorscheme solarized
-	catch /^Vim\%((\a\+)\)\=:E185/
+		" let g:airline_theme = 'solarized'
+		" let g:solarized_enable_extra_hi_groups = 1
+		" let g:solarized_statusline = 'low'
+		" let g:solarized_termtrans = 1
+		" colorscheme solarized
+	" catch /^Vim\%((\a\+)\)\=:E185/
 		" Fallback to desert
-		let g:airline_theme = 'dark'
-		colorscheme desert
-	endtry
-endif
+		" let g:airline_theme = 'dark'
+		" colorscheme desert
+	" endtry
+" endif
