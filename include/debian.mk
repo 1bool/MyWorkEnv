@@ -14,7 +14,8 @@ PKGS += git \
 	powerline \
 	language-pack-zh-hans \
 	thefuck \
-	tmux-plugin-manager
+	tmux-plugin-manager \
+	xsel
 # PKGS += dconf-cli # for Gogh
 INSTALLTARGETS := $(filter $(shell apt-cache search --names-only '.*' | cut -d' ' -f1),$(PKGS))
 GITPLUGINS := $(shell grep -E '^[[:blank:]]*Plug[[:blank:]]+' vim/plugrc.vim $(wildcard snippets/$(OSTYPE).pluginrc.vim) | cut -d\' -f2) pathogen
