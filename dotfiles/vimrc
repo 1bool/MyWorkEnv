@@ -135,6 +135,17 @@ if has("autocmd")
 	" autocmd BufEnter,FileType c,cpp,python,sh,java,javascript,perl,ruby,php,vim,go nested TagbarOpen
 	" autocmd FilterWritePre * nested if &diff | TagbarClose
 	autocmd BufReadPost * DetectIndent 
+	" vim -b : edit binary using xxd-format!
+	augroup Binary
+		au!
+		au BufReadPre  *.bin let &bin=1
+		au BufReadPost *.bin if &bin | %!xxd
+		au BufReadPost *.bin setlocal ft=xxd | endif
+		au BufWritePre *.bin if &bin | %!xxd -r
+		au BufWritePre *.bin endif
+		au BufWritePost *.bin if &bin | %!xxd
+		au BufWritePost *.bin setlocal nomod | endif
+	augroup END
 endif
 
 function! PluginSetup()
