@@ -18,7 +18,7 @@ elif [ -r /etc/system-release ]; then
 fi
 export DIST
 
-PKGS="make git curl bc"
+PKGS="make git curl bc python3-pip"
 case "$DIST_FAMILY" in
 	'rhel fedora')
 		if command -v yum; then
