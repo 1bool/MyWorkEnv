@@ -1,5 +1,6 @@
 -include /etc/os-release
 SHELL := bash -e
+PIP ?= $(or $(shell command -v pip),$(shell command -v pip3),$(shell command -v pip2),pip)
 OSTYPE := $(shell echo $$OSTYPE)
 OSTYPESIMP := $(subst linux-gnu,linux,$(subst msys,windows,$(OSTYPE)))
 MSYS := $(if $(findstring msys,$(OSTYPE)),1)
@@ -36,10 +37,9 @@ NERD_FONT_NAMES ?= Agave \
 				   VictorMono
 NERD_FONT_DIR ?= $(FONTDIR)/NerdFonts/
 PYMS := powerline $(if $(MSYS),,psutil) pylint
-INSTALLPYMS = $(filter-out $(shell pip list | tail +3 | cut -d' ' -f1),$(subst powerline,powerline-status,$(PYMS)))
+INSTALLPYMS = $(filter-out $(shell $(PIP) list --format freeze | cut -d'=' -f1),$(subst powerline,powerline-status,$(PYMS)))
 # PKGS += golang-go # for powerline-go update
 TARGET_POWERLINE_GO := $(if $(findstring x86_64,$(shell uname -m)),$(HOME)/.local/bin/powerline-go) # 64bit only
-PIP ?= $(or $(shell command -v pip),$(shell command -v pip3),$(shell command -v pip2),pip)
 
 all: install
 

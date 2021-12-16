@@ -15,7 +15,7 @@ PKGS += git \
 	clang \
 	cmake \
 	the_silver_searcher
-PKGS += $(or $(shell $(PKGM) list -q python3-devel | tail -1 | cut -d' ' -f1),python2-devel)
+PKGS += $(or $(shell $(PKGM) list -q python3-devel | tail -n -1 | cut -d' ' -f1),python2-devel)
 INSTALLTARGETS := $(PKGS)
 TARGETPKGS := $(filter-out $(shell rpm -qa --qf '%{NAME} '),$(INSTALLTARGETS))
 
