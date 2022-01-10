@@ -45,6 +45,14 @@ if [ -x /usr/bin/dircolors ]; then
 else export CLICOLOR=1
 fi
 
+function dirdiff()
+{
+    # Shell-escape each path:
+    DIR1=$(printf '%q' "$1"); shift
+    DIR2=$(printf '%q' "$1"); shift
+    vim $@ -c "DirDiff $DIR1 $DIR2"
+}
+
 if [ -r /usr/share/powerlevel9k/powerlevel9k.zsh-theme ]; then
   source /usr/share/powerlevel9k/powerlevel9k.zsh-theme
 fi
