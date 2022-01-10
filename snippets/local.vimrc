@@ -1,2 +1,4 @@
 
-source $HOME/.vimrc.local
+try
+	source $HOME/.vimrc.local
+endtry
