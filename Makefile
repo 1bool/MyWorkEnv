@@ -8,6 +8,7 @@ WSL := $(if $(findstring icrosoft,$(shell uname -r)),1)
 PLATFORM := $(if $(findstring linux-gnu,$(OSTYPE)),$(shell echo $(ID_LIKE) | tr ' ' '_'),$(or $(findstring darwin,$(OSTYPE)),$(OSTYPE)))
 DOTFILES := vimrc vimrc.local gvimrc gvimrc.local screenrc tmux.conf bashrc profile pylintrc dircolors zprofile zshrc quiltrc profile.local
 DOTFILES += $(if $(MSYS),minttyrc)
+DOTFILES += ctags.d/custom.ctags
 DESTFILES := $(addprefix $(HOME)/.,$(DOTFILES)) $(addprefix $(HOME)/.local/,$(wildcard bin/*))
 VIMDIR := $(HOME)/.vim
 AUTOLOADDIR := $(VIMDIR)/autoload
@@ -158,6 +159,10 @@ $(HOME)/.tmux.conf: \
 	$(if $(filter $(UBUNTU_VER),16.04),vi-style-2.1.tmux.conf,vi-style.tmux.conf) \
 	$(if $(filter powerline,$(PYMS)),powerline.tmux.conf) \
 	tpm.tmux.conf
+
+$(HOME)/.ctags.d/custom.ctags: dotfiles/ctags.d/custom.ctags
+	mkdir -p $(dir $@)
+	ln -f $< $@
 
 .SECONDEXPANSION:
 $(HOME)/.%: % $$(wildcard snippets/$$(OSTYPE)$$(@F)) $$(wildcard snippets/$$(ID_LIKE)$$(@F)) $$(if $$(WSL),$$(wildcard snippets/WSL$$(@F)))

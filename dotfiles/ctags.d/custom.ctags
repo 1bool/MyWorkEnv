@@ -1,0 +1,4 @@
+--exclude=.SOS
+--exclude=.git
+--extras=+q
+--fields=+i
