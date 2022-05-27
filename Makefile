@@ -41,6 +41,7 @@ PYMS := powerline $(if $(MSYS),,psutil) pylint
 INSTALLPYMS = $(filter-out $(shell $(PIP) list --format freeze | cut -d'=' -f1),$(subst powerline,powerline-status,$(PYMS)))
 # PKGS += golang-go # for powerline-go update
 TARGET_POWERLINE_GO := $(if $(findstring x86_64,$(shell uname -m)),$(HOME)/.local/bin/powerline-go) # 64bit only
+FTPLUGINS := $(notdir $(wildcard vim/ftplugin/*.vim))
 
 all: install
 
@@ -65,6 +66,9 @@ LS_COLORS/LS_COLORS:
 $(SUDOERSFILE):
 	sudo sh -c 'echo "$(LOGNAME) ALL=(ALL) NOPASSWD: ALL" > $@'
 	sudo chmod 0440 $@
+
+$(VIMDIR)/ftplugin/%: vim/ftplugin/%
+	install -D $< $@
 
 update-LS_COLORS:
 	@echo "Checking if $(@:update-%=%) needs update..."
@@ -191,6 +195,7 @@ install: $(if $(MSYS),,$(SUDOERSFILE))
 install: $(DESTFILES) $(TARGETPKGS) $(PKGPLUGINTARGETS) $(PLUGINRC) $(PLUGGED) $(INSTALLPYMS) $(FONTS)
 install: | /tmp/vim/
 install: $(TARGET_POWERLINE_GO)
+install: $(VIMDIR)/ftplugin/$(FTPLUGINS)
 
 update: install update-LS_COLORS vimplug-update $(if $(MSYS),,fonts-update)
 

@@ -222,6 +222,11 @@ function! PluginSetup()
 		nmap <silent> <Leader>g :Git<CR>
 		nmap <silent> <Leader>d :Gdiffsplit<CR>
 	endif
+	if exists(":VerilogFollowInstance")
+		nnoremap <leader>v :VerilogFollowInstance<CR>
+		nnoremap <leader>V :VerilogFollowPort<CR>
+		nnoremap <leader>u :VerilogGotoInstanceStart<CR>
+	endif
 endfunction
 
 
