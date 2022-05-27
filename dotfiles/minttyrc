@@ -1,5 +1,5 @@
 BoldAsFont=yes
-Font=agave NF
+Font=Iosevka NF
 FontHeight=12
 FontIsBold=no
 Term=xterm-256color
@@ -13,7 +13,7 @@ Charset=UTF-8
 CursorBlinks=yes
 BoldAsColour=no
 AllowBlinking=yes
-FontWeight=400
+FontWeight=500
 Columns=132
 Language=@
 Scrollbar=none
