@@ -39,7 +39,13 @@ let g:airline_symbols.readonly = ''
 let g:airline_symbols.linenr = ''
 
 colorscheme solarized
-set background=light
+
+if strftime("%H") > 7 && strftime("%H") < 18
+  set background=light
+else
+  set background=dark
+endif
+
 if has("gui_win32")
 	set formatoptions+=mM
 	language messages zh_CN.utf-8
