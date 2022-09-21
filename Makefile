@@ -37,7 +37,7 @@ NERD_FONT_NAMES ?= Agave \
 				   SourceCodePro \
 				   VictorMono
 NERD_FONT_DIR ?= $(FONTDIR)/NerdFonts/
-PYMS := powerline $(if $(MSYS),,psutil) pylint
+PYMS := powerline $(if $(MSYS),,psutil) pylint pip-search
 INSTALLPYMS = $(filter-out $(shell $(PIP) list --format freeze | cut -d'=' -f1),$(subst powerline,powerline-status,$(PYMS)))
 # PKGS += golang-go # for powerline-go update
 TARGET_POWERLINE_GO := $(if $(findstring x86_64,$(shell uname -m)),$(HOME)/.local/bin/powerline-go) # 64bit only
