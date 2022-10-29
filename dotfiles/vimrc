@@ -3,9 +3,9 @@ if has("win32")
 	set runtimepath^=~/.vim,$VIMRUNTIME
 	set pythonthreedll=python310.dll
 	" Use msys for terminal in win32
-	map te :ter ++close ++rows=12 D:\msys64\msys2_shell.cmd -defterm -here -no-start -msys<CR>
-" elseif has("win32unix")
-	" set shell=/D/msys64/msys2_shell.cmd\ -defterm\ -here\ -no-start\ -msys\ -shell\ zsh
+	" map te :ter ++close ++rows=12 D:\msys64\msys2_shell.cmd -defterm -here -no-start -msys<CR>
+elseif has("win32unix")
+	set pythonthreedll=msys-python3.10.dll
 else
 	map te :ter ++close ++rows=12<CR>
 endif
