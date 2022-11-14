@@ -95,7 +95,7 @@ noremap <C-L> <C-W>l
 set switchbuf=usetab,newtab
 map gn :bn<cr>
 map gp :bp<cr>
-map gd :bd<cr>
+map gx :bd<cr>
 nnoremap <C-TAB> :sbnext<CR>
 nnoremap <C-S-TAB> :sbprevious<CR>
 
