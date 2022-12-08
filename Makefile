@@ -98,7 +98,7 @@ $(HOME)/.local/bin/%: bin/% | $(HOME)/.local/bin/
 fonts/nerd-fonts/:
 	git clone --depth 1 -b master https://github.com/ryanoasis/nerd-fonts.git $@
 
-$(FONTDIR)/ /tmp/vim/:
+$(FONTDIR)/ $(VIMDIR)/swap/:
 	mkdir -p $@
 
 $(NERD_FONT_DIR): fonts/nerd-fonts/
@@ -193,7 +193,7 @@ $(INSTALLPYMS): install-pyms
 
 install: $(if $(MSYS),,$(SUDOERSFILE))
 install: $(DESTFILES) $(TARGETPKGS) $(PKGPLUGINTARGETS) $(PLUGINRC) $(PLUGGED) $(INSTALLPYMS) $(FONTS)
-install: | /tmp/vim/
+install: | $(VIMDIR)/swap/
 install: $(TARGET_POWERLINE_GO)
 install: $(VIMDIR)/ftplugin/$(FTPLUGINS)
 

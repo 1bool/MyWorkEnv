@@ -301,3 +301,5 @@ let g:onedark_terminal_italics = 1
 		" colorscheme desert
 	" endtry
 " endif
+
+set directory^=$HOME/.vim/swap//
