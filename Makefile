@@ -103,9 +103,7 @@ $(FONTDIR)/ $(VIMDIR)/swap/:
 
 $(NERD_FONT_DIR): fonts/nerd-fonts/
 	mkdir -p $@
-	@for NERD_FONT_NAME in $(NERD_FONT_NAMES); do \
-		./fonts/nerd-fonts/install.sh -sL "$$NERD_FONT_NAME" | sort | uniq | while read -r NERD_FONT_FILE; do \
-		find fonts/nerd-fonts/ -name "$$(basename "$$NERD_FONT_FILE")" -type f -print0 | xargs -0 -n1 -I % cp -v "%" "$@/"; done; done
+	./fonts/nerd-fonts/install.sh -sU "$$NERD_FONT_NAMES"
 	touch $@
 
 nerd-update: fonts/nerd-fonts/
@@ -114,9 +112,8 @@ nerd-update: fonts/nerd-fonts/
 		git fetch --depth 1 && \
 		if [ "$$(git rev-list HEAD...origin/$(BRANCH) --count)" -gt 0 ]; then \
 		git reset --hard origin/$(BRANCH); \
-		for NERD_FONT_NAME in $(NERD_FONT_NAMES); do \
-		./install.sh -sL "$$NERD_FONT_NAME" | sort | uniq | while read -r NERD_FONT_FILE; \
-		do find fonts/nerd-fonts/ -name "$$(basename "$$NERD_FONT_FILE")" -type f -print0 | xargs -0 -n1 -I % cp -v "%" "$(NERD_FONT_DIR)/"; done; done; touch $(NERD_FONT_DIR) .fonts_updated; fi
+		./install.sh -sU $$(NERD_FONT_NAMES); \
+		touch $(NERD_FONT_DIR) .fonts_updated; fi
 
 $(FONTS): $(NERD_FONT_DIR)
 	fc-cache -vf "$(FONTDIR)"
