@@ -112,7 +112,7 @@ nerd-update: fonts/nerd-fonts/
 		git fetch --depth 1 && \
 		if [ "$$(git rev-list HEAD...origin/$(BRANCH) --count)" -gt 0 ]; then \
 		git reset --hard origin/$(BRANCH); \
-		./install.sh -sU $$(NERD_FONT_NAMES); \
+		./install.sh -sU "$$NERD_FONT_NAMES"; \
 		touch $(NERD_FONT_DIR) .fonts_updated; fi
 
 $(FONTS): $(NERD_FONT_DIR)
