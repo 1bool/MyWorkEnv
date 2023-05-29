@@ -1,11 +1,11 @@
 if has("win32")
 	" Make windows use ~/.vim too, I don't want to use _vimfiles
 	set runtimepath^=~/.vim,$VIMRUNTIME
-	set pythonthreedll=python310.dll
+	set pythonthreedll=python311.dll
 	" Use msys for terminal in win32
 	" map te :ter ++close ++rows=12 D:\msys64\msys2_shell.cmd -defterm -here -no-start -msys<CR>
 elseif has("win32unix")
-	set pythonthreedll=msys-python3.10.dll
+	set pythonthreedll=msys-python3.11.dll
 else
 	map te :ter ++close ++rows=12<CR>
 endif
