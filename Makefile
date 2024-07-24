@@ -24,18 +24,13 @@ SUDOERSFILE := $(if $(LOGNAME),$(SUDOERSDIR)/nopass_for_$(LOGNAME),)
 NERD_FONT_NAMES ?= Agave \
 				   CascadiaCode \
 				   CodeNewRoman \
-				   FantasqueSansMono \
 				   FiraCode \
-				   Go-Mono \
-				   Hack \
-				   Hasklig \
-				   Inconsolata \
 				   Iosevka \
-				   Lilex \
-				   Monofur \
+				   Iosevka Term\
+				   Iosevka Term Slab\
 				   Mononoki \
 				   SourceCodePro \
-				   VictorMono
+				   ZedMono
 NERD_FONT_DIR ?= $(FONTDIR)/NerdFonts/
 PYMS := powerline $(if $(MSYS),,psutil) pylint pip-search
 INSTALLPYMS = $(filter-out $(shell $(PIP) list --format freeze | cut -d'=' -f1),$(subst powerline,powerline-status,$(PYMS)))
@@ -49,7 +44,7 @@ all: install
 vpath %.ttf
 
 install-pyms: $(TARGETPKGS) $(PIPINSTALL)
-	$(PIP) install $(if $(shell $(PIP) install --help | fgrep -e '--user'),--user,--prefix ~/.local) $(INSTALLPYMS)
+	$(PIP) install $(if $(shell $(PIP) install --help | fgrep -e '--user'),--user,--prefix ~/.local) --break-system-packages $(INSTALLPYMS)
 
 INSTALLPKGS = $(filter-out $(INSTALLPYMS),$(INSTALLTARGETS))
 

@@ -5,7 +5,8 @@ if has("win32")
 	" Use msys for terminal in win32
 	" map te :ter ++close ++rows=12 D:\msys64\msys2_shell.cmd -defterm -here -no-start -msys<CR>
 elseif has("win32unix")
-	set pythonthreedll=msys-python3.11.dll
+	set pythonthreedll=msys-python3.12.dll
+	map te :ter ++close ++rows=12<CR>
 else
 	map te :ter ++close ++rows=12<CR>
 endif
@@ -121,6 +122,12 @@ set noshowmode " already displayed in status line
 
 " Toggle line number
 nmap <C-N><C-N> :setlocal invnumber<CR>
+
+" Windows resize
+nmap wK :resize -5<CR>
+nmap wJ :resize +5<CR>
+nmap wH :vertical resize -5<CR>
+nmap wL :vertical resize +5<CR>
 
 " Toggle background
 map <Leader>b :let &background = ( &background == "dark"? "light" : "dark" )<CR>
