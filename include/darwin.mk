@@ -1,6 +1,6 @@
 FONTDIR := /Library/Fonts
 BREW := $(shell which brew &> /dev/null || echo brew)
-INSTALLTARGETS := $(filter-out zsh ssh-askpass,$(subst vim,macvim,$(PKGS))) the_silver_searcher thefuck lua llvm cmake powerline-go
+INSTALLTARGETS := $(filter-out zsh ssh-askpass,$(subst vim,macvim,$(PKGS))) the_silver_searcher lua llvm cmake powerline-go
 TARGETPKGS = $(filter-out $(shell brew list),$(INSTALLPKGS))
 PKGUPDATE := brew-update
 MACVIM_APP := /Applications/MacVim.app

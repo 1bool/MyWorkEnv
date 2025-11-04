@@ -13,7 +13,6 @@ PKGS += git \
 	python-psutil \
 	powerline \
 	language-pack-zh-hans \
-	thefuck \
 	tmux-plugin-manager \
 	xsel
 # PKGS += dconf-cli # for Gogh
