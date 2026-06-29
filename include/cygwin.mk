@@ -1,4 +1,3 @@
-DESTFILES += /usr/bin/vi
 PKGS += mintty man-pages-posix unzip diffutils python-pip
 PKGS += gcc cmake libcrypt-devel # for ycm compiling
 PYMS += mintty-colors
@@ -7,18 +6,18 @@ INSTALLTARGETS := $(subst ack,perl-ack,\
 TARGETPKGS = $(filter-out $(shell pacman -Qsq),$(INSTALLPKGS))
 FONTS :=
 
+$(TARGET_POWERLINE_GO): | $(HOME)/.local/bin/
+	curl -LSso $@ https://github.com/justjanne/powerline-go/releases/latest/download/powerline-go-windows-amd64.exe || rm -f $@
+	chmod a+x $@
+
 $(INSTALLPKGS):
 	pacman -S --noconfirm --needed $@
 
 install-pkgs:
 	pacman -S --noconfirm --needed $(TARGETPKGS)
 
-/usr/bin/vi:
-	ln -s vim $@
-
 pacman-update:
 	pacman -Sy --noconfirm
 	pacman -Su --noconfirm --needed $(INSTALLPKGS)
 
 update: pacman-update # powerline-go-update
-
