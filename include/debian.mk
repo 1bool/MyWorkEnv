@@ -77,6 +77,7 @@ $(sort $(PKGPLUGINTARGETS)): | $(VIMDIR)/
 	vam install $@
 
 $(BUNDLE)/YCM-Generator/ update-$(BUNDLE)/YCM-Generator: BRANCH := stable
+$(BUNDLE)/vim-ai/ update-$(BUNDLE)/vim-ai: BRANCH := main
 
 $(BUNDLE)/%/:
 	git clone -b $(BRANCH) https://github.com/$(filter %/$(notdir $(@:/=)),$(GITPLUGINS)).git $@

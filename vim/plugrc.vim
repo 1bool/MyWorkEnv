@@ -46,3 +46,4 @@ Plug 'jonathanfilip/vim-lucius'
 Plug 'rakr/vim-one'
 " Plug 'sonph/onehalf', { 'rtp': 'vim' }
 Plug 'ryanoasis/vim-devicons'
+Plug 'madox2/vim-ai'
