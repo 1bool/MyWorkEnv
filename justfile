@@ -31,20 +31,23 @@ bootstrap:
 	    command -v unzip >/dev/null || sudo dnf -y install unzip; \
 	    command -v git   >/dev/null || sudo dnf -y install git; \
 	fi; \
-	if command -v chezmoi >/dev/null 2>&1 || [ -x "$$HOME/.local/bin/chezmoi" ] || { is_msys2 && [ -x "$$USERPROFILE/.local/bin/chezmoi" ]; }; then echo "  ✓ chezmoi"; \
+	CHEZMOI_BIN=""; \
+	if is_msys2; then CHEZMOI_BIN="$USERPROFILE/.local/bin/chezmoi"; \
+	else CHEZMOI_BIN="$HOME/.local/bin/chezmoi"; fi; \
+	if command -v chezmoi >/dev/null 2>&1 || [ -x "$CHEZMOI_BIN" ]; then echo "  ✓ chezmoi"; \
 	else \
 	    if is_msys2; then \
-	        sh -c "$$(curl -fsLS get.chezmoi.io)" -- -b "$$USERPROFILE/.local/bin"; \
+	        bash -c "$(curl -fsLS get.chezmoi.io)" -- -b "$USERPROFILE/.local/bin"; \
 	    else \
-	        sh -c "$$(curl -fsLS get.chezmoi.io)" -- -b "$$HOME/.local/bin"; \
+	        bash -c "$(curl -fsLS get.chezmoi.io)" -- -b "$HOME/.local/bin"; \
 	    fi; \
 	    echo "  ✓ chezmoi installed"; \
 	fi; \
 	if is_msys2; then \
-	    C="$${USERPROFILE}/.config/chezmoi/chezmoi.toml"; \
-	    mkdir -p "$$(dirname "$$C")"; \
-	    grep -q '\[interpreters' "$$C" 2>/dev/null || \
-	        printf '[data]\n  isWSL = false\n[interpreters.sh]\n  command = "bash"\n[interpreters.bash]\n  command = "bash"\n' > "$$C"; \
+	    C="${USERPROFILE}/.config/chezmoi/chezmoi.toml"; \
+	    mkdir -p "$(dirname "$C")"; \
+	    grep -q '\[interpreters' "$C" 2>/dev/null || \
+	        printf '[data]\n  isWSL = false\n[interpreters.sh]\n  command = "bash"\n[interpreters.bash]\n  command = "bash"\n' > "$C"; \
 	fi
 
 bootstrap-update:
@@ -71,7 +74,7 @@ packages:
         for pkg in $(grep -v '^#' packages/cygwin-mingw.txt); do \
             MINGW="$MINGW ${MINGW_PACKAGE_PREFIX}-$pkg"; \
         done; \
-        [ -n "$MINGW" ] && pacman -S --noconfirm --needed $MINGW; \
+        [ -n "$MINGW" ] && pacman -S --noconfirm --needed -- $MINGW; \
         pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple 2>/dev/null || true; \
         pip install --user --break-system-packages powerline-status 2>/dev/null || true; \
     elif is_macos; then \
