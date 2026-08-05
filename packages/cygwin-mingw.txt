@@ -6,4 +6,5 @@ eza
 ripgrep
 fzf
 python-ruff
+nodejs
 starship

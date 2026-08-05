@@ -8,10 +8,10 @@ set shell := ["bash", "-c"]
 default:
     @just --list --unsorted
 
-install: bootstrap packages msys2 dotfiles fonts plugins
+install: bootstrap packages msys2 dotfiles fonts plugins claude-code
     @echo "=== MyWorkEnv installed ==="
 
-update: packages-update dotfiles-update plugins-update bootstrap-update
+update: packages-update dotfiles-update plugins-update bootstrap-update claude-code-update
     @echo "=== MyWorkEnv updated ==="
 
 # ── Bootstrap ──
@@ -145,6 +145,7 @@ dotfiles-update:
 fonts:
     @echo "=== Nerd Fonts ==="; \
     source scripts/detect.sh; \
+    if is_wsl; then echo "WSL uses host fonts, skipping."; exit 0; fi; \
     FONTS="$(grep -v '^#' packages/fonts.txt 2>/dev/null | grep -v '^$' || true)"; \
     [ -n "$FONTS" ] || { echo "No fonts in packages/fonts.txt"; exit 0; }; \
     GH="${GH_PROXY:-}"; \
@@ -200,6 +201,7 @@ fonts:
 fonts-update:
     @echo "=== Fonts update ==="; \
     source scripts/detect.sh; \
+    if is_wsl; then echo "WSL uses host fonts, skipping."; exit 0; fi; \
     if is_msys2; then \
         D="$USERPROFILE/fonts/NerdFonts"; rm -f "$D/.version"; \
         just fonts; \
@@ -218,28 +220,23 @@ migrate:
         done; \
         echo "Cleaning stale dotfiles..."; \
         rm -f ~/.dircolors ~/.fonts_installed 2>/dev/null; \
-        rm -rf LS_COLORS dotfiles snippets 2>/dev/null; \
         echo "Cleaning orphan fonts..."; \
         powershell -ExecutionPolicy Bypass -Command '$keep=@(Get-Content packages/fonts.txt | Where-Object {$_ -notmatch "^#" -and $_.Trim() -ne ""} | ForEach-Object {$_.Trim()}); $store=Join-Path $env:USERPROFILE "fonts\NerdFonts"; $willInstall=@{}; foreach($f in $keep){$fd=Join-Path $store $f; if(Test-Path $fd){Get-ChildItem $fd -Filter *.ttf -ea 0 | ForEach-Object {$willInstall[$_.Name]=$true}; Get-ChildItem $fd -Filter *.otf -ea 0 | ForEach-Object {$willInstall[$_.Name]=$true}}}; $d=Join-Path $env:LOCALAPPDATA "Microsoft\Windows\Fonts"; Get-ChildItem $d -Filter "*NerdFont*" -ea 0 | Where-Object {-not $willInstall.ContainsKey($_.Name)} | ForEach-Object {Remove-Item $_.FullName -Force; Write-Host "  del file: $($_.Name)"}; $reg="HKCU:\Software\Microsoft Windows NT\CurrentVersion\Fonts"; $item=Get-Item $reg -ea 0; if($item){foreach($pn in $item.Property){$val=$item.GetValue($pn); if($val -like "*NerdFont*"){$fn=Split-Path $val -Leaf; if(-not $willInstall.ContainsKey($fn)){Remove-ItemProperty $reg -Name $pn -Force -ea 0; Write-Host "  del reg: $pn"}}}}; Write-Host "  ✓ orphan fonts + registry"'; \
         echo "  ✓ cleaned"; \
         echo "Removing old chezmoi state..."; \
         rm -rf "${USERPROFILE}/.config/chezmoi" 2>/dev/null; \
-        echo "Cleaning legacy vim plugins..."; \
-        for d in syntastic ctrlp.vim vim-grepper autopep8 nerdtree nerdcommenter YouCompleteMe; do \
-            rm -rf ~/.vim/plugged/"$d" 2>/dev/null; done; \
-        echo "  ✓ cleaned"; \
     elif is_macos; then \
         echo "Removing legacy packages..."; \
         brew uninstall the_silver_searcher powerline-go 2>/dev/null || true; \
         rm -f ~/.dircolors; \
-    elif is_linux; then \
+    elif is_linux || is_wsl; then \
         echo "Removing legacy packages..."; \
-        is_debian && { sudo apt-get -y remove exuberant-ctags silversearcher-ag powerline-go 2>/dev/null || true; }; \
+        is_debian && { sudo apt-get -y remove exuberant-ctags silversearcher-ag powerline-go vim-scripts vim-addon-manager vim-airline-themes python3-autopep8 2>/dev/null || true; }; \
         is_rhel && { sudo dnf -y remove ctags the_silver_searcher 2>/dev/null || true; }; \
         rm -f ~/.dircolors; \
     fi; \
-    rm -rf fonts 2>/dev/null; \
-    for d in ctrlp.vim YouCompleteMe; do rm -rf ~/.vim/plugged/"$d" 2>/dev/null; done; \
+    rm -rf fonts LS_COLORS dotfiles snippets 2>/dev/null; \
+    for d in syntastic ctrlp ctrlp.vim vim-grepper autopep8 nerdtree nerdcommenter YouCompleteMe vim-airline-themes; do rm -rf ~/.vim/plugged/"$d" 2>/dev/null; done; \
     FDIR="${XDG_DATA_HOME:-$HOME/.local/share}/fonts/NerdFonts"; \
     if [ -d "$FDIR" ]; then \
         rm -f "$FDIR"/*.ttf "$FDIR"/*.otf 2>/dev/null; \
@@ -273,6 +270,23 @@ plugins-update:
     @echo "=== Update plugins ==="
     @command -v vim >/dev/null 2>&1 && vim +PlugUpdate +qall! || true
     @[ -d ~/.tmux/plugins/tpm ] && (cd ~/.tmux/plugins/tpm && git pull) || true
+
+# ── Claude Code ──
+claude-code:
+    @echo "=== Claude Code ==="; \
+    command -v node >/dev/null 2>&1 || { echo "Node.js required. Run 'just packages' first."; exit 1; }; \
+    npm set prefix "$HOME/.local" 2>/dev/null; \
+    if command -v claude >/dev/null 2>&1; then \
+        echo "  ✓ claude (up to date)"; \
+    else \
+        npm install -g @anthropic-ai/claude-code 2>/dev/null && echo "  ✓ claude-code installed"; \
+    fi
+
+claude-code-update:
+    @echo "=== Claude Code update ==="; \
+    command -v node >/dev/null 2>&1 || { echo "Node.js required."; exit 1; }; \
+    npm set prefix "$HOME/.local" 2>/dev/null; \
+    npm update -g @anthropic-ai/claude-code 2>/dev/null && echo "  ✓ claude-code updated"
 
 # ── Windows Terminal profile ──
 wt-config: packages

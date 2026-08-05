@@ -10,5 +10,6 @@ ruff
 lua
 llvm
 cmake
+node
 starship
 powerline
