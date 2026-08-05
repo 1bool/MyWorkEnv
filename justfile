@@ -262,13 +262,13 @@ plugins:
     else curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
         https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim 2>/dev/null && echo "  ✓ vim-plug"; fi; \
     mkdir -p ~/.vim; cp -f "$(pwd)/home/dot_vim/plugrc.vim" ~/.vim/pluginrc.vim 2>/dev/null && echo "  ✓ pluginrc" || echo "  ✗ pluginrc"; \
-    command -v vim >/dev/null 2>&1 && { [ -f ~/.vim/plugged ] && rm ~/.vim/plugged; mkdir -p ~/.vim/plugged; vim -c 'PlugInstall | quitall' 2>&1; echo "  ✓ vim plugins"; }; \
+    command -v vim >/dev/null 2>&1 && { [ -f ~/.vim/plugged ] && rm ~/.vim/plugged; mkdir -p ~/.vim/plugged; vim -i NONE -c 'PlugInstall | quitall' >/dev/null 2>&1; echo "  ✓ vim plugins"; }; \
     if [ -d ~/.tmux/plugins/tpm ]; then echo "  ✓ tpm"; \
     else git clone --depth 1 https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm 2>/dev/null && echo "  ✓ tpm"; fi
 
 plugins-update:
     @echo "=== Update plugins ==="
-    @command -v vim >/dev/null 2>&1 && vim +PlugUpdate +qall! || true
+    @command -v vim >/dev/null 2>&1 && vim -i NONE +PlugUpdate +qall! >/dev/null 2>&1 || true
     @[ -d ~/.tmux/plugins/tpm ] && (cd ~/.tmux/plugins/tpm && git pull) || true
 
 # ── Claude Code ──
