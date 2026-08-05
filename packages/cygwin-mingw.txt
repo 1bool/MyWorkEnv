@@ -1,0 +1,9 @@
+# MINGW packages — UCRT64/CLANG64 preferred over MSYS
+git
+ctags
+python-psutil
+eza
+ripgrep
+fzf
+python-ruff
+starship

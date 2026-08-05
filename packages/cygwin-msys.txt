@@ -1,0 +1,5 @@
+# MSYS2 MSYS packages (pacman, no prefix)
+mintty
+man-pages-posix
+diffutils
+python3-pip

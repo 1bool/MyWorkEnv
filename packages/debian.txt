@@ -1,0 +1,21 @@
+# Debian/Ubuntu packages (apt)
+universal-ctags
+vim-gtk3
+tmux
+curl
+wget
+eza
+ripgrep
+fzf
+fontconfig
+python3-psutil
+python3-powerline
+starship
+language-pack-zh-hans
+tmux-plugin-manager
+xsel
+python3-dev
+g++
+gcc
+clang
+cmake

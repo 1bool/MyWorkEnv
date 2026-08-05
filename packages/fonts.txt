@@ -1,0 +1,8 @@
+# Nerd Font families to install (comment out unused ones)
+CodeNewRoman
+FiraCode
+IosevkaTerm
+IosevkaTermSlab
+JetBrainsMono
+SourceCodePro
+ZedMono

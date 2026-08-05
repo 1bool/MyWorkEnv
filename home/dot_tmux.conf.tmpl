@@ -1,0 +1,73 @@
+# screen 模式
+#unbind ^b
+#set -g prefix 'C-a'
+#bind-key C-a send-prefix
+# split panes using | and -
+unbind '"'
+unbind %
+bind | split-window -h -c '#{pane_current_path}'
+bind - split-window -v -c '#{pane_current_path}'
+# Default terminal is 256 colors
+set -g default-terminal "screen-256color"
+# Add truecolor support
+set-option -ga terminal-overrides ",*256color:Tc"
+# set window and pane index to 1 (0 by default)
+set-option -g base-index 1
+setw -g pane-base-index 1
+# start a non-login shell
+set -g default-command "${SHELL}"
+# reload ~/.tmux.conf using PREFIX r
+bind r source-file ~/.tmux.conf \; display "Reloaded!"
+# switch panes using Alt-jklh without prefix
+bind -n M-h select-pane -L
+bind -n M-l select-pane -R
+bind -n M-k select-pane -U
+bind -n M-j select-pane -D
+# vi模式切换窗口
+bind h previous-window
+bind l next-window
+# vi 风格 copy mode 和粘贴
+unbind p
+bind p paste-buffer
+bind v copy-mode
+bind -T copy-mode-vi v send-keys -X begin-selection
+bind -T copy-mode-vi y send-keys -X copy-selection-and-cancel
+# bind j select-pane -D
+# bind k select-pane -U
+# 给调整窗格大小设置快捷键
+bind H resize-pane -L 8  # 向左扩展
+bind L resize-pane -R 8  # 向右扩展
+bind K resize-pane -U 4   # 向上扩展
+bind J resize-pane -D 4   # 向下扩展
+# 鼠标支持
+setw -g mouse on
+# copy mode 使用 vi 键位
+setw -g mode-keys vi
+# 旧版鼠标支持
+# setw -g mode-mouse on
+# set -g mouse-select-pane on
+# set -g mouse-resize-pane on
+# set -g mouse-select-window on
+# 增加可上翻buffer容量
+set-option -g history-limit 32768
+# 关闭窗口后重新排序
+set-option -g renumber-windows on
+# tmux-plugin
+set -g @plugin 'tmux-plugins/tpm'
+# set -g @plugin 'tmux-plugins/tmux-sensible'
+set -g @plugin 'tmux-plugins/tmux-yank'
+set -g @plugin 'tmux-plugins/tmux-resurrect'
+
+# Powerline integration
+{{- if and (eq .chezmoi.os "linux") (eq .chezmoi.osRelease.idLike "debian") }}
+if-shell 'test -f /usr/share/powerline/bindings/tmux/powerline.conf' "source /usr/share/powerline/bindings/tmux/powerline.conf"
+{{- else }}
+run-shell 'PATH="$HOME/.local/bin:$PATH"; POWERLINE_CONF="$(pip show powerline-status 2>/dev/null | grep -F Location | cut -d" " -f2)/powerline/bindings/tmux/powerline.conf"; POWERLINE_CONF=$(cygpath -u "$POWERLINE_CONF" 2>/dev/null || echo "$POWERLINE_CONF"); test -f "$POWERLINE_CONF" && tmux source-file "$POWERLINE_CONF"'
+{{- end }}
+
+# Tmux Plugin Manager
+{{- if and (eq .chezmoi.os "linux") (eq .chezmoi.osRelease.idLike "debian") }}
+run -b '/usr/share/tmux-plugin-manager/tpm'
+{{- else }}
+run -b '~/.tmux/plugins/tpm/tpm'
+{{- end }}

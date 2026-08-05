@@ -1,0 +1,19 @@
+# RHEL/Fedora packages (dnf/yum)
+tmux
+curl
+wget
+vim-X11
+automake
+eza
+gcc
+gcc-c++
+kernel-devel
+python3-devel
+python3-pip
+python3-psutil
+python3-powerline
+ruff
+ripgrep
+fzf
+clang
+cmake

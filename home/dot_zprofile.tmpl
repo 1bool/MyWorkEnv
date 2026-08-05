@@ -1,0 +1,30 @@
+# MSYS2: zsh doesn't source /etc/profile — do it here
+{{- if eq .chezmoi.os "windows" }}
+emulate sh
+. /etc/profile
+emulate zsh
+{{- end }}
+
+{{- if eq .chezmoi.os "windows" }}
+# chezmoi: isolate config per MSYS2 installation
+export XDG_CONFIG_HOME="$(cygpath -m "$HOME/.config" 2>/dev/null || echo "$HOME/.config")"
+# add Windows user bin for native exes (chezmoi etc.)
+export PATH="$(cygpath -u "$USERPROFILE/.local/bin" 2>/dev/null || echo "$USERPROFILE/.local/bin"):$PATH"
+{{- end }}
+
+# set PATH to include user's private bin
+if [ -d "$HOME/bin" ] ; then
+    PATH="$HOME/bin:$PATH"
+fi
+
+# set PATH so it includes user's private bin if it exists
+if [ -d "$HOME/.local/bin" ] ; then
+    PATH="$HOME/.local/bin:$PATH"
+fi
+
+EDITOR='vim'
+
+# load local customizations
+if [ -f "$HOME/.zprofile.local" ]; then
+    . "$HOME/.zprofile.local"
+fi

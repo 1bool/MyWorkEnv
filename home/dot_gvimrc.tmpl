@@ -1,0 +1,65 @@
+{{- if eq .chezmoi.os "windows" }}
+set encoding=utf-8
+set guioptions-=r  "remove right-hand scroll bar
+{{- end }}
+set guioptions-=T  "remove toolbar
+set guioptions-=m  "remove menu bar
+set guioptions-=r  "remove right-hand scroll bar
+set guioptions-=L  "remove left-hand scroll bar
+nnoremap <C-F1> :if &go=~#'m'<Bar>set go-=m<Bar>else<Bar>set go+=m<Bar>endif<CR>
+nnoremap <C-F2> :if &go=~#'T'<Bar>set go-=T<Bar>else<Bar>set go+=T<Bar>endif<CR>
+nnoremap <C-F3> :if &go=~#'r'<Bar>set go-=r<Bar>else<Bar>set go+=r<Bar>endif<CR>
+
+" For airline
+if !exists('g:airline_symbols')
+	let g:airline_symbols = {}
+endif
+" unicode symbols
+let g:airline_left_sep = '»'
+let g:airline_left_sep = '▶'
+let g:airline_right_sep = '«'
+let g:airline_right_sep = '◀'
+let g:airline_symbols.crypt = '🔒'
+let g:airline_symbols.linenr = '␊'
+let g:airline_symbols.linenr = '␤'
+let g:airline_symbols.linenr = '¶'
+let g:airline_symbols.maxlinenr = '☰'
+let g:airline_symbols.maxlinenr = ''
+let g:airline_symbols.branch = '⎇'
+let g:airline_symbols.paste = 'ρ'
+let g:airline_symbols.paste = 'Þ'
+let g:airline_symbols.paste = '∥'
+let g:airline_symbols.spell = 'Ꞩ'
+let g:airline_symbols.notexists = '∄'
+let g:airline_symbols.whitespace = 'Ξ'
+let g:airline_symbols.space = "\ua0"
+" powerline symbols
+let g:airline_left_sep = ''
+let g:airline_left_alt_sep = ''
+let g:airline_right_sep = ''
+let g:airline_right_alt_sep = ''
+let g:airline_symbols.branch = ''
+let g:airline_symbols.readonly = ''
+let g:airline_symbols.linenr = ''
+
+colorscheme solarized
+
+if strftime("%H") > 7 && strftime("%H") < 18
+  set background=light
+{{- if eq .chezmoi.os "windows" }}
+if has("gui_win32")
+	set formatoptions+=mM
+	language messages zh_CN.utf-8
+	set langmenu=zh_CN.utf-8
+	runtime! delmenu.vim
+	runtime! menu.vim
+	set guifont=FiraCode_NF:h12:cANSI:qDRAFT
+{{- else }}
+else
+	set guifont=FiraCode\ Nerd\ Font\ Mono\ 12
+{{- end }}
+
+" load local customizations
+if filereadable($HOME."/.gvimrc.local")
+  source $HOME/.gvimrc.local
+endif

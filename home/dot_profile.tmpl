@@ -1,0 +1,57 @@
+# ~/.profile: executed by the command interpreter for login shells.
+# This file is not read by bash(1), if ~/.bash_profile or ~/.bash_login
+# exists.
+# see /usr/share/doc/bash/examples/startup-files for examples.
+# the files are located in the bash-doc package.
+
+# the default umask is set in /etc/profile; for setting the umask
+# for ssh logins, install and configure the libpam-umask package.
+#umask 022
+
+# set PATH so it includes user's private bin if it exists
+if [ -d "$HOME/bin" ] ; then
+    PATH="$HOME/bin:$PATH"
+fi
+
+# set PATH so it includes user's private bin if it exists
+if [ -d "$HOME/.local/bin" ] ; then
+    PATH="$HOME/.local/bin:$PATH"
+fi
+
+{{- if eq .chezmoi.os "windows" }}
+# chezmoi: isolate config per MSYS2 installation
+export XDG_CONFIG_HOME="$(cygpath -m "$HOME/.config" 2>/dev/null || echo "$HOME/.config")"
+# add Windows user bin for native exes (chezmoi etc.)
+BIN="$(cygpath -u "$USERPROFILE/.local/bin" 2>/dev/null || echo "$USERPROFILE/.local/bin")"
+if [ -d "$BIN" ]; then
+    PATH="$BIN:$PATH"
+fi
+{{- end }}
+
+{{- if eq .chezmoi.os "darwin" }}
+# For mac not having /usr/local/{,s}bin needed by brew
+PATH="/usr/local/bin:/usr/local/sbin:$PATH"
+{{- end }}
+
+EDITOR='vim'
+
+{{- if .isWSL }}
+LANG=zh_CN.UTF-8
+export DISPLAY=:0
+{{- end }}
+{{- if eq .chezmoi.os "windows" }}
+LANG=zh_CN.UTF-8
+{{- end }}
+
+# if running bash
+if [ -n "$BASH_VERSION" ]; then
+    # include .bashrc if it exists
+    if [ -f "$HOME/.bashrc" ]; then
+        . "$HOME/.bashrc"
+    fi
+fi
+
+# load local customizations
+if [ -f "$HOME/.profile.local" ]; then
+    . "$HOME/.profile.local"
+fi

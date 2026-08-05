@@ -1,0 +1,60 @@
+#!/usr/bin/env bash
+# configure-claude-msys2 — set Claude Code SHELL to MSYS2 wrapper (runs in ~/.local/bin)
+#
+# Called from install.sh when MSYS2 is detected.
+# Targets %HOME%/.claude/settings.json (Windows user profile, not MSYS2 /home).
+set -euo pipefail
+
+wrapper_path() {
+    # Return Windows-style path to the msys2-shell wrapper
+    # USERNAME is set by MSYS2 from the Windows environment
+    echo "C:/Users/${USERNAME}/.local/bin/msys2-shell"
+}
+
+CLAUDE_DIR="C:/Users/${USERNAME}/.claude"
+SETTINGS_FILE="${CLAUDE_DIR}/settings.json"
+WRAPPER="$(wrapper_path)"
+
+mkdir -p "$(cygpath -u "$CLAUDE_DIR")"
+
+if [[ ! -f "$(cygpath -u "$SETTINGS_FILE")" ]]; then
+    echo "Creating ${SETTINGS_FILE}..."
+    cat > "$(cygpath -u "$SETTINGS_FILE")" <<EOF
+{
+  "env": {
+    "SHELL": "${WRAPPER}"
+  }
+}
+EOF
+    echo "Done."
+    exit 0
+fi
+
+SETTINGS="$(cygpath -u "$SETTINGS_FILE")"
+
+# If SHELL already set, update it in place
+if grep -q '"SHELL"' "$SETTINGS"; then
+    echo "Updating SHELL in ${SETTINGS_FILE}..."
+    sed -i "s|\"SHELL\": *\"[^\"]*\"|\"SHELL\": \"${WRAPPER}\"|" "$SETTINGS"
+    echo "Done."
+    exit 0
+fi
+
+# SHELL not set — insert after "env": { line, or after first line for bare objects
+echo "Adding SHELL to ${SETTINGS_FILE}..."
+if grep -q '"env"' "$SETTINGS"; then
+    # Insert SHELL after "env": { line
+    sed -i "/\"env\"/,/\"}/{
+        /\"env\".*/!{
+            /}/i\\
+    \"SHELL\": \"${WRAPPER}\"
+        }
+    }" "$SETTINGS"
+else
+    # No env block, add after opening brace
+    sed -i "/^{/a\\
+  \"env\": {\\
+    \"SHELL\": \"${WRAPPER}\"\\
+  }," "$SETTINGS"
+fi
+echo "Done."

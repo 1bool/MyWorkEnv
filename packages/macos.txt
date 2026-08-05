@@ -1,0 +1,14 @@
+# macOS packages (brew)
+tmux
+curl
+wget
+macvim
+eza
+ripgrep
+fzf
+ruff
+lua
+llvm
+cmake
+starship
+powerline

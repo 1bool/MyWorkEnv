@@ -1,0 +1,287 @@
+if has("win32")
+	" Make windows use ~/.vim too, I don't want to use _vimfiles
+	set runtimepath^=~/.vim,$VIMRUNTIME
+	set pythonthreedll=python311.dll
+elseif has("win32unix")
+	set pythonthreedll=msys-python3.12.dll
+	map te :ter ++close ++rows=12<CR>
+else
+	map te :ter ++close ++rows=12<CR>
+endif
+call plug#begin('~/.vim/plugged')
+runtime! pluginrc.vim
+call plug#end()
+
+syntax on
+" If using a dark background within the editing area and syntax highlighting
+" turn on this option as well
+" set background=dark
+
+" Uncomment the following to have Vim jump to the last position when
+" reopening a file
+if has("autocmd")
+	au BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") |
+				\	exe "normal! g'\"" | endif
+endif
+
+" Uncomment the following to have Vim load indentation rules and plugins
+" according to the detected filetype.
+if has("autocmd")
+	filetype plugin indent on
+endif
+
+" Normally we use vim-extensions. If you want true vi-compatibility
+" remove change the following statements
+set nocompatible	" Use Vim defaults instead of 100% vi compatibility
+set backspace=2		" more powerful backspacing
+
+" The following are commented out as they cause vim to behave a lot
+" differently from regular Vi. They are highly recommended though.
+set showcmd		" Show (partial) command in status line.
+set showmatch		" Show matching brackets.
+set ignorecase		" Do case insensitive matching
+set smartcase		" Do smart case matching
+set incsearch		" Incremental search
+set autowrite		" Automatically save before commands like :next and :make
+set hidden		" Hide buffers when they are abandoned
+set mouse=a		" Enable mouse usage (all modes)
+
+set hlsearch " turns on search highlighting
+set tags=./tags;/
+set t_Co=256
+set laststatus=2 " For powerline always show
+set wildmenu
+set autoindent
+set smartindent
+set smarttab
+" set expandtab
+
+if &term =~ '256color'
+	if exists('+termguicolors')
+		let &t_8f = "\<Esc>[38;2;%lu;%lu;%lum"
+		let &t_8b = "\<Esc>[48;2;%lu;%lu;%lum"
+		set termguicolors
+	endif
+endif
+
+if !&scrolloff
+	set scrolloff=1
+endif
+if !&sidescrolloff
+	set sidescrolloff=5
+endif
+set display+=lastline
+
+set fencs=utf-8,gb18030,cp936,big5,default,ucs-bom,latin1
+set ffs=unix,dos
+
+" Use system clipboard
+vnoremap <S-Del> "+x
+vnoremap <C-X> "+x
+vnoremap <C-Insert> "+y
+vnoremap <C-C> "+y
+map <silent> <S-Insert> "+gP
+imap <silent> <C-V> <ESC>"+gPa
+cmap <silent> <C-V> <C-R>+
+
+" let mapleader = "\<Space>"
+
+" Easier to switch window
+noremap <C-J> <C-W>j
+noremap <C-K> <C-W>k
+noremap <C-H> <C-W>h
+noremap <C-L> <C-W>l
+
+" Easier to switch buffer
+set switchbuf=usetab,newtab
+map gn :bn<cr>
+map gp :bp<cr>
+map gx :bd<cr>
+nnoremap <C-TAB> :sbnext<CR>
+nnoremap <C-S-TAB> :sbprevious<CR>
+
+" Open file explorer
+map ge :Lexplore<CR>
+let g:netrw_winsize = 40
+let g:netrw_liststyle = 3
+let g:netrw_browse_split = 4
+let g:netrw_banner = 0
+
+" Open buffer explorer
+map gb :BufExplorer<CR>
+
+" Man
+runtime ftplugin/man.vim
+nnoremap K :Man <cword><cr>
+
+" Some people like the visual feedback shown in the status line
+" by the following alternative for your vimrc
+nnoremap <F2> :set invpaste paste?<CR>
+set pastetoggle=<F2>
+set noshowmode " already displayed in status line
+
+" Toggle line number
+nmap <C-N><C-N> :setlocal invnumber<CR>
+
+" Windows resize
+nmap wK :resize -5<CR>
+nmap wJ :resize +5<CR>
+nmap wH :vertical resize -5<CR>
+nmap wL :vertical resize +5<CR>
+
+" Toggle background
+map <Leader>b :let &background = ( &background == "dark"? "light" : "dark" )<CR>
+
+" Go back and forth as like in browser with mouse
+nnoremap <X1Mouse> <C-O>
+nnoremap <X2Mouse> <C-I>
+
+if has("autocmd")
+	autocmd BufEnter,BufWrite,FileType c,cpp,python,sh,java,javascript,perl,ruby,php,make,vim,go
+				\ setlocal number | setlocal cursorline expandtab shiftwidth=4 softtabstop=4
+	autocmd FileType c,cpp,python,sh,java,javascript,perl,ruby,php,vim,go
+				\ setlocal expandtab shiftwidth=4 softtabstop=4
+	autocmd VimEnter,FileType * call PluginSetup()
+	autocmd BufReadPost * DetectIndent 
+	" vim -b : edit binary using xxd-format!
+	augroup Binary
+		au!
+		au BufReadPre  *.bin let &bin=1
+		au BufReadPost *.bin if &bin | %!xxd
+		au BufReadPost *.bin setlocal ft=xxd | endif
+		au BufWritePre *.bin if &bin | %!xxd -r
+		au BufWritePre *.bin endif
+		au BufWritePost *.bin if &bin | %!xxd
+		au BufWritePost *.bin setlocal nomod | endif
+	augroup END
+endif
+
+function! PluginSetup()
+	if exists(":TagbarToggle")
+		let g:tagbar_width = 40
+		let g:tagbar_zoomwidth = 0
+		let g:tagbar_autoclose = 1
+		let g:tagbar_autofocus = 1
+		let g:tagbar_sort = 0
+		let g:tagbar_compact = 1
+		let g:tagbar_indent = 1
+		nnoremap <silent> <F7> :TagbarToggle<CR>
+		nnoremap tt :TagbarToggle<CR>
+	endif
+	if exists(":NERDTreeToggle")
+		let g:NERDTreeWinSize=40 "设置 NERDTree 子窗口宽度
+		let g:NERDTreeWinPos="left" "设置 NERDTree 子窗口位置
+		let g:NERDTreeShowBookmarks = 1
+		let g:NERDTreeQuitOnOpen = 1
+		let g:NERDTreeMinimalUI = 1
+		let g:NERDTreeAutoCenterThreshold = 8
+		let g:NERDTreeNaturalSort = 1
+		let g:NERDTreeChDirMode = 3
+		if exists(":NERDTreeToggleVCS")
+			nnoremap <silent> <F6> :NERDTreeToggleVCS<CR>
+			nnoremap tf :NERDTreeToggleVCS<CR>
+		else
+			nnoremap <silent> <F6> :NERDTreeToggle<CR>
+			nnoremap tf :NERDTreeToggle<CR>
+		endif
+	endif
+if exists(":Rg")
+			nmap gs :Rg<CR>
+			nnoremap <leader>* :Rg <cword><CR>
+		endif
+		" nmap <silent> <Leader>i <Plug>IndentGuidesToggle
+	" endif
+	if exists(":IndentLinesToggle")
+		" let g:indentLine_defaultGroup = 'SpecialKey'
+		" let g:indentLine_setColors = 0
+		let g:indentLine_fileType = [ 'c', 'cpp', 'python', 'go', 'sh', 'make', 'spec', 'vim', 'yaml', 'json',
+					\ 'perl', 'java', 'javascript', 'lua', 'php', 'tcl', 'ruby', 'verilog_systemverilog' ]
+		let g:indentLine_char_list = ['|', '¦', '┆', '┊']
+		let g:indentLine_bufTypeExclude = ['help', 'terminal', 'quickfix']
+		let g:indentLine_bufNameExclude = ['_.*', 'NERD_tree.*']
+		nmap <silent> <Leader>i :IndentLinesToggle<CR>
+		nmap <silent> <Leader>l :LeadingSpaceToggle<CR>
+	endif
+	if exists(":Git")
+		nmap <silent> <Leader>g :Git<CR>
+		nmap <silent> <Leader>d :Gdiffsplit<CR>
+	endif
+	if exists(":VerilogFollowInstance")
+		nnoremap <leader>v :VerilogFollowInstance<CR>
+		nnoremap <leader>V :VerilogFollowPort<CR>
+		nnoremap <leader>u :VerilogGotoInstanceStart<CR>
+	endif
+endfunction
+
+
+" air-line
+let g:airline_powerline_fonts = 1
+"let g:Powerline_symbols = 'fancy'
+let g:airline#extensions#tabline#enabled = 1
+
+" startify
+let g:startify_change_to_dir = 0
+set viminfo='100,n$HOME/.vim/files/info/viminfo
+
+" ale — async lint engine
+let g:ale_linters_explicit = 1
+let g:ale_lint_on_text_changed = 'normal'
+let g:ale_lint_on_insert_leave = 1
+let g:ale_lint_on_enter = 1
+let g:ale_lint_on_save = 1
+
+" auto cd
+let g:rooter_change_directory_for_non_project_files = 'current'
+let g:rooter_silent_chdir = 1
+
+" Add spaces after comment delimiters by default
+let g:NERDSpaceDelims = 1
+" Align line-wise comment delimiters flush left instead of following code indentation
+let g:NERDDefaultAlign = 'both'
+" Set a language to use its alternate delimiters by default
+let g:NERDAltDelims_c = 1
+" Enable trimming of trailing whitespace when uncommenting
+let g:NERDTrimTrailingWhitespace = 1
+" No nesting
+let g:NERDDefaultNesting = 0
+
+
+" fzf — fuzzy file finder
+nnoremap <C-p> :Files<CR>
+nnoremap <leader>f :Buffers<CR>
+nnoremap <leader>m :History<CR>
+
+let g:python_highlight_all = 1 " python-syntax
+
+" let g:ycm_confirm_extra_conf = 0
+
+
+let g:detectindent_preferred_indent = 4 " specify a preferred indent level when no detection is possible
+
+let g:onedark_terminal_italics = 1
+
+
+set directory^=$HOME/.vim/swap//
+
+{{- if ne .chezmoi.os "windows" }}
+set directory=~/tmp/vim,/var/tmp/vim,/tmp/vim,. " directory to store swap files
+set undodir=~/tmp/vim,/var/tmp/vim,/tmp/vim,. " directory to store undo files
+set undofile
+if has("gui_win32")
+	set formatoptions+=mM
+	language messages zh_CN.utf-8
+	set langmenu=zh_CN.utf-8
+	runtime! delmenu.vim
+	runtime! menu.vim
+	set guifont=FiraCode_NF:h12:cANSI:qDRAFT
+else
+	set guifont=FiraCode\ Nerd\ Font\ Mono\ 12
+endif
+{{- end }}
+
+" Vim customizations - load local config if present
+try
+	if filereadable($HOME."/.vimrc.local")
+  source $HOME/.vimrc.local
+endif
+endtry

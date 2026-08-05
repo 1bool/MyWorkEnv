@@ -1,0 +1,3 @@
+{{- if eq .chezmoi.os "msys" "" | or (eq .chezmoi.os "cygwin") }}
+dot_minttyrc
+{{- end }}

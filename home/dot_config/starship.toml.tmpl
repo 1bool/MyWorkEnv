@@ -1,0 +1,16 @@
+{{- if eq .chezmoi.os "linux" }}
+# Starship config — single-line Linux style
+add_newline = false
+format = "$directory$git_branch$git_status$character"
+
+[directory]
+truncation_length = 5
+truncate_to_repo = true
+
+[git_branch]
+symbol = " "
+
+[character]
+success_symbol = "[❯](green)"
+error_symbol = "[❯](red)"
+{{- end }}
