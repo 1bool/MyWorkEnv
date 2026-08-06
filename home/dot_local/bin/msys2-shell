@@ -1,12 +1,25 @@
 #!/usr/bin/env bash
-# Claude Code → MSYS2 shell wrapper
-# MSYS2 root is read from CONFIG_SITE (set by MSYS2 parent process).
-# ${CONFIG_SITE%/etc/config.site} → e.g. D:/Desktop/msys64
+# Claude Code → MSYS2 bash wrapper
+set -euo pipefail
 
+# Method 1: CONFIG_SITE (set by MSYS2 /etc/profile)
 msys_root="${CONFIG_SITE%/etc/config.site}"
 
-if [[ -z "$msys_root" || ! -x "$msys_root/usr/bin/bash.exe" ]]; then
-    echo "ERROR: Cannot find MSYS2 bash. CONFIG_SITE='$CONFIG_SITE'" >&2
+# Method 2: walk up from script location until /etc/msystem found
+if [[ -z "$msys_root" || ! -f "$msys_root/etc/msystem" ]]; then
+    msys_root=""
+    dir="$(cd "$(dirname "$0")" && pwd -P)"
+    while [[ "$dir" != "/" && "$dir" != "" ]]; do
+        if [[ -f "$dir/etc/msystem" ]]; then
+            msys_root="$dir"
+            break
+        fi
+        dir="$(dirname "$dir")"
+    done
+fi
+
+if [[ -z "$msys_root" ]]; then
+    echo "ERROR: Cannot find MSYS2 root" >&2
     exit 1
 fi
 

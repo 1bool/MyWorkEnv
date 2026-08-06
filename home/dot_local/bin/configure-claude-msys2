@@ -1,25 +1,23 @@
 #!/usr/bin/env bash
-# configure-claude-msys2 — set Claude Code SHELL to MSYS2 wrapper (runs in ~/.local/bin)
+# configure-claude-msys2 — set Claude Code SHELL to MSYS2 wrapper
 #
 # Called from install.sh when MSYS2 is detected.
-# Targets %HOME%/.claude/settings.json (Windows user profile, not MSYS2 /home).
+# Writes to MSYS2 $HOME/.claude/settings.json (isolated via CLAUDE_CONFIG_DIR).
 set -euo pipefail
 
 wrapper_path() {
-    # Return Windows-style path to the msys2-shell wrapper
-    # USERNAME is set by MSYS2 from the Windows environment
-    echo "C:/Users/${USERNAME}/.local/bin/msys2-shell"
+    # Return Windows-style path to msys2-shell inside MSYS2 home
+    cygpath -w "$HOME/.local/bin/msys2-shell"
 }
 
-CLAUDE_DIR="C:/Users/${USERNAME}/.claude"
-SETTINGS_FILE="${CLAUDE_DIR}/settings.json"
+SETTINGS_FILE="$HOME/.claude/settings.json"
 WRAPPER="$(wrapper_path)"
 
-mkdir -p "$(cygpath -u "$CLAUDE_DIR")"
+mkdir -p "$HOME/.claude"
 
-if [[ ! -f "$(cygpath -u "$SETTINGS_FILE")" ]]; then
+if [[ ! -f "$SETTINGS_FILE" ]]; then
     echo "Creating ${SETTINGS_FILE}..."
-    cat > "$(cygpath -u "$SETTINGS_FILE")" <<EOF
+    cat > "$SETTINGS_FILE" <<EOF
 {
   "env": {
     "SHELL": "${WRAPPER}"
@@ -30,31 +28,27 @@ EOF
     exit 0
 fi
 
-SETTINGS="$(cygpath -u "$SETTINGS_FILE")"
-
 # If SHELL already set, update it in place
-if grep -q '"SHELL"' "$SETTINGS"; then
+if grep -q '"SHELL"' "$SETTINGS_FILE"; then
     echo "Updating SHELL in ${SETTINGS_FILE}..."
-    sed -i "s|\"SHELL\": *\"[^\"]*\"|\"SHELL\": \"${WRAPPER}\"|" "$SETTINGS"
+    sed -i "s|\"SHELL\": *\"[^\"]*\"|\"SHELL\": \"${WRAPPER}\"|" "$SETTINGS_FILE"
     echo "Done."
     exit 0
 fi
 
-# SHELL not set — insert after "env": { line, or after first line for bare objects
+# SHELL not set — insert after "env": { line, or add env block
 echo "Adding SHELL to ${SETTINGS_FILE}..."
-if grep -q '"env"' "$SETTINGS"; then
-    # Insert SHELL after "env": { line
+if grep -q '"env"' "$SETTINGS_FILE"; then
     sed -i "/\"env\"/,/\"}/{
         /\"env\".*/!{
             /}/i\\
     \"SHELL\": \"${WRAPPER}\"
         }
-    }" "$SETTINGS"
+    }" "$SETTINGS_FILE"
 else
-    # No env block, add after opening brace
     sed -i "/^{/a\\
   \"env\": {\\
     \"SHELL\": \"${WRAPPER}\"\\
-  }," "$SETTINGS"
+  }," "$SETTINGS_FILE"
 fi
 echo "Done."

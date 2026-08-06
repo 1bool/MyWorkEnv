@@ -29,6 +29,8 @@ fi
 	{{- if env "MSYSTEM" }}
 	# add MSYS2 sbin for system daemons (e.g. unfsd)
 	PATH="/ucrt64/sbin:$PATH"
+	# Claude Code: use MSYS2 home for config
+	export CLAUDE_CONFIG_DIR="$(cygpath -w "$HOME/.claude")"
 	{{- end }}
 {{- end }}
 
