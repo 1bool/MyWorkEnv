@@ -10,6 +10,10 @@ emulate zsh
 export XDG_CONFIG_HOME="$(cygpath -m "$HOME/.config" 2>/dev/null || echo "$HOME/.config")"
 # add Windows user bin for native exes (chezmoi etc.)
 export PATH="$(cygpath -u "$USERPROFILE/.local/bin" 2>/dev/null || echo "$USERPROFILE/.local/bin"):$PATH"
+	{{- if env "MSYSTEM" }}
+	# add MSYS2 sbin for system daemons (e.g. unfsd)
+	export PATH="/ucrt64/sbin:$PATH"
+	{{- end }}
 {{- end }}
 
 # set PATH to include user's private bin

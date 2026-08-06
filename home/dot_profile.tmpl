@@ -26,6 +26,10 @@ BIN="$(cygpath -u "$USERPROFILE/.local/bin" 2>/dev/null || echo "$USERPROFILE/.l
 if [ -d "$BIN" ]; then
     PATH="$BIN:$PATH"
 fi
+	{{- if env "MSYSTEM" }}
+	# add MSYS2 sbin for system daemons (e.g. unfsd)
+	PATH="/ucrt64/sbin:$PATH"
+	{{- end }}
 {{- end }}
 
 {{- if eq .chezmoi.os "darwin" }}
