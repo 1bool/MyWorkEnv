@@ -274,7 +274,7 @@ plugins-update:
 # ── Claude Code ──
 claude-code:
     @echo "=== Claude Code ==="; \
-    command -v node >/dev/null 2>&1 || { echo "Node.js required. Run 'just packages' first."; exit 1; }; \
+    command -v npm >/dev/null 2>&1 || { echo "npm required. Run 'just packages' first."; exit 1; }; \
     npm set prefix "$HOME/.local" 2>/dev/null; \
     if command -v claude >/dev/null 2>&1; then \
         echo "  ✓ claude (up to date)"; \
@@ -284,7 +284,7 @@ claude-code:
 
 claude-code-update:
     @echo "=== Claude Code update ==="; \
-    command -v node >/dev/null 2>&1 || { echo "Node.js required."; exit 1; }; \
+    command -v npm >/dev/null 2>&1 || { echo "npm required."; exit 1; }; \
     npm set prefix "$HOME/.local" 2>/dev/null; \
     npm update -g @anthropic-ai/claude-code 2>/dev/null && echo "  ✓ claude-code updated"
 
