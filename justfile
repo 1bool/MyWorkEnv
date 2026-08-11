@@ -231,12 +231,14 @@ migrate:
         rm -f ~/.dircolors; \
     elif is_linux || is_wsl; then \
         echo "Removing legacy packages..."; \
-        is_debian && { sudo apt-get -y remove exuberant-ctags silversearcher-ag powerline-go vim-scripts vim-addon-manager vim-airline-themes python3-autopep8 2>/dev/null || true; }; \
+        is_debian && { sudo apt-get -y remove exuberant-ctags silversearcher-ag powerline-go vim-scripts vim-addon-manager vim-airline vim-airline-themes python3-autopep8 2>/dev/null || true; }; \
         is_rhel && { sudo dnf -y remove ctags the_silver_searcher 2>/dev/null || true; }; \
         rm -f ~/.dircolors; \
     fi; \
     rm -rf fonts LS_COLORS dotfiles snippets 2>/dev/null; \
-    for d in syntastic ctrlp ctrlp.vim vim-grepper autopep8 nerdtree nerdcommenter YouCompleteMe vim-airline-themes; do rm -rf ~/.vim/plugged/"$d" 2>/dev/null; done; \
+    for d in syntastic ctrlp ctrlp.vim vim-grepper autopep8 YouCompleteMe; do rm -rf ~/.vim/plugged/"$d" 2>/dev/null; done; \
+    rm -rf ~/.vim/bundle 2>/dev/null; \
+    rm -f ~/.vim/plugin/ctrlp.vim ~/.vim/plugin/lastplace.vim ~/.vim/plugin/youcompleteme.vim 2>/dev/null; \
     FDIR="${XDG_DATA_HOME:-$HOME/.local/share}/fonts/NerdFonts"; \
     if [ -d "$FDIR" ]; then \
         rm -f "$FDIR"/*.ttf "$FDIR"/*.otf 2>/dev/null; \
