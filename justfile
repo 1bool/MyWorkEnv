@@ -76,7 +76,7 @@ packages:
         done; \
         [ -n "$MINGW" ] && pacman -S --noconfirm --needed -- $MINGW; \
         pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple 2>/dev/null || true; \
-        pip install --user --break-system-packages powerline-status 2>/dev/null || true; \
+        pip install --user --break-system-packages powerline-status || echo "  ⚠ powerline-status install failed"; \
     elif is_macos; then \
         command -v brew >/dev/null || /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"; \
         brew install $(grep -h -v '^#' packages/base.txt packages/macos.txt); \
