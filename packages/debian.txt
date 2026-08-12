@@ -11,7 +11,6 @@ fontconfig
 python3-psutil
 python3-powerline
 starship
-npm
 language-pack-zh-hans
 tmux-plugin-manager
 xsel
