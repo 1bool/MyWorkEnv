@@ -50,6 +50,17 @@ function dirdiff()
     vim $@ -c "DirDiff $DIR1 $DIR2"
 }
 
+{{- if eq .chezmoi.os "windows" }}
+# Home/End keys — MSYS2 zsh doesn't auto-bind from terminfo (unlike Linux).
+# Bind all possible sequences: xterm normal/app mode + screen (tmux) editing keys.
+bindkey '\e[H'   beginning-of-line
+bindkey '\e[F'   end-of-line
+bindkey '\eOH'   beginning-of-line
+bindkey '\eOF'   end-of-line
+bindkey '\e[1~'  beginning-of-line
+bindkey '\e[4~'  end-of-line
+{{- end }}
+
 # Starship prompt
 eval "$(starship init zsh)"
 
