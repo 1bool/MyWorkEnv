@@ -138,7 +138,7 @@ dotfiles:
 
 dotfiles-update:
     @echo "=== Update dotfiles ==="; \
-    git pull --ff-only 2>/dev/null || echo "  (git pull failed — check SSH/network)"; \
+    git pull --ff-only || echo "  (git pull failed — see error above; likely uncommitted changes or network)"; \
     chezmoi apply --interactive=false
 
 # ── Nerd Fonts (download + install) ──
