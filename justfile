@@ -124,8 +124,7 @@ msys2:
         [ -f "$s" ] || continue; \
         [ -L ~/.local/bin/$(basename "$s") ] && continue; \
         ln -sf "$(pwd)/$s" ~/.local/bin/ 2>/dev/null && echo "  ✓ $(basename "$s")"; \
-    done; \
-    [ -x ~/.local/bin/configure-claude-msys2 ] && ~/.local/bin/configure-claude-msys2 || true
+    done
 
 # ── Dotfiles ──
 dotfiles:

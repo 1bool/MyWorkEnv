@@ -1,0 +1,7 @@
+# Claude Code Bash 工具引导（BASH_ENV）
+# bash 对非交互 shell 会自动 source 此文件。
+# 仅当从 MSYS2 启动（MSYSTEM 已设置）时铺环境；cmd/powershell 启动（MSYSTEM 未设）不动作。
+if [ -n "${MSYSTEM:-}" ]; then
+    [ -f /etc/profile ] && . /etc/profile      # MSYSTEM 派生 PATH：/ucrt64/bin 等
+    [ -f "$HOME/.profile" ] && . "$HOME/.profile"  # sbin + CLAUDE_CONFIG_DIR + XDG 等
+fi
