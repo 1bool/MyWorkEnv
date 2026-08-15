@@ -8,6 +8,7 @@ eza
 ripgrep
 fzf
 fontconfig
+python3-pip
 python3-psutil
 python3-powerline
 starship

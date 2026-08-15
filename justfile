@@ -12,11 +12,28 @@ gh_proxy := env_var_or_default("GH_PROXY", "https://ghfast.top/")
 default:
     @just --list --unsorted
 
-install: bootstrap packages msys2 dotfiles fonts plugins claude-code
+install: prep bootstrap packages msys2 dotfiles fonts plugins claude-code
     @echo "=== MyWorkEnv installed ==="
 
 update: packages-update dotfiles-update plugins-update bootstrap-update claude-code-update
     @echo "=== MyWorkEnv updated ==="
+
+# ── Prep: one-time system setup (passwordless sudo, WSL PATH fix) ──
+prep:
+    @echo "=== Prep ==="; \
+    source scripts/detect.sh; \
+    if is_msys2; then echo "  (MSYS2 — nothing to do)"; exit 0; fi; \
+    command -v sudo >/dev/null 2>&1 || { echo "  ✗ sudo not found"; exit 1; }; \
+    if sudo -n true 2>/dev/null; then echo "  ✓ passwordless sudo already set"; \
+    else \
+        echo "  → enabling passwordless sudo (enter password once)..."; \
+        echo "$USER ALL=(ALL) NOPASSWD: ALL" | sudo tee "/etc/sudoers.d/nopass_for_$USER" >/dev/null && sudo chmod 0440 "/etc/sudoers.d/nopass_for_$USER" && echo "  ✓ passwordless sudo enabled"; \
+    fi; \
+    if is_wsl; then \
+        if grep -q 'appendWindowsPath' /etc/wsl.conf 2>/dev/null; then echo "  ✓ /etc/wsl.conf already set"; \
+        else printf '[interop]\nappendWindowsPath = false\n' | sudo tee -a /etc/wsl.conf >/dev/null && echo "  ✓ WSL: appendWindowsPath disabled (restart WSL to apply)"; \
+        fi; \
+    fi
 
 # ── Bootstrap ──
 bootstrap:
