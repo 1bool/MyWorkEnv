@@ -78,7 +78,7 @@ packages:
         echo 'Server = https://mirrors.ustc.edu.cn/msys2/msys/$arch/' >> /etc/pacman.d/mirrorlist.msys; \
         echo 'Server = https://repo.msys2.org/msys/$arch/' >> /etc/pacman.d/mirrorlist.msys; \
         pacman -Sy --noconfirm --needed; \
-        pacman -S --noconfirm --needed $(grep -v '^#' packages/base.txt) $(grep -v '^#' packages/cygwin-msys.txt); \
+        pacman -S --noconfirm --needed $(grep -v '^#' packages/base.txt) $(grep -v '^#' packages/cygwin-msys.txt) || { echo "  ✗ pacman install failed — some packages missing"; exit 1; }; \
         MINGW=""; \
         for pkg in $(grep -v '^#' packages/cygwin-mingw.txt); do \
             MINGW="$MINGW ${MINGW_PACKAGE_PREFIX}-$pkg"; \
@@ -88,7 +88,7 @@ packages:
         pip install --user --break-system-packages powerline-status || echo "  ⚠ powerline-status install failed"; \
     elif is_macos; then \
         command -v brew >/dev/null || /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"; \
-        brew install $(grep -h -v '^#' packages/base.txt packages/macos.txt); \
+        brew install $(grep -h -v '^#' packages/base.txt packages/macos.txt) || { echo "  ✗ brew install failed — some packages missing"; exit 1; }; \
     elif is_debian; then \
         for src in /etc/apt/sources.list /etc/apt/sources.list.d/ubuntu.sources; do \
             [ -f "$$src" ] && sudo sed -i \
@@ -97,14 +97,14 @@ packages:
                 "$$src"; \
         done; \
         sudo apt-get update; \
-        sudo apt-get -y install $(grep -h -v '^#' packages/base.txt packages/debian.txt); \
+        sudo apt-get -y install $(grep -h -v '^#' packages/base.txt packages/debian.txt) || { echo "  ✗ apt install failed — some packages missing"; exit 1; }; \
         pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple 2>/dev/null || true; \
         [ -f packages/pip.txt ] && for pkg in $(grep -v '^#' packages/pip.txt); do \
             command -v "$pkg" >/dev/null 2>&1 && continue; \
             pip install --user --break-system-packages "$pkg" || true; \
         done; \
     elif is_rhel; then \
-        sudo dnf -y install $(grep -h -v '^#' packages/base.txt packages/fedora.txt); \
+        sudo dnf -y install $(grep -h -v '^#' packages/base.txt packages/fedora.txt) || { echo "  ✗ dnf install failed — some packages missing"; exit 1; }; \
     fi
 
 packages-update:
