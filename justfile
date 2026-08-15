@@ -168,7 +168,7 @@ fonts:
             for f in $FONTS; do \
                 echo -n "  → $f ... "; \
                 T=$(mktemp -d); \
-                curl -fsSL "$B/$f.zip" -o "$T/$f.zip" 2>/dev/null || { echo "download ✗"; rm -rf "$T"; continue; }; \
+                curl -fL --connect-timeout 30 --max-time 600 --retry 3 "$B/$f.zip" -o "$T/$f.zip" || { echo "download ✗"; rm -rf "$T"; continue; }; \
                 rm -rf "$D/$f" 2>/dev/null; unzip -qo "$T/$f.zip" -d "$D/$f" 2>/dev/null || { echo "unzip ✗"; rm -rf "$T"; continue; }; \
                 rm -rf "$T"; echo "✓"; \
             done; \
@@ -184,7 +184,7 @@ fonts:
             if is_macos; then ls /Library/Fonts/$f-Regular.ttf >/dev/null 2>&1 && { echo "✓"; continue; }; \
             elif is_linux; then [ -d "${XDG_DATA_HOME:-$HOME/.local/share}/fonts/NerdFonts/$f" ] && { echo "✓"; continue; }; \
             fi; \
-            curl -fsSL "$B/$f.zip" -o "$T/$f.zip" 2>/dev/null || { echo "download ✗"; continue; }; \
+            curl -fL --connect-timeout 30 --max-time 600 --retry 3 "$B/$f.zip" -o "$T/$f.zip" || { echo "download ✗"; continue; }; \
             unzip -qo "$T/$f.zip" -d "$T/$f" 2>/dev/null || { echo "unzip ✗"; continue; }; \
             added=0; skipped=0; \
             for ttf in "$T"/$f/*.ttf; do \
@@ -269,18 +269,28 @@ migrate:
     echo "=== Migration complete ==="
 plugins:
     @echo "=== Plugins ==="; \
+    if [ -n "{{ gh_proxy }}" ]; then \
+        export GIT_CONFIG_COUNT=1; \
+        export GIT_CONFIG_KEY_0="url.{{ gh_proxy }}https://github.com/.insteadOf"; \
+        export GIT_CONFIG_VALUE_0="https://github.com/"; \
+    fi; \
     if [ -f ~/.vim/autoload/plug.vim ]; then echo "  ✓ vim-plug"; \
     else curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
         https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim 2>/dev/null && echo "  ✓ vim-plug"; fi; \
     mkdir -p ~/.vim; cp -f "$(pwd)/home/dot_vim/plugrc.vim" ~/.vim/pluginrc.vim 2>/dev/null && echo "  ✓ pluginrc" || echo "  ✗ pluginrc"; \
-    command -v vim >/dev/null 2>&1 && { [ -f ~/.vim/plugged ] && rm ~/.vim/plugged; mkdir -p ~/.vim/plugged; vim -i NONE -c 'PlugInstall | quitall' >/dev/null 2>&1; echo "  ✓ vim plugins"; }; \
+    command -v vim >/dev/null 2>&1 && { [ -f ~/.vim/plugged ] && rm ~/.vim/plugged; mkdir -p ~/.vim/plugged; echo "  installing vim plugins (git)..."; vim -i NONE -c 'PlugInstall | quitall' 2>&1; echo "  ✓ vim plugins"; }; \
     if [ -d ~/.tmux/plugins/tpm ]; then echo "  ✓ tpm"; \
-    else git clone --depth 1 https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm 2>/dev/null && echo "  ✓ tpm"; fi
+    else git clone --depth 1 https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm && echo "  ✓ tpm" || echo "  ✗ tpm"; fi
 
 plugins-update:
-    @echo "=== Update plugins ==="
-    @command -v vim >/dev/null 2>&1 && vim -i NONE +PlugUpdate +qall! >/dev/null 2>&1 || true
-    @[ -d ~/.tmux/plugins/tpm ] && (cd ~/.tmux/plugins/tpm && git pull) || true
+    @echo "=== Update plugins ==="; \
+    if [ -n "{{ gh_proxy }}" ]; then \
+        export GIT_CONFIG_COUNT=1; \
+        export GIT_CONFIG_KEY_0="url.{{ gh_proxy }}https://github.com/.insteadOf"; \
+        export GIT_CONFIG_VALUE_0="https://github.com/"; \
+    fi; \
+    command -v vim >/dev/null 2>&1 && vim -i NONE +PlugUpdate +qall! 2>&1 || true; \
+    [ -d ~/.tmux/plugins/tpm ] && (cd ~/.tmux/plugins/tpm && git pull) || true
 
 # ── Claude Code ──
 claude-code:
