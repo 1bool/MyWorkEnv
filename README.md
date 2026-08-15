@@ -7,7 +7,7 @@ Tested on MSYS2 (UCRT64/CLANG64), Ubuntu, Fedora, and macOS.
 ## Features
 
 - Zsh with starship prompt
-- Vim IDE with 30+ plugins (vim-plug, airline status bar)
+- Vim IDE with 35+ plugins (vim-plug, airline status bar)
 - Tmux with TPM + powerline status bar
 - Nerd Fonts (selective download)
 - Cross-platform package management (pacman/apt/dnf/brew)
@@ -20,6 +20,12 @@ git clone https://github.com/1bool/MyWorkEnv.git
 cd MyWorkEnv
 ./install.sh          # installs just, then full setup
 ```
+
+> **国内网络**：默认走 `https://ghproxy.net/` 加速镜像下载 chezmoi / Nerd Fonts。默认值在 `justfile` 顶部 `gh_proxy` 变量里配置，改成 `""` 即直连。也可用环境变量临时覆盖：
+> ```bash
+> export GH_PROXY=https://mirror.ghproxy.com/   # 换镜像
+> export GH_PROXY=                               # 直连 GitHub，不走镜像
+> ```
 
 ## Just Recipes
 
@@ -36,8 +42,10 @@ cd MyWorkEnv
 | `just msys2` | MSYS2 config (zsh shell, scripts, Claude) |
 | `just migrate` | Remove legacy packages from old system |
 | `just wt-config` | Add profile to Windows Terminal |
+| `just claude-code` | Install Claude Code |
+| `just fonts-update` | Force reinstall Nerd Fonts |
 
-Update sub-recipes: `just packages-update`, `just dotfiles-update`, `just plugins-update`
+Update sub-recipes: `just packages-update`, `just dotfiles-update`, `just plugins-update`, `just bootstrap-update`, `just claude-code-update`
 
 ## Vim Key Bindings
 
@@ -47,7 +55,7 @@ Update sub-recipes: `just packages-update`, `just dotfiles-update`, `just plugin
 | `<F7>` / `tt` | Toggle tag bar |
 | `<F2>` | Toggle paste mode |
 | `<C-p>` | Fuzzy file find (fzf) |
-| `<leader>b` | Buffer list (fzf) |
+| `<leader>f` | Buffer list (fzf) |
 | `gs` | Grep with ripgrep (Rg) |
 | `<leader>*` | Search word under cursor |
 | `gn` / `gp` | Next / previous buffer |
