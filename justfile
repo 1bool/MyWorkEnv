@@ -60,6 +60,7 @@ bootstrap:
 
 bootstrap-update:
     @echo "  chezmoi: checking..."; \
+    source scripts/detect.sh; ensure_user_bin; \
     chezmoi upgrade 2>/dev/null && echo "    ✓ upgraded" || echo "    ✓ up to date"
 
 # ── System packages ──
@@ -137,6 +138,7 @@ msys2:
 # ── Dotfiles ──
 dotfiles:
     @echo "=== Dotfiles ==="; \
+    source scripts/detect.sh; ensure_user_bin; \
     SRC="$(cygpath -m "$(pwd)" 2>/dev/null || echo "$(pwd)")"; \
     CONF="${XDG_CONFIG_HOME:-$(cygpath -m "$HOME/.config" 2>/dev/null || echo "$HOME/.config")}"; \
     mkdir -p "$CONF/chezmoi"; \
@@ -145,6 +147,7 @@ dotfiles:
 
 dotfiles-update:
     @echo "=== Update dotfiles ==="; \
+    source scripts/detect.sh; ensure_user_bin; \
     git pull --ff-only || echo "  (git pull failed — see error above; likely uncommitted changes or network)"; \
     chezmoi apply --interactive=false
 

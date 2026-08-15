@@ -17,3 +17,20 @@ is_linux()  { [[ "$(uname -s)" == "Linux" ]] && ! is_wsl; }
 is_macos()  { [[ "$(uname -s)" == "Darwin" ]]; }
 is_debian() { [[ "${ID_LIKE:-}" == *debian* ]]; }
 is_rhel()   { [[ "${ID_LIKE:-}" == *rhel* ]] || [[ "${ID_LIKE:-}" == *fedora* ]]; }
+
+# Ensure the user's local bin dir (chezmoi, etc.) is on PATH.
+# Recipes run in fresh shells that haven't sourced ~/.profile yet, so this
+# makes `just <recipe>` work on a fresh machine before dotfiles are deployed.
+ensure_user_bin() {
+    local bin
+    if is_msys2; then
+        bin="$(cygpath -u "$USERPROFILE/.local/bin" 2>/dev/null || echo "$USERPROFILE/.local/bin")"
+    else
+        bin="$HOME/.local/bin"
+    fi
+    [ -d "$bin" ] || return 0
+    case ":$PATH:" in
+        *":$bin:"*) ;;
+        *) export PATH="$bin:$PATH" ;;
+    esac
+}
