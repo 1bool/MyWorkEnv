@@ -24,7 +24,7 @@ prep:
     source scripts/detect.sh; \
     if is_msys2; then echo "  (MSYS2 — nothing to do)"; exit 0; fi; \
     command -v sudo >/dev/null 2>&1 || { echo "  ✗ sudo not found"; exit 1; }; \
-    if sudo -n true 2>/dev/null; then echo "  ✓ passwordless sudo already set"; \
+    if [ -f "/etc/sudoers.d/nopass_for_$USER" ]; then echo "  ✓ passwordless sudo already set"; \
     else \
         echo "  → enabling passwordless sudo (enter password once)..."; \
         echo "$USER ALL=(ALL) NOPASSWD: ALL" | sudo tee "/etc/sudoers.d/nopass_for_$USER" >/dev/null && sudo chmod 0440 "/etc/sudoers.d/nopass_for_$USER" && echo "  ✓ passwordless sudo enabled"; \
@@ -318,7 +318,7 @@ claude-code:
         fi; \
         if [ "$ok" -ne 1 ] && command -v npm >/dev/null 2>&1; then \
             echo "  → claude.ai unreachable, trying npm (npmmirror)..."; \
-            npm install -g @anthropic-ai/claude-code --prefix "$HOME/.local" --registry=https://registry.npmmirror.com && ok=1; \
+            mkdir -p "$HOME/.local" && npm install -g @anthropic-ai/claude-code --prefix "$HOME/.local" --registry=https://registry.npmmirror.com && ok=1; \
         fi; \
         [ "$ok" -eq 1 ] && echo "  ✓ claude-code installed" || echo "  ✗ claude-code install failed (claude.ai blocked, npm unavailable)"; \
     fi
