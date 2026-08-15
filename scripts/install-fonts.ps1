@@ -39,7 +39,7 @@ $total = 0
 $families = Get-ChildItem -Path $fontsDir -Directory
 foreach ($dir in $families) {
     $name = $dir.Name
-    $ttfs = @(Get-ChildItem -Path $dir.FullName | Where-Object {
+    $ttfs = @(Get-ChildItem -Path $dir.FullName -Recurse | Where-Object {
         ($_.Extension -match '\.(ttf|otf)$') -and ($_.Name -notmatch 'Propo')
     })
     $missing = @($ttfs | Where-Object { -not $installed.ContainsKey($_.Name) })

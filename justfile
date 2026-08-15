@@ -42,11 +42,11 @@ bootstrap:
 	else \
 	    if is_msys2; then \
 	        curl -fsSL --connect-timeout 30 --retry 3 get.chezmoi.io \
-	          | sed "s|https://github.com/|{{ gh_proxy }}https://github.com/|g; s|curl -w '%{http_code}'|curl --http1.1 --connect-timeout 30 --max-time 600 -w '%{http_code}'|g; s|-fsSL|-fL|g" \
+	          | sed "s|https://github.com/|{{ gh_proxy }}https://github.com/|g; s|curl -w '%{http_code}'|curl --http1.1 --connect-timeout 30 --speed-limit 1024 --speed-time 60 -w '%{http_code}'|g; s|-fsSL|-fL|g" \
 	          | bash -s -- -b "$USERPROFILE/.local/bin"; \
 	    else \
 	        curl -fsSL --connect-timeout 30 --retry 3 get.chezmoi.io \
-	          | sed "s|https://github.com/|{{ gh_proxy }}https://github.com/|g; s|curl -w '%{http_code}'|curl --http1.1 --connect-timeout 30 --max-time 600 -w '%{http_code}'|g; s|-fsSL|-fL|g" \
+	          | sed "s|https://github.com/|{{ gh_proxy }}https://github.com/|g; s|curl -w '%{http_code}'|curl --http1.1 --connect-timeout 30 --speed-limit 1024 --speed-time 60 -w '%{http_code}'|g; s|-fsSL|-fL|g" \
 	          | bash -s -- -b "$HOME/.local/bin"; \
 	    fi; \
 	    echo "  ✓ chezmoi installed"; \
@@ -84,7 +84,7 @@ packages:
             MINGW="$MINGW ${MINGW_PACKAGE_PREFIX}-$pkg"; \
         done; \
         [ -n "$MINGW" ] && pacman -S --noconfirm --needed -- $MINGW; \
-        pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple 2>/dev/null || true; \
+        pip config get global.index-url 2>/dev/null | grep -q tuna.tsinghua || pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple 2>/dev/null || true; \
         pip install --user --break-system-packages powerline-status || echo "  ⚠ powerline-status install failed"; \
     elif is_macos; then \
         command -v brew >/dev/null || /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"; \
@@ -98,7 +98,7 @@ packages:
         done; \
         sudo apt-get update; \
         sudo apt-get -y install $(grep -h -v '^#' packages/base.txt packages/debian.txt) || { echo "  ✗ apt install failed — some packages missing"; exit 1; }; \
-        pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple 2>/dev/null || true; \
+        pip config get global.index-url 2>/dev/null | grep -q tuna.tsinghua || pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple 2>/dev/null || true; \
         [ -f packages/pip.txt ] && for pkg in $(grep -v '^#' packages/pip.txt); do \
             command -v "$pkg" >/dev/null 2>&1 && continue; \
             pip install --user --break-system-packages "$pkg" || true; \
@@ -161,34 +161,29 @@ fonts:
     B="{{ gh_proxy }}https://github.com/ryanoasis/nerd-fonts/releases/latest/download"; \
     echo "  source: {{ gh_proxy }}github.com/ryanoasis/nerd-fonts"; \
     if is_msys2; then \
-        D="$USERPROFILE/fonts/NerdFonts"; VERFILE="$D/.version"; mkdir -p "$D"; \
-        LATEST=$(curl -s "{{ gh_proxy }}https://api.github.com/repos/ryanoasis/nerd-fonts/releases/latest" 2>/dev/null | grep '"tag_name"' | head -1 | cut -d'"' -f4); \
-        if [ -n "$LATEST" ] && [ -f "$VERFILE" ] && [ "$(cat "$VERFILE")" = "$LATEST" ]; then \
-            echo "  Fonts up to date."; \
-        else \
-            for f in $FONTS; do \
-                echo -n "  → $f ... "; \
-                T=$(mktemp -d); \
-                curl -fL --http1.1 --connect-timeout 30 --max-time 600 --retry 3 "$B/$f.zip" -o "$T/$f.zip" || { echo "download ✗"; rm -rf "$T"; continue; }; \
-                rm -rf "$D/$f" 2>/dev/null; unzip -qo "$T/$f.zip" -d "$D/$f" 2>/dev/null || { echo "unzip ✗"; rm -rf "$T"; continue; }; \
-                rm -rf "$T"; echo "✓"; \
-            done; \
-            echo "$LATEST" > "$VERFILE"; \
-        fi; \
+        D="$USERPROFILE/fonts/NerdFonts"; mkdir -p "$D"; \
+        for f in $FONTS; do \
+            if [ -n "$(find "$D/$f" -type f \( -name '*.ttf' -o -name '*.otf' \) 2>/dev/null | head -n 1)" ]; then echo "  ✓ $f (installed)"; continue; fi; \
+            echo "  → $f ..."; \
+            T=$(mktemp -d); \
+            curl -C - -fL --http1.1 --connect-timeout 30 --speed-limit 1024 --speed-time 60 --retry 3 "$B/$f.zip" -o "$T/$f.zip" || { echo "  ✗ download"; rm -rf "$T"; continue; }; \
+            rm -rf "$D/$f" 2>/dev/null; mkdir -p "$D/$f"; unzip -qo "$T/$f.zip" -d "$D/$f" 2>/dev/null || { echo "  ✗ unzip"; rm -rf "$T"; continue; }; \
+            rm -rf "$T"; \
+        done; \
         count=$(ls -d "$D"/*/ 2>/dev/null | wc -l); \
         echo "  $count families in $D"; \
         powershell -ExecutionPolicy Bypass -File "$(pwd)/scripts/install-fonts.ps1"; \
     else \
         T=$(mktemp -d); \
         for f in $FONTS; do \
-            echo -n "  → $f ... "; \
+            echo "  → $f ..."; \
             if is_macos; then ls /Library/Fonts/$f-Regular.ttf >/dev/null 2>&1 && { echo "✓"; continue; }; \
-            elif is_linux; then [ -d "${XDG_DATA_HOME:-$HOME/.local/share}/fonts/NerdFonts/$f" ] && { echo "✓"; continue; }; \
+            elif is_linux; then [ -n "$(find "${XDG_DATA_HOME:-$HOME/.local/share}/fonts/NerdFonts/$f" -type f -name '*.ttf' 2>/dev/null | head -n 1)" ] && { echo "✓"; continue; }; \
             fi; \
-            curl -fL --http1.1 --connect-timeout 30 --max-time 600 --retry 3 "$B/$f.zip" -o "$T/$f.zip" || { echo "download ✗"; continue; }; \
+            curl -C - -fL --http1.1 --connect-timeout 30 --speed-limit 1024 --speed-time 60 --retry 3 "$B/$f.zip" -o "$T/$f.zip" || { echo "download ✗"; continue; }; \
             unzip -qo "$T/$f.zip" -d "$T/$f" 2>/dev/null || { echo "unzip ✗"; continue; }; \
             added=0; skipped=0; \
-            for ttf in "$T"/$f/*.ttf; do \
+            for ttf in "$T"/$f/*.ttf "$T"/$f/*/*.ttf; do \
                 [ -f "$ttf" ] || continue; \
                 fn=$(basename "$ttf"); \
                 if is_macos; then \
@@ -279,7 +274,7 @@ plugins:
     else curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
         https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim && echo "  ✓ vim-plug"; fi; \
     mkdir -p ~/.vim; cp -f "$(pwd)/home/dot_vim/plugrc.vim" ~/.vim/pluginrc.vim 2>/dev/null && echo "  ✓ pluginrc" || echo "  ✗ pluginrc"; \
-    command -v vim >/dev/null 2>&1 && { [ -f ~/.vim/plugged ] && rm ~/.vim/plugged; mkdir -p ~/.vim/plugged; echo "  installing vim plugins (git)..."; vim -i NONE -c 'set nomore | PlugInstall | quitall' 2>&1; echo "  ✓ vim plugins"; }; \
+    command -v vim >/dev/null 2>&1 && { [ -f ~/.vim/plugged ] && rm ~/.vim/plugged; mkdir -p ~/.vim/plugged; echo "  installing vim plugins (git)..."; vim -i NONE -c 'set nomore | PlugInstall | quitall' 2>&1; missing=""; for p in $(grep -oE "^Plug '[^']+'" "$(pwd)/home/dot_vim/plugrc.vim" | cut -d/ -f2 | cut -d"'" -f1); do [ -d "$HOME/.vim/plugged/$p" ] || missing="$missing $p"; done; if [ -n "$missing" ]; then echo "  ✗ vim plugins missing:$missing"; else echo "  ✓ vim plugins"; fi; }; \
     if [ -d ~/.tmux/plugins/tpm ]; then echo "  ✓ tpm"; \
     else git clone --depth 1 https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm && echo "  ✓ tpm" || echo "  ✗ tpm"; fi
 
@@ -299,7 +294,16 @@ claude-code:
     if command -v claude >/dev/null 2>&1; then \
         echo "  ✓ claude (up to date)"; \
     else \
-        curl -fsSL https://claude.ai/install.sh | bash 2>/dev/null && echo "  ✓ claude-code installed"; \
+        ok=0; \
+        if curl -fsSL --connect-timeout 30 https://claude.ai/install.sh -o /tmp/claude-install.sh 2>/dev/null; then \
+            bash /tmp/claude-install.sh && ok=1; \
+            rm -f /tmp/claude-install.sh; \
+        fi; \
+        if [ "$ok" -ne 1 ] && command -v npm >/dev/null 2>&1; then \
+            echo "  → claude.ai unreachable, trying npm (npmmirror)..."; \
+            npm install -g @anthropic-ai/claude-code --prefix "$HOME/.local" --registry=https://registry.npmmirror.com && ok=1; \
+        fi; \
+        [ "$ok" -eq 1 ] && echo "  ✓ claude-code installed" || echo "  ✗ claude-code install failed (claude.ai blocked, npm unavailable)"; \
     fi
 
 claude-code-update:
