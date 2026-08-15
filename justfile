@@ -7,7 +7,7 @@ set shell := ["bash", "-c"]
 
 # GitHub 加速镜像前缀（国内直连慢/被墙）。环境变量 GH_PROXY 可覆盖。
 # 关闭加速：把默认值改成空字符串 ""。
-gh_proxy := env_var_or_default("GH_PROXY", "https://ghproxy.net/")
+gh_proxy := env_var_or_default("GH_PROXY", "https://ghfast.top/")
 
 default:
     @just --list --unsorted
@@ -29,7 +29,7 @@ bootstrap:
 	    command -v unzip >/dev/null || brew install unzip; \
 	    command -v git   >/dev/null || brew install git; \
 	elif is_debian; then \
-	    command -v unzip >/dev/null || { sudo apt-get update -qq && sudo apt-get -y install unzip; }; \
+	    command -v unzip >/dev/null || { sudo apt-get update && sudo apt-get -y install unzip; }; \
 	    command -v git   >/dev/null || { sudo apt-get -y install git; }; \
 	elif is_rhel; then \
 	    command -v unzip >/dev/null || sudo dnf -y install unzip; \
@@ -42,11 +42,11 @@ bootstrap:
 	else \
 	    if is_msys2; then \
 	        curl -fsSL --connect-timeout 30 --retry 3 get.chezmoi.io \
-	          | sed "s|https://github.com/|{{ gh_proxy }}https://github.com/|g; s|curl -w '%{http_code}'|curl --connect-timeout 30 --max-time 600 -w '%{http_code}'|g" \
+	          | sed "s|https://github.com/|{{ gh_proxy }}https://github.com/|g; s|curl -w '%{http_code}'|curl --http1.1 --connect-timeout 30 --max-time 600 -w '%{http_code}'|g; s|-fsSL|-fL|g" \
 	          | bash -s -- -b "$USERPROFILE/.local/bin"; \
 	    else \
 	        curl -fsSL --connect-timeout 30 --retry 3 get.chezmoi.io \
-	          | sed "s|https://github.com/|{{ gh_proxy }}https://github.com/|g; s|curl -w '%{http_code}'|curl --connect-timeout 30 --max-time 600 -w '%{http_code}'|g" \
+	          | sed "s|https://github.com/|{{ gh_proxy }}https://github.com/|g; s|curl -w '%{http_code}'|curl --http1.1 --connect-timeout 30 --max-time 600 -w '%{http_code}'|g; s|-fsSL|-fL|g" \
 	          | bash -s -- -b "$HOME/.local/bin"; \
 	    fi; \
 	    echo "  ✓ chezmoi installed"; \
@@ -61,7 +61,7 @@ bootstrap:
 bootstrap-update:
     @echo "  chezmoi: checking..."; \
     source scripts/detect.sh; ensure_user_bin; \
-    chezmoi upgrade 2>/dev/null && echo "    ✓ upgraded" || echo "    ✓ up to date"
+    chezmoi upgrade && echo "    ✓ upgraded" || echo "    ✓ up to date"
 
 # ── System packages ──
 packages:
@@ -96,12 +96,12 @@ packages:
                 -e 's|http://security.ubuntu.com|https://mirrors.tuna.tsinghua.edu.cn|g' \
                 "$$src"; \
         done; \
-        sudo apt-get update -qq; \
+        sudo apt-get update; \
         sudo apt-get -y install $(grep -h -v '^#' packages/base.txt packages/debian.txt); \
         pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple 2>/dev/null || true; \
         [ -f packages/pip.txt ] && for pkg in $(grep -v '^#' packages/pip.txt); do \
             command -v "$pkg" >/dev/null 2>&1 && continue; \
-            pip install --user --break-system-packages "$pkg" 2>/dev/null || true; \
+            pip install --user --break-system-packages "$pkg" || true; \
         done; \
     elif is_rhel; then \
         sudo dnf -y install $(grep -h -v '^#' packages/base.txt packages/fedora.txt); \
@@ -159,6 +159,7 @@ fonts:
     FONTS="$(grep -v '^#' packages/fonts.txt 2>/dev/null | grep -v '^$' || true)"; \
     [ -n "$FONTS" ] || { echo "No fonts in packages/fonts.txt"; exit 0; }; \
     B="{{ gh_proxy }}https://github.com/ryanoasis/nerd-fonts/releases/latest/download"; \
+    echo "  source: {{ gh_proxy }}github.com/ryanoasis/nerd-fonts"; \
     if is_msys2; then \
         D="$USERPROFILE/fonts/NerdFonts"; VERFILE="$D/.version"; mkdir -p "$D"; \
         LATEST=$(curl -s "{{ gh_proxy }}https://api.github.com/repos/ryanoasis/nerd-fonts/releases/latest" 2>/dev/null | grep '"tag_name"' | head -1 | cut -d'"' -f4); \
@@ -168,7 +169,7 @@ fonts:
             for f in $FONTS; do \
                 echo -n "  → $f ... "; \
                 T=$(mktemp -d); \
-                curl -fL --connect-timeout 30 --max-time 600 --retry 3 "$B/$f.zip" -o "$T/$f.zip" || { echo "download ✗"; rm -rf "$T"; continue; }; \
+                curl -fL --http1.1 --connect-timeout 30 --max-time 600 --retry 3 "$B/$f.zip" -o "$T/$f.zip" || { echo "download ✗"; rm -rf "$T"; continue; }; \
                 rm -rf "$D/$f" 2>/dev/null; unzip -qo "$T/$f.zip" -d "$D/$f" 2>/dev/null || { echo "unzip ✗"; rm -rf "$T"; continue; }; \
                 rm -rf "$T"; echo "✓"; \
             done; \
@@ -184,7 +185,7 @@ fonts:
             if is_macos; then ls /Library/Fonts/$f-Regular.ttf >/dev/null 2>&1 && { echo "✓"; continue; }; \
             elif is_linux; then [ -d "${XDG_DATA_HOME:-$HOME/.local/share}/fonts/NerdFonts/$f" ] && { echo "✓"; continue; }; \
             fi; \
-            curl -fL --connect-timeout 30 --max-time 600 --retry 3 "$B/$f.zip" -o "$T/$f.zip" || { echo "download ✗"; continue; }; \
+            curl -fL --http1.1 --connect-timeout 30 --max-time 600 --retry 3 "$B/$f.zip" -o "$T/$f.zip" || { echo "download ✗"; continue; }; \
             unzip -qo "$T/$f.zip" -d "$T/$f" 2>/dev/null || { echo "unzip ✗"; continue; }; \
             added=0; skipped=0; \
             for ttf in "$T"/$f/*.ttf; do \
@@ -276,7 +277,7 @@ plugins:
     fi; \
     if [ -f ~/.vim/autoload/plug.vim ]; then echo "  ✓ vim-plug"; \
     else curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
-        https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim 2>/dev/null && echo "  ✓ vim-plug"; fi; \
+        https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim && echo "  ✓ vim-plug"; fi; \
     mkdir -p ~/.vim; cp -f "$(pwd)/home/dot_vim/plugrc.vim" ~/.vim/pluginrc.vim 2>/dev/null && echo "  ✓ pluginrc" || echo "  ✗ pluginrc"; \
     command -v vim >/dev/null 2>&1 && { [ -f ~/.vim/plugged ] && rm ~/.vim/plugged; mkdir -p ~/.vim/plugged; echo "  installing vim plugins (git)..."; vim -i NONE -c 'PlugInstall | quitall' 2>&1; echo "  ✓ vim plugins"; }; \
     if [ -d ~/.tmux/plugins/tpm ]; then echo "  ✓ tpm"; \

@@ -21,10 +21,10 @@ cd MyWorkEnv
 ./install.sh          # installs just, then full setup
 ```
 
-> **国内网络**：默认走 `https://ghproxy.net/` 加速镜像下载 chezmoi / Nerd Fonts。默认值在 `justfile` 顶部 `gh_proxy` 变量里配置，改成 `""` 即直连。也可用环境变量临时覆盖：
+> **国内网络**：直连 GitHub 不可用（被墙），默认走镜像 `https://ghfast.top/` 加速下载 chezmoi / Nerd Fonts；安装后该值会写入 `~/.zshrc.local` / `~/.bashrc.local`，之后 `just update` 读本机这份设置。换镜像或直连：
 > ```bash
-> export GH_PROXY=https://mirror.ghproxy.com/   # 换镜像
-> export GH_PROXY=                               # 直连 GitHub，不走镜像
+> export GH_PROXY=https://gh-proxy.com/  # 备选镜像（实测 ~300KB/s）
+> export GH_PROXY=                        # 直连（仅当本机另有代理）
 > ```
 
 ## Just Recipes
