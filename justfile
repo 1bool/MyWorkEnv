@@ -291,7 +291,7 @@ plugins:
     else curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
         https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim && echo "  ✓ vim-plug"; fi; \
     mkdir -p ~/.vim; cp -f "$(pwd)/home/dot_vim/plugrc.vim" ~/.vim/pluginrc.vim 2>/dev/null && echo "  ✓ pluginrc" || echo "  ✗ pluginrc"; \
-    command -v vim >/dev/null 2>&1 && { [ -f ~/.vim/plugged ] && rm ~/.vim/plugged; mkdir -p ~/.vim/plugged; echo "  installing vim plugins (git)..."; vim -i NONE -c 'set nomore | PlugInstall | quitall' 2>&1; missing=""; for p in $(grep -oE "^Plug '[^']+'" "$(pwd)/home/dot_vim/plugrc.vim" | cut -d/ -f2 | cut -d"'" -f1); do [ -d "$HOME/.vim/plugged/$p" ] || missing="$missing $p"; done; if [ -n "$missing" ]; then echo "  ✗ vim plugins missing:$missing"; else echo "  ✓ vim plugins"; fi; }; \
+    command -v vim >/dev/null 2>&1 && { [ -f ~/.vim/plugged ] && rm ~/.vim/plugged; mkdir -p ~/.vim/plugged; echo "  installing vim plugins (git)..."; vim -e -i NONE -c 'set nomore | PlugInstall | quitall' 2>&1; missing=""; for p in $(grep -oE "^Plug '[^']+'" "$(pwd)/home/dot_vim/plugrc.vim" | cut -d/ -f2 | cut -d"'" -f1); do [ -d "$HOME/.vim/plugged/$p" ] || missing="$missing $p"; done; if [ -n "$missing" ]; then echo "  ✗ vim plugins missing:$missing"; else echo "  ✓ vim plugins"; fi; }; \
     if [ -d ~/.tmux/plugins/tpm ]; then echo "  ✓ tpm"; \
     else git clone --depth 1 https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm && echo "  ✓ tpm" || echo "  ✗ tpm"; fi
 
@@ -302,7 +302,7 @@ plugins-update:
         export GIT_CONFIG_KEY_0="url.{{ gh_proxy }}https://github.com/.insteadOf"; \
         export GIT_CONFIG_VALUE_0="https://github.com/"; \
     fi; \
-    command -v vim >/dev/null 2>&1 && vim -i NONE +PlugUpdate +qall! 2>&1 || true; \
+    command -v vim >/dev/null 2>&1 && vim -e -i NONE +PlugUpdate +qall! 2>&1 || true; \
     [ -d ~/.tmux/plugins/tpm ] && (cd ~/.tmux/plugins/tpm && git pull) || true
 
 # ── Claude Code ──
