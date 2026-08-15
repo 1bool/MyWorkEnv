@@ -1,8 +1,11 @@
 # Nerd Font families to install (comment out unused ones)
+CascadiaCode
+CascadiaMono
 CodeNewRoman
 FiraCode
 IosevkaTerm
 IosevkaTermSlab
 JetBrainsMono
 SourceCodePro
+Tinos
 ZedMono
