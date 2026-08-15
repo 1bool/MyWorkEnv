@@ -5,6 +5,10 @@
 
 set shell := ["bash", "-c"]
 
+# GitHub 加速镜像前缀（国内直连慢/被墙）。环境变量 GH_PROXY 可覆盖。
+# 关闭加速：把默认值改成空字符串 ""。
+gh_proxy := env_var_or_default("GH_PROXY", "https://ghproxy.net/")
+
 default:
     @just --list --unsorted
 
@@ -37,9 +41,13 @@ bootstrap:
 	if command -v chezmoi >/dev/null 2>&1 || [ -x "$CHEZMOI_BIN" ]; then echo "  ✓ chezmoi"; \
 	else \
 	    if is_msys2; then \
-	        bash -c "$(curl -fsLS get.chezmoi.io)" -- -b "$USERPROFILE/.local/bin"; \
+	        curl -fsSL --connect-timeout 30 --retry 3 get.chezmoi.io \
+	          | sed "s|https://github.com/|{{ gh_proxy }}https://github.com/|g; s|curl -w '%{http_code}'|curl --connect-timeout 30 --max-time 600 -w '%{http_code}'|g" \
+	          | bash -s -- -b "$USERPROFILE/.local/bin"; \
 	    else \
-	        bash -c "$(curl -fsLS get.chezmoi.io)" -- -b "$HOME/.local/bin"; \
+	        curl -fsSL --connect-timeout 30 --retry 3 get.chezmoi.io \
+	          | sed "s|https://github.com/|{{ gh_proxy }}https://github.com/|g; s|curl -w '%{http_code}'|curl --connect-timeout 30 --max-time 600 -w '%{http_code}'|g" \
+	          | bash -s -- -b "$HOME/.local/bin"; \
 	    fi; \
 	    echo "  ✓ chezmoi installed"; \
 	fi; \
@@ -147,11 +155,10 @@ fonts:
     if is_wsl; then echo "WSL uses host fonts, skipping."; exit 0; fi; \
     FONTS="$(grep -v '^#' packages/fonts.txt 2>/dev/null | grep -v '^$' || true)"; \
     [ -n "$FONTS" ] || { echo "No fonts in packages/fonts.txt"; exit 0; }; \
-    GH="${GH_PROXY:-}"; \
-    B="${GH}https://github.com/ryanoasis/nerd-fonts/releases/latest/download"; \
+    B="{{ gh_proxy }}https://github.com/ryanoasis/nerd-fonts/releases/latest/download"; \
     if is_msys2; then \
         D="$USERPROFILE/fonts/NerdFonts"; VERFILE="$D/.version"; mkdir -p "$D"; \
-        LATEST=$(curl -s "${GH}https://api.github.com/repos/ryanoasis/nerd-fonts/releases/latest" 2>/dev/null | grep '"tag_name"' | head -1 | cut -d'"' -f4); \
+        LATEST=$(curl -s "{{ gh_proxy }}https://api.github.com/repos/ryanoasis/nerd-fonts/releases/latest" 2>/dev/null | grep '"tag_name"' | head -1 | cut -d'"' -f4); \
         if [ -n "$LATEST" ] && [ -f "$VERFILE" ] && [ "$(cat "$VERFILE")" = "$LATEST" ]; then \
             echo "  Fonts up to date."; \
         else \
