@@ -96,11 +96,15 @@ packages:
         echo 'Server = https://repo.msys2.org/msys/$arch/' >> /etc/pacman.d/mirrorlist.msys; \
         pacman -Sy --noconfirm --needed; \
         pacman -S --noconfirm --needed $(grep -v '^#' packages/base.txt) $(grep -v '^#' packages/cygwin-msys.txt) || { echo "  ✗ pacman install failed — some packages missing"; exit 1; }; \
-        MINGW=""; \
-        for pkg in $(grep -v '^#' packages/cygwin-mingw.txt); do \
-            MINGW="$MINGW ${MINGW_PACKAGE_PREFIX}-$pkg"; \
-        done; \
-        [ -n "$MINGW" ] && pacman -S --noconfirm --needed -- $MINGW; \
+        if [ -n "${MINGW_PACKAGE_PREFIX:-}" ]; then \
+            MINGW=""; \
+            for pkg in $(grep -v '^#' packages/cygwin-mingw.txt); do \
+                MINGW="$MINGW ${MINGW_PACKAGE_PREFIX}-$pkg"; \
+            done; \
+            [ -n "$MINGW" ] && pacman -S --noconfirm --needed -- $MINGW; \
+        else \
+            echo "  (MSYS — no MINGW_PACKAGE_PREFIX, skipping mingw packages)"; \
+        fi; \
         pip config get global.index-url 2>/dev/null | grep -q tuna.tsinghua || pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple 2>/dev/null || true; \
         pip install --user --break-system-packages powerline-status || echo "  ⚠ powerline-status install failed"; \
     elif is_macos; then \
