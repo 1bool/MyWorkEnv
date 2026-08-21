@@ -24,5 +24,4 @@ clangd
 clang-format
 cmake
 neovim
-ruff
 shellcheck
