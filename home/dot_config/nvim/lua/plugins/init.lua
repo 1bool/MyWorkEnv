@@ -1,20 +1,18 @@
 -- lazy.nvim 插件清单（全原生；语言工具走系统包）
 return {
-  -- ── 主题 ──
+  -- ── 主题（沿用 vim 的 solarized） ──
   {
-    "catppuccin/nvim",
-    name = "catppuccin",
+    "shaunsingh/solarized.nvim",
+    name = "solarized",
     priority = 1000,
-    opts = { flavour = "mocha" },
-    config = function(_, opts)
-      require("catppuccin").setup(opts)
-      vim.cmd.colorscheme("catppuccin")
+    config = function()
+      vim.cmd.colorscheme("solarized")
     end,
   },
 
   -- ── 状态栏 / 图标 ──
   { "nvim-tree/nvim-web-devicons", lazy = true },
-  { "nvim-lualine/lualine.nvim", opts = { options = { theme = "catppuccin" } } },
+  { "nvim-lualine/lualine.nvim", opts = { options = { theme = "auto" } } },
 
   -- ── 文件树 ──
   {
@@ -56,27 +54,6 @@ return {
     keys = { { "<leader>g", "<cmd>Neogit<CR>", desc = "Git 状态" } },
     dependencies = { "nvim-lua/plenary.nvim" },
     opts = {},
-  },
-
-  -- ── LSP（系统包 clangd / ruff server） ──
-  {
-    "neovim/nvim-lspconfig",
-    dependencies = { "hrsh7th/cmp-nvim-lsp" },
-    config = function()
-      local lspconfig = require("lspconfig")
-      local capabilities = require("cmp_nvim_lsp").default_capabilities()
-      local on_attach = function(_, bufnr)
-        local o = { noremap = true, silent = true, buffer = bufnr }
-        vim.keymap.set("n", "gd", vim.lsp.buf.definition, o)
-        vim.keymap.set("n", "gr", vim.lsp.buf.references, o)
-        vim.keymap.set("n", "gi", vim.lsp.buf.implementation, o)
-        vim.keymap.set("n", "gh", vim.lsp.buf.hover, o)
-        vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, o)
-        vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, o)
-      end
-      lspconfig.clangd.setup({ on_attach = on_attach, capabilities = capabilities })
-      lspconfig.ruff.setup({ on_attach = on_attach, capabilities = capabilities })
-    end,
   },
 
   -- ── 补全 ──
