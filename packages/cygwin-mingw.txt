@@ -8,3 +8,5 @@ fzf
 python-ruff
 nodejs
 starship
+neovim
+clang

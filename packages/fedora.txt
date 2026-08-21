@@ -18,3 +18,5 @@ fzf
 clang
 cmake
 nodejs
+neovim
+shellcheck

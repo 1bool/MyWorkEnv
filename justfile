@@ -297,7 +297,8 @@ plugins:
     mkdir -p ~/.vim; cp -f "$(pwd)/home/dot_vim/plugrc.vim" ~/.vim/pluginrc.vim 2>/dev/null && echo "  ✓ pluginrc" || echo "  ✗ pluginrc"; \
     command -v vim >/dev/null 2>&1 && { [ -f ~/.vim/plugged ] && rm ~/.vim/plugged; mkdir -p ~/.vim/plugged; echo "  installing vim plugins (git)..."; vim -e -i NONE -c 'set nomore | PlugInstall | quitall' 2>&1; missing=""; for p in $(grep -oE "^Plug '[^']+'" "$(pwd)/home/dot_vim/plugrc.vim" | cut -d/ -f2 | cut -d"'" -f1); do [ -d "$HOME/.vim/plugged/$p" ] || missing="$missing $p"; done; if [ -n "$missing" ]; then echo "  ✗ vim plugins missing:$missing"; else echo "  ✓ vim plugins"; fi; }; \
     if [ -d ~/.tmux/plugins/tpm ]; then echo "  ✓ tpm"; \
-    else git clone --depth 1 https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm && echo "  ✓ tpm" || echo "  ✗ tpm"; fi
+    else git clone --depth 1 https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm && echo "  ✓ tpm" || echo "  ✗ tpm"; fi; \
+    command -v nvim >/dev/null 2>&1 && { echo "  installing nvim plugins (git)..."; nvim --headless "+Lazy! sync" +qa 2>&1; echo "  ✓ nvim plugins"; };
 
 plugins-update:
     @echo "=== Update plugins ==="; \
@@ -307,6 +308,7 @@ plugins-update:
         export GIT_CONFIG_VALUE_0="https://github.com/"; \
     fi; \
     command -v vim >/dev/null 2>&1 && vim -e -i NONE +PlugUpdate +qall! 2>&1 || true; \
+    command -v nvim >/dev/null 2>&1 && nvim --headless "+Lazy! sync" +qa 2>&1 || true; \
     [ -d ~/.tmux/plugins/tpm ] && (cd ~/.tmux/plugins/tpm && git pull) || true
 
 # ── Claude Code ──

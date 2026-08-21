@@ -20,4 +20,9 @@ python3-dev
 g++
 gcc
 clang
+clangd
+clang-format
 cmake
+neovim
+ruff
+shellcheck
