@@ -140,7 +140,7 @@ return {
     build = ":TSUpdate",
     config = function()
       require("nvim-treesitter.configs").setup({
-        ensure_installed = { "c", "python", "bash", "make" },
+        ensure_installed = { "c", "cpp", "python", "bash", "make", "lua", "yaml", "diff", "markdown", "markdown_inline" },
         highlight = { enable = true },
         indent = { enable = true },
       })
@@ -212,6 +212,26 @@ return {
               url = "${url}/v1/messages",
               headers = {
                 authorization = "Bearer ${api_key}",
+              },
+              -- 网关不支持 GET /v1/models（404），禁用模型列表拉取，改用 env 静态列表
+              schema = {
+                model = {
+                  choices = function()
+                    local models = {}
+                    for _, var in ipairs({
+                      "ANTHROPIC_MODEL",
+                      "ANTHROPIC_DEFAULT_SONNET_MODEL",
+                      "ANTHROPIC_DEFAULT_HAIKU_MODEL",
+                      "ANTHROPIC_DEFAULT_OPUS_MODEL",
+                    }) do
+                      local name = os.getenv(var)
+                      if name and name ~= "" then
+                        models[name] = { opts = {} }
+                      end
+                    end
+                    return models
+                  end,
+                },
               },
             })
           end,
