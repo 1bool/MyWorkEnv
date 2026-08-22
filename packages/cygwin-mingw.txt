@@ -10,3 +10,15 @@ nodejs
 starship
 neovim
 clang
+
+# nvim-claude MCP/RPC 原生依赖（fastmcp + pynvim 的 C/Rust 扩展）
+# 删除 nvim-claude 时，连同下面 9 个一起删（或 just remove-nvim-claude）
+python-watchfiles
+python-pydantic-core
+python-cryptography
+python-rpds-py
+python-yaml
+python-markupsafe
+python-lazy-object-proxy
+python-msgpack
+python-greenlet

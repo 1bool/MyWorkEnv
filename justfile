@@ -335,6 +335,18 @@ plugins-update:
     [ -d ~/.tmux/plugins/tpm ] && (cd ~/.tmux/plugins/tpm && git pull) || true
     [ -d ~/.tmux/plugins/catppuccin ] && (cd ~/.tmux/plugins/catppuccin && git pull) || true
 
+# ── nvim-claude 移除（含 pacman 原生依赖） ──
+# 依赖清单对应 packages/cygwin-mingw.txt 底部注释块；删 nvim-claude 时跑这个即可
+remove-nvim-claude:
+    @echo "=== Remove nvim-claude + native deps ==="; \
+    source scripts/detect.sh; \
+    P="${MINGW_PACKAGE_PREFIX:-}"; \
+    [ -n "$P" ] || { echo "  ✗ 非 mingw 环境（MINGW_PACKAGE_PREFIX 未设）"; exit 1; }; \
+    pkgs=""; for p in watchfiles pydantic-core cryptography rpds-py yaml markupsafe lazy-object-proxy msgpack greenlet; do pkgs="$pkgs $P-python-$p"; done; \
+    pacman -Rns --noconfirm $pkgs 2>/dev/null || echo "  (原生依赖已删)"; \
+    rm -rf ~/.local/share/nvim/nvim-claude; \
+    echo "  ✓ 完成 — 还需删 init.lua 里的 nvim-claude 插件块 + lazy-lock.json 条目"
+
 # ── Claude Code ──
 claude-code:
     @echo "=== Claude Code ==="; \
