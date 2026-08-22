@@ -15,7 +15,7 @@ default:
 install: prep bootstrap packages msys2 dotfiles fonts plugins claude-code
     @echo "=== MyWorkEnv installed ==="
 
-update: packages-update dotfiles-update plugins-update bootstrap-update claude-code-update
+update: bootstrap bootstrap-update dotfiles-update packages packages-update msys2 fonts-update plugins plugins-update claude-code claude-code-update
     @echo "=== MyWorkEnv updated ==="
 
 # ── Prep: one-time system setup (passwordless sudo, WSL PATH fix) ──
@@ -181,10 +181,17 @@ fonts:
     [ -n "$FONTS" ] || { echo "No fonts in packages/fonts.txt"; exit 0; }; \
     B="{{ gh_proxy }}https://github.com/ryanoasis/nerd-fonts/releases/latest/download"; \
     echo "  source: {{ gh_proxy }}github.com/ryanoasis/nerd-fonts"; \
+    V=""; \
+    for u in "https://api.github.com/repos/ryanoasis/nerd-fonts/releases/latest" "{{ gh_proxy }}https://api.github.com/repos/ryanoasis/nerd-fonts/releases/latest"; do \
+        V=$(curl -s --connect-timeout 8 --max-time 15 "$u" | sed -n 's/.*"tag_name"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' | head -n 1); \
+        [ -n "$V" ] && break; \
+    done; \
+    [ -n "$V" ] && echo "  latest: $V"; \
+    if is_msys2; then MARKER="$USERPROFILE/fonts/NerdFonts/.version"; else MARKER="${XDG_DATA_HOME:-$HOME/.local/share}/fonts/NerdFonts/.version"; fi; \
     if is_msys2; then \
         D="$USERPROFILE/fonts/NerdFonts"; mkdir -p "$D"; \
         for f in $FONTS; do \
-            if [ -n "$(find "$D/$f" -type f \( -name '*.ttf' -o -name '*.otf' \) 2>/dev/null | head -n 1)" ]; then echo "  ✓ $f (installed)"; continue; fi; \
+            if [ "${FONTS_FORCE:-}" != "1" ] && [ -n "$(find "$D/$f" -type f \( -name '*.ttf' -o -name '*.otf' \) 2>/dev/null | head -n 1)" ]; then echo "  ✓ $f (installed)"; continue; fi; \
             echo "  → $f ..."; \
             T=$(mktemp -d); \
             curl -C - -fL --http1.1 --connect-timeout 30 --speed-limit 1024 --speed-time 60 --retry 3 "$B/$f.zip" -o "$T/$f.zip" || { echo "  ✗ download"; rm -rf "$T"; continue; }; \
@@ -198,8 +205,8 @@ fonts:
         T=$(mktemp -d); \
         for f in $FONTS; do \
             echo "  → $f ..."; \
-            if is_macos; then ls /Library/Fonts/$f-Regular.ttf >/dev/null 2>&1 && { echo "✓"; continue; }; \
-            elif is_linux; then [ -n "$(find "${XDG_DATA_HOME:-$HOME/.local/share}/fonts/NerdFonts/$f" -type f -name '*.ttf' 2>/dev/null | head -n 1)" ] && { echo "✓"; continue; }; \
+            if is_macos; then [ "${FONTS_FORCE:-}" != "1" ] && ls /Library/Fonts/$f-Regular.ttf >/dev/null 2>&1 && { echo "✓"; continue; }; \
+            elif is_linux; then [ "${FONTS_FORCE:-}" != "1" ] && [ -n "$(find "${XDG_DATA_HOME:-$HOME/.local/share}/fonts/NerdFonts/$f" -type f -name '*.ttf' 2>/dev/null | head -n 1)" ] && { echo "✓"; continue; }; \
             fi; \
             curl -C - -fL --http1.1 --connect-timeout 30 --speed-limit 1024 --speed-time 60 --retry 3 "$B/$f.zip" -o "$T/$f.zip" || { echo "download ✗"; continue; }; \
             unzip -qo "$T/$f.zip" -d "$T/$f" 2>/dev/null || { echo "unzip ✗"; continue; }; \
@@ -221,19 +228,30 @@ fonts:
         rm -rf "$T"; \
         is_linux && fc-cache -fv 2>/dev/null || true; \
     fi; \
+    [ -n "$V" ] && { mkdir -p "$(dirname "$MARKER")"; printf '%s\n' "$V" > "$MARKER"; }; \
     echo "  ✓ fonts"
 
-# ── Fonts update (force reinstall) ──
+# ── Fonts update (version-aware) ──
 fonts-update:
     @echo "=== Fonts update ==="; \
     source scripts/detect.sh; \
     if is_wsl; then echo "WSL uses host fonts, skipping."; exit 0; fi; \
-    if is_msys2; then \
-        D="$USERPROFILE/fonts/NerdFonts"; rm -f "$D/.version"; \
-        just fonts; \
+    if is_msys2; then MARKER="$USERPROFILE/fonts/NerdFonts/.version"; else MARKER="${XDG_DATA_HOME:-$HOME/.local/share}/fonts/NerdFonts/.version"; fi; \
+    LATEST=""; \
+    for u in "https://api.github.com/repos/ryanoasis/nerd-fonts/releases/latest" "{{ gh_proxy }}https://api.github.com/repos/ryanoasis/nerd-fonts/releases/latest"; do \
+        LATEST=$(curl -s --connect-timeout 8 --max-time 15 "$u" | sed -n 's/.*"tag_name"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' | head -n 1); \
+        [ -n "$LATEST" ] && break; \
+    done; \
+    INSTALLED="$(cat "$MARKER" 2>/dev/null || true)"; \
+    FORCE=""; \
+    if [ -n "$LATEST" ] && [ -n "$INSTALLED" ] && [ "$LATEST" != "$INSTALLED" ]; then \
+        echo "  upgrade: $INSTALLED → $LATEST"; FORCE=1; \
+    elif [ -z "$LATEST" ]; then \
+        echo "  (version check failed — installing missing only)"; \
     else \
-        just fonts; \
-    fi
+        echo "  ✓ up to date ($LATEST)"; \
+    fi; \
+    FONTS_FORCE="$FORCE" just fonts
 
 # ── Migrate from old system ──
 migrate:
