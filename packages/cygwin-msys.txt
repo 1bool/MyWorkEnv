@@ -2,4 +2,3 @@
 mintty
 man-pages-posix
 diffutils
-python3-pip

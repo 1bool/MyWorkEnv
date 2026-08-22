@@ -58,12 +58,12 @@ set -g @plugin 'tmux-plugins/tpm'
 set -g @plugin 'tmux-plugins/tmux-yank'
 set -g @plugin 'tmux-plugins/tmux-resurrect'
 
-# Powerline integration
-{{- if and (eq .chezmoi.os "linux") (eq .chezmoi.osRelease.idLike "debian") }}
-if-shell 'test -f /usr/share/powerline/bindings/tmux/powerline.conf' "source /usr/share/powerline/bindings/tmux/powerline.conf"
-{{- else }}
-run-shell 'PATH="$HOME/.local/bin:$PATH"; POWERLINE_CONF="$(pip show powerline-status 2>/dev/null | grep -F Location | cut -d" " -f2)/powerline/bindings/tmux/powerline.conf"; POWERLINE_CONF=$(cygpath -u "$POWERLINE_CONF" 2>/dev/null || echo "$POWERLINE_CONF"); test -f "$POWERLINE_CONF" && tmux source-file "$POWERLINE_CONF"'
-{{- end }}
+# Status bar theme: catppuccin（纯 shell，无 Python 依赖）
+set -g @catppuccin_flavor 'mocha'  # latte / frappe / macchiato / mocha
+run '~/.tmux/plugins/catppuccin/catppuccin.tmux'
+
+# 状态栏模块：右端 = uptime + load + 日期时间
+set -gF status-right "#{E:@catppuccin_status_uptime}#{E:@catppuccin_status_load}#{E:@catppuccin_status_date_time}"
 
 # Tmux Plugin Manager
 {{- if and (eq .chezmoi.os "linux") (eq .chezmoi.osRelease.idLike "debian") }}

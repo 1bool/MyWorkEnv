@@ -8,7 +8,7 @@ Tested on MSYS2 (UCRT64/CLANG64), Ubuntu, Fedora, and macOS.
 
 - Zsh with starship prompt
 - Vim IDE with 35+ plugins (vim-plug, airline status bar)
-- Tmux with TPM + powerline status bar
+- Tmux with TPM + catppuccin status bar
 - Nerd Fonts (selective download)
 - Cross-platform package management (pacman/apt/dnf/brew)
 - Claude Code integration (MSYS2 shell auto-detection)

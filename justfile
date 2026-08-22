@@ -105,8 +105,6 @@ packages:
         else \
             echo "  (MSYS — no MINGW_PACKAGE_PREFIX, skipping mingw packages)"; \
         fi; \
-        pip config get global.index-url 2>/dev/null | grep -q tuna.tsinghua || pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple 2>/dev/null || true; \
-        pip install --user --break-system-packages powerline-status || echo "  ⚠ powerline-status install failed"; \
     elif is_macos; then \
         command -v brew >/dev/null || /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"; \
         brew install $(grep -h -v '^#' packages/base.txt packages/macos.txt) || { echo "  ✗ brew install failed — some packages missing"; exit 1; }; \
@@ -262,6 +260,11 @@ migrate:
         for pkg in powerline-go the_silver_searcher perl-ack pylint exuberant-ctags; do \
             pacman -Q "$pkg" >/dev/null 2>&1 && { pacman -R --noconfirm "$pkg" 2>/dev/null; echo "  ✓ removed $pkg"; }; \
         done; \
+        echo "Removing MSYS python + powerline-status (legacy)..."; \
+        command -v pip >/dev/null 2>&1 && pip uninstall -y powerline-status 2>/dev/null || true; \
+        for pkg in python python-pip python-setuptools; do \
+            pacman -Q "$pkg" >/dev/null 2>&1 && { pacman -Rns --noconfirm "$pkg" 2>/dev/null && echo "  ✓ removed $pkg"; }; \
+        done; \
         echo "Cleaning stale dotfiles..."; \
         rm -f ~/.dircolors ~/.fonts_installed 2>/dev/null; \
         echo "Cleaning orphan fonts..."; \
@@ -316,6 +319,8 @@ plugins:
     command -v vim >/dev/null 2>&1 && { [ -f ~/.vim/plugged ] && rm ~/.vim/plugged; mkdir -p ~/.vim/plugged; echo "  installing vim plugins (git)..."; vim -e -i NONE -c 'set nomore | PlugInstall | quitall' 2>&1; missing=""; for p in $(grep -oE "^Plug '[^']+'" "$(pwd)/home/dot_vim/plugrc.vim" | cut -d/ -f2 | cut -d"'" -f1); do [ -d "$HOME/.vim/plugged/$p" ] || missing="$missing $p"; done; if [ -n "$missing" ]; then echo "  ✗ vim plugins missing:$missing"; else echo "  ✓ vim plugins"; fi; }; \
     if [ -d ~/.tmux/plugins/tpm ]; then echo "  ✓ tpm"; \
     else git clone --depth 1 https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm && echo "  ✓ tpm" || echo "  ✗ tpm"; fi; \
+    if [ -d ~/.tmux/plugins/catppuccin ]; then echo "  ✓ catppuccin"; \
+    else git clone --depth 1 https://github.com/catppuccin/tmux ~/.tmux/plugins/catppuccin && echo "  ✓ catppuccin" || echo "  ✗ catppuccin"; fi; \
     command -v nvim >/dev/null 2>&1 && { echo "  installing nvim plugins (git)..."; nvim --headless "+Lazy! sync" +qa 2>&1; echo "  ✓ nvim plugins"; };
 
 plugins-update:
@@ -328,6 +333,7 @@ plugins-update:
     command -v vim >/dev/null 2>&1 && vim -e -i NONE +PlugUpdate +qall! 2>&1 || true; \
     command -v nvim >/dev/null 2>&1 && nvim --headless "+Lazy! sync" +qa 2>&1 || true; \
     [ -d ~/.tmux/plugins/tpm ] && (cd ~/.tmux/plugins/tpm && git pull) || true
+    [ -d ~/.tmux/plugins/catppuccin ] && (cd ~/.tmux/plugins/catppuccin && git pull) || true
 
 # ── Claude Code ──
 claude-code:

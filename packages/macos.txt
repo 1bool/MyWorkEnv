@@ -12,7 +12,6 @@ llvm
 cmake
 node
 starship
-powerline
 neovim
 ruff
 shellcheck

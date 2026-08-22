@@ -11,8 +11,6 @@ fontconfig
 python3-pip
 python3-venv
 python3-psutil
-python3-powerline
-powerline
 starship
 language-pack-zh-hans
 tmux-plugin-manager

@@ -11,7 +11,6 @@ kernel-devel
 python3-devel
 python3-pip
 python3-psutil
-python3-powerline
 ruff
 ripgrep
 fzf
