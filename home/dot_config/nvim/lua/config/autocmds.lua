@@ -30,6 +30,11 @@ autocmd({ "BufEnter", "BufWrite", "FileType" }, {
   end,
 })
 
+-- tmux focus：切回该 pane 时重新检查文件是否在外部被改动（配合 tmux 的 focus-events on）
+autocmd("FocusGained", {
+  command = "checktime",
+})
+
 -- 自动把 cwd 切到项目根目录（git root 等），跟随 buffer 切换
 -- 用 nvim 内置 vim.fs.root()（0.10+），零依赖；找不到项目根时保持原 cwd 不变。
 -- 用全局 cd 而非 lcd，这样 nvim-claude 里启动的 Claude 拿到的 cwd 也会跟着变。

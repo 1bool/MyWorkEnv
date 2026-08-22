@@ -11,6 +11,8 @@ bind - split-window -v -c '#{pane_current_path}'
 set -g default-terminal "tmux-256color"
 # Add truecolor support: Tc tells tmux the outer terminal supports 24-bit
 set-option -ga terminal-overrides ",*256color:Tc"
+# 把焦点变化事件转发给 pane 里的程序（nvim 的 FocusGained/FocusLost 依赖它）
+set -g focus-events on
 # set window and pane index to 1 (0 by default)
 set-option -g base-index 1
 setw -g pane-base-index 1
