@@ -1,12 +1,13 @@
 -- lazy.nvim 插件清单（全原生；语言工具走系统包）
 return {
-  -- ── 主题（沿用 vim 的 solarized） ──
+  -- ── 主题（solarized8：高对比 dark 模式） ──
   {
-    "shaunsingh/solarized.nvim",
-    name = "solarized",
+    "lifepillar/vim-solarized8",
+    name = "solarized8",
     priority = 1000,
     config = function()
-      vim.cmd.colorscheme("solarized")
+      vim.o.background = "dark"
+      vim.cmd.colorscheme("solarized8")
     end,
   },
 

@@ -48,6 +48,19 @@ opt.switchbuf = "useopen,usetab,newtab"
 -- 系统剪贴板（对应 vimrc 里的 "+ 映射，nvim 直接走 unnamedplus）
 opt.clipboard = "unnamedplus"
 
+-- shell 修正：MSYS2 下 nvim 用 bash/zsh 作 &shell，但 shellcmdflag 仍是
+-- cmd.exe 的 /s /c，导致 vim.fn.system() 跑 POSIX 命令失败
+-- （nvim-claude 的 `which tmux` 就因此报 "tmux not found"）。
+-- 只有 &shell 是 POSIX shell 时才改成 -c；真 Windows 的 cmd.exe/powershell 保持默认。
+if vim.fn.has("win32") == 1 then
+  local sh = (vim.o.shell or ""):lower()
+  if sh:match("bash") or sh:match("zsh") or sh:match("fish")
+      or sh:match("dash") or sh:match("[/\\]sh$") then
+    opt.shellcmdflag = "-c"
+    opt.shellxquote = ""
+  end
+end
+
 -- 搜索 / tags
 opt.tags = "./tags;"
 
