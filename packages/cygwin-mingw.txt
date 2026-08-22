@@ -1,5 +1,6 @@
 # MINGW packages — UCRT64/CLANG64 preferred over MSYS
 git
+github-cli
 ctags
 python-psutil
 eza

@@ -6,6 +6,7 @@ macvim
 eza
 ripgrep
 fzf
+gh
 ruff
 lua
 llvm
