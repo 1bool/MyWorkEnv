@@ -4,6 +4,13 @@
 vim.g.mapleader = " "
 vim.g.maplocalleader = " "
 
+-- 让 nvim 成为 RPC server：nvim-claude 的 hook 靠 vim.v.servername 非空来定位
+-- 这个 nvim 实例。裸 `nvim`（不带 --listen）启动时 servername 为空，nvim-claude
+-- 的 settings-updater 会静默跳过注册，导致 hook 报 "No Neovim server found"。
+if vim.v.servername == "" then
+  vim.fn.serverstart()
+end
+
 local opt = vim.opt
 
 -- 按键时序：空格当 leader 后，按完前缀要等下一次按键；默认 1000ms 会让组合键
