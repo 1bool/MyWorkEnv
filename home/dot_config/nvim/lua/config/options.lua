@@ -1,5 +1,14 @@
 -- 基础选项（迁移自 ~/.vimrc 的 set 项 + nvim 增强）
+
+-- leader 键：必须在任何 <leader> 映射生效前设置（本文件由 init.lua 最先 require）
+vim.g.mapleader = " "
+vim.g.maplocalleader = " "
+
 local opt = vim.opt
+
+-- 按键时序：空格当 leader 后，按完前缀要等下一次按键；默认 1000ms 会让组合键
+-- 有明显停顿，调小到 300ms 手感更顺（也缓解 nvim-claude 的 <Space>cp 歧义延迟）
+opt.timeoutlen = 300
 
 -- 编辑
 opt.backspace = "indent,eol,start"

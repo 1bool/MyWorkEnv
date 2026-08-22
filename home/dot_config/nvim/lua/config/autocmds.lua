@@ -29,3 +29,17 @@ autocmd({ "BufEnter", "BufWrite", "FileType" }, {
     vim.opt_local.softtabstop = 4
   end,
 })
+
+-- 自动把 cwd 切到项目根目录（git root 等），跟随 buffer 切换
+-- 用 nvim 内置 vim.fs.root()（0.10+），零依赖；找不到项目根时保持原 cwd 不变。
+-- 用全局 cd 而非 lcd，这样 nvim-claude 里启动的 Claude 拿到的 cwd 也会跟着变。
+local proot_group = augroup("project_root_cd", { clear = true })
+autocmd({ "BufEnter", "VimEnter" }, {
+  group = proot_group,
+  callback = function()
+    local root = vim.fs.root(0, { ".git", ".hg", ".svn", "_darcs", ".bzr" })
+    if root then
+      vim.api.nvim_set_current_dir(root)
+    end
+  end,
+})
