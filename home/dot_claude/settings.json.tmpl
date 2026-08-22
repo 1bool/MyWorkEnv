@@ -1,13 +1,10 @@
 {{- $msysRoot := trimSuffix "/etc/config.site" (env "CONFIG_SITE") -}}
 {
   "env": {
-    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "deepseek-v4-flash",
-    "ANTHROPIC_SMALL_FAST_MODEL": "deepseek-v4-flash",
-    "ANTHROPIC_DEFAULT_OPUS_MODEL": "kimi-k3",
-    "ANTHROPIC_DEFAULT_SONNET_MODEL": "deepseek-v4-pro[1m]",
-    "ANTHROPIC_MODEL": "deepseek-v4-pro[1m]"{{- if and (eq .chezmoi.os "windows") (ne $msysRoot "") }},
+{{- if and (eq .chezmoi.os "windows") (ne $msysRoot "") }}
     "CLAUDE_CODE_GIT_BASH_PATH": "{{ $msysRoot }}/usr/bin/bash.exe",
-    "BASH_ENV": "~/.claude/bash_env"{{ end }}
+    "BASH_ENV": "~/.claude/bash_env"
+{{- end }}
   },
   "theme": "auto"
 }

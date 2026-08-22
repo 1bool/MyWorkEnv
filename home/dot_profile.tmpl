@@ -41,6 +41,11 @@ PATH="/usr/local/bin:/usr/local/sbin:$PATH"
 
 EDITOR='vim'
 
+# Claude Code 与 codecompanion.nvim 共用：模型映射（单一来源 ~/.config/shell/models.env）
+if [ -f "$HOME/.config/shell/models.env" ]; then
+    . "$HOME/.config/shell/models.env"
+fi
+
 {{- if .isWSL }}
 LANG=zh_CN.UTF-8
 export DISPLAY=:0

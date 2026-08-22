@@ -1,4 +1,9 @@
 -- lazy.nvim 插件清单（全原生；语言工具走系统包）
+
+-- 与 ~/.config/shell/models.env 导出的模型 env 联动（单一来源；不设兜底）
+local cc_main_model = os.getenv("ANTHROPIC_MODEL")
+local cc_fast_model = os.getenv("ANTHROPIC_DEFAULT_HAIKU_MODEL")
+
 return {
   -- ── 主题（solarized8：高对比 dark 模式） ──
   {
@@ -183,5 +188,40 @@ return {
     cmd = { "ClaudeChat", "ClaudeSendBuffer", "ClaudeSendSelection", "ClaudeBg" },
     opts = {},
     submodules = false, -- 跳过 C++ 子模块 cursor_cpp（镜像克隆不了，且非目标语言）
+  },
+
+  -- ── AI 助手（CodeCompanion） ──
+  {
+    "olimorris/codecompanion.nvim",
+    dependencies = { "nvim-lua/plenary.nvim", "nvim-treesitter/nvim-treesitter" },
+    keys = {
+      { "<leader>aa", "<cmd>CodeCompanionChat<CR>", desc = "AI 对话" },
+      { "<leader>ai", "<cmd>CodeCompanion<CR>", desc = "AI 内联改写" },
+    },
+    opts = {
+      -- 隐私：token / base_url 从 ~/.zprofile.local 导出的环境变量读取，不进仓库。
+      -- 模型名从 ~/.config/shell/models.env 导出的 env 读取（与 Claude Code 共用同一来源）。
+      adapters = {
+        http = {
+          anthropic = function()
+            return require("codecompanion.adapters").extend("anthropic", {
+              env = {
+                api_key = "ANTHROPIC_AUTH_TOKEN",
+                url = "ANTHROPIC_BASE_URL",
+              },
+              url = "${url}/v1/messages",
+              headers = {
+                authorization = "Bearer ${api_key}",
+              },
+            })
+          end,
+        },
+      },
+      interactions = {
+        chat = { adapter = { name = "anthropic", model = cc_main_model } },
+        inline = { adapter = { name = "anthropic", model = cc_main_model } },
+        background = { adapter = { name = "anthropic", model = cc_fast_model } },
+      },
+    },
   },
 }
