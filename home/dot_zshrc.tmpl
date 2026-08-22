@@ -50,6 +50,15 @@ function dirdiff()
     vim $@ -c "DirDiff $DIR1 $DIR2"
 }
 
+# nvim：始终带 --listen 启动，让 v:servername 非空。
+# nvim-claude 的 hook 靠 vim.v.servername 定位 nvim 实例并写入 server 文件；
+# 裸 `nvim` 启动时 servername 为空，hook 会报 "No Neovim server found"。
+function nvim()
+{
+    local sock="${XDG_RUNTIME_DIR:-/tmp}/nvim-$$-$RANDOM.sock"
+    command nvim --listen "$sock" "$@"
+}
+
 {{- if eq .chezmoi.os "windows" }}
 # Home/End/Delete keys — MSYS2 zsh doesn't auto-bind from terminfo (unlike Linux).
 # Bind all possible sequences: xterm normal/app mode + screen (tmux) editing keys.
