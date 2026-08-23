@@ -59,13 +59,27 @@ set -g @plugin 'tmux-plugins/tpm'
 # set -g @plugin 'tmux-plugins/tmux-sensible'
 set -g @plugin 'tmux-plugins/tmux-yank'
 set -g @plugin 'tmux-plugins/tmux-resurrect'
+set -g @plugin 'tmux-plugins/tmux-cpu'
 
 # Status bar theme: catppuccin（纯 shell，无 Python 依赖）
 set -g @catppuccin_flavor 'mocha'  # latte / frappe / macchiato / mocha
 run '~/.tmux/plugins/catppuccin/catppuccin.tmux'
 
-# 状态栏模块：右端 = uptime + load + 日期时间
-set -gF status-right "#{E:@catppuccin_status_uptime}#{E:@catppuccin_status_load}#{E:@catppuccin_status_date_time}"
+# load 模块插件把命令包在 l: 字面量里导致 #() 不执行、只显示原命令，这里覆盖成可执行版本
+set -g @catppuccin_load_text "#(uptime | awk '{split(substr($0, index($0, \"load\")), a, \":\"); print a[2]}')"
+# cpu/ram：tmux-cpu 的插值只扫 status-right/left 的字面量，扫不到 catppuccin 嵌套的 #{E:...}，
+# 所以直接嵌脚本命令（tmux-cpu 同时提供 cpu 和 ram，无需单独的 tmux-ram 插件）
+set -g @catppuccin_cpu_text " #(~/.tmux/plugins/tmux-cpu/scripts/cpu_percentage.sh)"
+set -g @catppuccin_ram_text " #(~/.tmux/plugins/tmux-cpu/scripts/ram_percentage.sh)"
+# gitmux：插件默认 -cfg 指向不存在的 ~/.gitmux.conf 会空输出，去掉 -cfg 用内置默认配置
+set -g @catppuccin_gitmux_text ' #(gitmux "#{pane_current_path}")'
+
+# 状态栏模块
+# 左：会话名 + 当前路径；右：git 状态 + cpu + 内存 + 已运行 + 负载 + 日期
+set -g status-left-length 100
+set -g status-left "#{E:@catppuccin_status_session}#{E:@catppuccin_status_directory}"
+set -g status-right-length 200
+set -g status-right "#{E:@catppuccin_status_gitmux}#{E:@catppuccin_status_cpu}#{E:@catppuccin_status_ram}#{E:@catppuccin_status_uptime}#{E:@catppuccin_status_load}#{E:@catppuccin_status_date_time}"
 
 # Tmux Plugin Manager
 {{- if and (eq .chezmoi.os "linux") (eq .chezmoi.osRelease.idLike "debian") }}

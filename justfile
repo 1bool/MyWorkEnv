@@ -12,10 +12,10 @@ gh_proxy := env_var_or_default("GH_PROXY", "https://ghfast.top/")
 default:
     @just --list --unsorted
 
-install: prep bootstrap packages msys2 dotfiles fonts plugins claude-code
+install: prep bootstrap packages msys2 dotfiles fonts plugins claude-code gitmux
     @echo "=== MyWorkEnv installed ==="
 
-update: bootstrap bootstrap-update dotfiles-update packages packages-update msys2 fonts-update plugins plugins-update claude-code claude-code-update
+update: bootstrap bootstrap-update dotfiles-update packages packages-update msys2 fonts-update plugins plugins-update claude-code claude-code-update gitmux-update
     @echo "=== MyWorkEnv updated ==="
 
 # ── Prep: one-time system setup (passwordless sudo, WSL PATH fix) ──
@@ -356,6 +356,23 @@ claude-code:
 claude-code-update:
     @echo "=== Claude Code update ==="; \
     claude update 2>/dev/null && echo "  ✓ claude-code updated" || echo "  ✓ claude-code up to date"
+
+# ── gitmux（tmux git 分支状态，自动取最新 release） ──
+gitmux:
+    @echo "=== gitmux ==="; \
+    if command -v gitmux >/dev/null 2>&1; then echo "  ✓ gitmux"; \
+    else \
+        mkdir -p ~/.local/bin; \
+        ver="$(curl -fsSL https://api.github.com/repos/arl/gitmux/releases/latest | grep -o '"tag_name": *"[^"]*"' | head -1 | cut -d'"' -f4)"; \
+        curl -fsSL "https://github.com/arl/gitmux/releases/download/$ver/gitmux_${ver}_linux_amd64.tar.gz" -o /tmp/gitmux.tar.gz && \
+        tar xzf /tmp/gitmux.tar.gz -C ~/.local/bin gitmux && rm -f /tmp/gitmux.tar.gz && echo "  ✓ gitmux $ver" || echo "  ✗ gitmux"; \
+    fi
+
+gitmux-update:
+    @echo "=== gitmux update ==="; \
+    ver="$(curl -fsSL https://api.github.com/repos/arl/gitmux/releases/latest | grep -o '"tag_name": *"[^"]*"' | head -1 | cut -d'"' -f4)"; \
+    curl -fsSL "https://github.com/arl/gitmux/releases/download/$ver/gitmux_${ver}_linux_amd64.tar.gz" -o /tmp/gitmux.tar.gz && \
+    tar xzf /tmp/gitmux.tar.gz -C ~/.local/bin gitmux && rm -f /tmp/gitmux.tar.gz && echo "  ✓ gitmux $ver" || echo "  ✗ gitmux update failed"
 
 # ── Windows Terminal profile ──
 wt-config: packages
