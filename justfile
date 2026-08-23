@@ -319,8 +319,8 @@ plugins:
     command -v vim >/dev/null 2>&1 && { [ -f ~/.vim/plugged ] && rm ~/.vim/plugged; mkdir -p ~/.vim/plugged; echo "  installing vim plugins (git)..."; vim -e -i NONE -c 'set nomore | PlugInstall | quitall' 2>&1; missing=""; for p in $(grep -oE "^Plug '[^']+'" "$(pwd)/home/dot_vim/plugrc.vim" | cut -d/ -f2 | cut -d"'" -f1); do [ -d "$HOME/.vim/plugged/$p" ] || missing="$missing $p"; done; if [ -n "$missing" ]; then echo "  ✗ vim plugins missing:$missing"; else echo "  ✓ vim plugins"; fi; }; \
     if [ -d ~/.tmux/plugins/tpm ]; then echo "  ✓ tpm"; \
     else git clone --depth 1 https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm && echo "  ✓ tpm" || echo "  ✗ tpm"; fi; \
-    if [ -d ~/.tmux/plugins/catppuccin ]; then echo "  ✓ catppuccin"; \
-    else git clone --depth 1 https://github.com/catppuccin/tmux ~/.tmux/plugins/catppuccin && echo "  ✓ catppuccin" || echo "  ✗ catppuccin"; fi; \
+    if [ -d ~/.tmux/plugins-manual/catppuccin ]; then echo "  ✓ catppuccin"; \
+    else git clone --depth 1 https://github.com/catppuccin/tmux ~/.tmux/plugins-manual/catppuccin && echo "  ✓ catppuccin" || echo "  ✗ catppuccin"; fi; \
     if [ -f ~/.tmux.conf ] && [ -x ~/.tmux/plugins/tpm/bin/install_plugins ]; then \
         echo "  installing tmux plugins (tpm)..."; \
         ~/.tmux/plugins/tpm/bin/install_plugins && echo "  ✓ tmux plugins" || echo "  ✗ tmux plugins"; \
@@ -337,7 +337,7 @@ plugins-update:
     command -v vim >/dev/null 2>&1 && vim -e -i NONE +PlugUpdate +qall! 2>&1 || true; \
     command -v nvim >/dev/null 2>&1 && nvim --headless "+Lazy! sync" +qa 2>&1 || true; \
     [ -d ~/.tmux/plugins/tpm ] && (cd ~/.tmux/plugins/tpm && git pull) || true
-    [ -d ~/.tmux/plugins/catppuccin ] && (cd ~/.tmux/plugins/catppuccin && git pull) || true
+    [ -d ~/.tmux/plugins-manual/catppuccin ] && (cd ~/.tmux/plugins-manual/catppuccin && git pull) || true
     [ -x ~/.tmux/plugins/tpm/bin/update_plugins ] && ~/.tmux/plugins/tpm/bin/update_plugins || true
 
 # ── Claude Code ──

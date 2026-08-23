@@ -63,7 +63,8 @@ set -g @plugin 'tmux-plugins/tmux-cpu'
 
 # Status bar theme: catppuccin（纯 shell，无 Python 依赖）
 set -g @catppuccin_flavor 'mocha'  # latte / frappe / macchiato / mocha
-run '~/.tmux/plugins/catppuccin/catppuccin.tmux'
+# catppuccin 放 plugins-manual（不在 tpm @plugin 里），避免 tpm clean_plugins 误删
+run '~/.tmux/plugins-manual/catppuccin/catppuccin.tmux'
 
 # load 模块插件把命令包在 l: 字面量里导致 #() 不执行、只显示原命令，这里覆盖成可执行版本
 set -g @catppuccin_load_text "#(uptime | awk '{split(substr($0, index($0, \"load\")), a, \":\"); print a[2]}')"
