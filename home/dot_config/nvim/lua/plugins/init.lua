@@ -181,15 +181,6 @@ return {
   -- ── 键位提示 ──
   { "folke/which-key.nvim", opts = {} },
 
-  -- ── Claude Code ──
-  {
-    "zolinthecow/nvim-claude",
-    dependencies = { "nvim-lua/plenary.nvim" },
-    cmd = { "ClaudeChat", "ClaudeSendBuffer", "ClaudeSendSelection", "ClaudeBg" },
-    opts = {},
-    submodules = false, -- 跳过 C++ 子模块 cursor_cpp（镜像克隆不了，且非目标语言）
-  },
-
   -- ── AI 助手（CodeCompanion） ──
   {
     "olimorris/codecompanion.nvim",
