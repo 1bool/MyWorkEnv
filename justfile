@@ -364,14 +364,14 @@ gitmux:
     else \
         mkdir -p ~/.local/bin; \
         ver="$(curl -fsSL https://api.github.com/repos/arl/gitmux/releases/latest | grep -o '"tag_name": *"[^"]*"' | head -1 | cut -d'"' -f4)"; \
-        curl -fsSL "https://github.com/arl/gitmux/releases/download/$ver/gitmux_${ver}_linux_amd64.tar.gz" -o /tmp/gitmux.tar.gz && \
+        curl -fL --progress-bar "https://github.com/arl/gitmux/releases/download/$ver/gitmux_${ver}_linux_amd64.tar.gz" -o /tmp/gitmux.tar.gz && \
         tar xzf /tmp/gitmux.tar.gz -C ~/.local/bin gitmux && rm -f /tmp/gitmux.tar.gz && echo "  ✓ gitmux $ver" || echo "  ✗ gitmux"; \
     fi
 
 gitmux-update:
     @echo "=== gitmux update ==="; \
     ver="$(curl -fsSL https://api.github.com/repos/arl/gitmux/releases/latest | grep -o '"tag_name": *"[^"]*"' | head -1 | cut -d'"' -f4)"; \
-    curl -fsSL "https://github.com/arl/gitmux/releases/download/$ver/gitmux_${ver}_linux_amd64.tar.gz" -o /tmp/gitmux.tar.gz && \
+    curl -fL --progress-bar "https://github.com/arl/gitmux/releases/download/$ver/gitmux_${ver}_linux_amd64.tar.gz" -o /tmp/gitmux.tar.gz && \
     tar xzf /tmp/gitmux.tar.gz -C ~/.local/bin gitmux && rm -f /tmp/gitmux.tar.gz && echo "  ✓ gitmux $ver" || echo "  ✗ gitmux update failed"
 
 # ── Windows Terminal profile ──
