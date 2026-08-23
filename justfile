@@ -251,9 +251,9 @@ fonts-update:
     fi; \
     FONTS_FORCE="$FORCE" just fonts
 
-# ── Migrate from old system ──
-migrate:
-    @echo "=== Migrate from old MyWorkEnv ==="; \
+# ── Clean（清理遗留包 + 字体/vim/tmux/nvim 孤儿） ──
+clean:
+    @echo "=== Clean ==="; \
     source scripts/detect.sh; \
     if is_msys2; then \
         echo "Removing legacy packages..."; \
@@ -283,7 +283,14 @@ migrate:
         rm -f ~/.dircolors; \
     fi; \
     rm -rf fonts LS_COLORS dotfiles snippets 2>/dev/null; \
-    for d in syntastic ctrlp ctrlp.vim vim-grepper autopep8 YouCompleteMe; do rm -rf ~/.vim/plugged/"$d" 2>/dev/null; done; \
+    for d in ~/.vim/plugged/*/; do \
+        [ -d "$d" ] || continue; \
+        dn=$(basename "$d"); keep=0; \
+        for p in $(grep -oE "^Plug '[^']+'" "$(pwd)/home/dot_vim/plugrc.vim" | cut -d/ -f2 | cut -d"'" -f1); do \
+            [ "$dn" = "$p" ] && { keep=1; break; }; \
+        done; \
+        [ "$keep" -eq 0 ] && rm -rf "$d" && echo "  del: $dn/"; \
+    done; \
     rm -rf ~/.vim/bundle 2>/dev/null; \
     rm -f ~/.vim/plugin/ctrlp.vim ~/.vim/plugin/lastplace.vim ~/.vim/plugin/youcompleteme.vim 2>/dev/null; \
     FDIR="${XDG_DATA_HOME:-$HOME/.local/share}/fonts/NerdFonts"; \
@@ -304,7 +311,9 @@ migrate:
     rm -f ~/.config/chezmoi/chezmoi.yaml ~/.config/chezmoi/chezmoi.json 2>/dev/null; \
     rm -f ~/README.md ~/install.sh ~/justfile 2>/dev/null; \
     rm -rf ~/packages ~/scripts ~/bin ~/vim ~/.config/chezmoi/chezmoistate.boltdb 2>/dev/null; \
-    echo "=== Migration complete ==="
+    [ -x ~/.tmux/plugins/tpm/bin/clean_plugins ] && ~/.tmux/plugins/tpm/bin/clean_plugins || true; \
+    command -v nvim >/dev/null 2>&1 && nvim --headless "+Lazy! clean" +qa 2>&1 || true; \
+    echo "=== Clean complete ==="
 plugins:
     @echo "=== Plugins ==="; \
     if [ -n "{{ gh_proxy }}" ]; then \
