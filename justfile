@@ -321,6 +321,10 @@ plugins:
     else git clone --depth 1 https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm && echo "  ✓ tpm" || echo "  ✗ tpm"; fi; \
     if [ -d ~/.tmux/plugins/catppuccin ]; then echo "  ✓ catppuccin"; \
     else git clone --depth 1 https://github.com/catppuccin/tmux ~/.tmux/plugins/catppuccin && echo "  ✓ catppuccin" || echo "  ✗ catppuccin"; fi; \
+    if [ -f ~/.tmux.conf ] && [ -x ~/.tmux/plugins/tpm/bin/install_plugins ]; then \
+        echo "  installing tmux plugins (tpm)..."; \
+        ~/.tmux/plugins/tpm/bin/install_plugins && echo "  ✓ tmux plugins" || echo "  ✗ tmux plugins"; \
+    fi; \
     command -v nvim >/dev/null 2>&1 && { echo "  installing nvim plugins (git)..."; nvim --headless "+Lazy! sync" +qa 2>&1; echo "  ✓ nvim plugins"; };
 
 plugins-update:
@@ -334,6 +338,7 @@ plugins-update:
     command -v nvim >/dev/null 2>&1 && nvim --headless "+Lazy! sync" +qa 2>&1 || true; \
     [ -d ~/.tmux/plugins/tpm ] && (cd ~/.tmux/plugins/tpm && git pull) || true
     [ -d ~/.tmux/plugins/catppuccin ] && (cd ~/.tmux/plugins/catppuccin && git pull) || true
+    [ -x ~/.tmux/plugins/tpm/bin/update_plugins ] && ~/.tmux/plugins/tpm/bin/update_plugins || true
 
 # ── Claude Code ──
 claude-code:
