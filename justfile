@@ -371,22 +371,28 @@ claude-code-update:
     @echo "=== Claude Code update ==="; \
     claude update 2>/dev/null && echo "  ✓ claude-code updated" || echo "  ✓ claude-code up to date"
 
-# ── gitmux（tmux git 分支状态，自动取最新 release） ──
+# ── gitmux（tmux git 分支状态；无 Windows 二进制，仅 Linux/macOS） ──
 gitmux:
     @echo "=== gitmux ==="; \
-    if command -v gitmux >/dev/null 2>&1; then echo "  ✓ gitmux"; \
-    else \
-        mkdir -p ~/.local/bin; \
-        ver="$(curl -fsSL https://api.github.com/repos/arl/gitmux/releases/latest | grep -o '"tag_name": *"[^"]*"' | head -1 | cut -d'"' -f4)"; \
-        curl -fL --progress-bar "https://github.com/arl/gitmux/releases/download/$ver/gitmux_${ver}_linux_amd64.tar.gz" -o /tmp/gitmux.tar.gz && \
-        tar xzf /tmp/gitmux.tar.gz -C ~/.local/bin gitmux && rm -f /tmp/gitmux.tar.gz && echo "  ✓ gitmux $ver" || echo "  ✗ gitmux"; \
-    fi
+    source scripts/detect.sh; \
+    if is_msys2; then echo "  (Windows — gitmux 无二进制，跳过)"; exit 0; fi; \
+    if command -v gitmux >/dev/null 2>&1; then echo "  ✓ gitmux"; exit 0; fi; \
+    mkdir -p ~/.local/bin; \
+    ver="$(curl -fsSL https://api.github.com/repos/arl/gitmux/releases/latest | grep -o '"tag_name": *"[^"]*"' | head -1 | cut -d'"' -f4)"; \
+    case "$(uname -m)" in x86_64) goarch=amd64;; arm64|aarch64) goarch=arm64;; *) goarch="$(uname -m)";; esac; \
+    if is_macos; then asset="macOS_${goarch}"; else asset="linux_${goarch}"; fi; \
+    curl -fL --progress-bar "https://github.com/arl/gitmux/releases/download/$ver/gitmux_${ver}_${asset}.tar.gz" -o /tmp/gitmux.tar.gz && \
+    tar xzf /tmp/gitmux.tar.gz -C ~/.local/bin gitmux && rm -f /tmp/gitmux.tar.gz && echo "  ✓ gitmux $ver ($asset)" || echo "  ✗ gitmux"
 
 gitmux-update:
     @echo "=== gitmux update ==="; \
+    source scripts/detect.sh; \
+    if is_msys2; then echo "  (Windows — gitmux 无二进制，跳过)"; exit 0; fi; \
     ver="$(curl -fsSL https://api.github.com/repos/arl/gitmux/releases/latest | grep -o '"tag_name": *"[^"]*"' | head -1 | cut -d'"' -f4)"; \
-    curl -fL --progress-bar "https://github.com/arl/gitmux/releases/download/$ver/gitmux_${ver}_linux_amd64.tar.gz" -o /tmp/gitmux.tar.gz && \
-    tar xzf /tmp/gitmux.tar.gz -C ~/.local/bin gitmux && rm -f /tmp/gitmux.tar.gz && echo "  ✓ gitmux $ver" || echo "  ✗ gitmux update failed"
+    case "$(uname -m)" in x86_64) goarch=amd64;; arm64|aarch64) goarch=arm64;; *) goarch="$(uname -m)";; esac; \
+    if is_macos; then asset="macOS_${goarch}"; else asset="linux_${goarch}"; fi; \
+    curl -fL --progress-bar "https://github.com/arl/gitmux/releases/download/$ver/gitmux_${ver}_${asset}.tar.gz" -o /tmp/gitmux.tar.gz && \
+    tar xzf /tmp/gitmux.tar.gz -C ~/.local/bin gitmux && rm -f /tmp/gitmux.tar.gz && echo "  ✓ gitmux $ver ($asset)" || echo "  ✗ gitmux update failed"
 
 # ── Windows Terminal profile ──
 wt-config: packages
