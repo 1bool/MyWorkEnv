@@ -66,12 +66,23 @@ set -g @catppuccin_flavor 'mocha'  # latte / frappe / macchiato / mocha
 # catppuccin 放 plugins-manual（不在 tpm @plugin 里），避免 tpm clean_plugins 误删
 run '~/.tmux/plugins-manual/catppuccin/catppuccin.tmux'
 
+{{- if ne .chezmoi.os "windows" }}
 # load 模块插件把命令包在 l: 字面量里导致 #() 不执行、只显示原命令，这里覆盖成可执行版本
 set -g @catppuccin_load_text "#(uptime | awk '{split(substr($0, index($0, \"load\")), a, \":\"); print a[2]}')"
 # cpu/ram：tmux-cpu 的插值只扫 status-right/left 的字面量，扫不到 catppuccin 嵌套的 #{E:...}，
 # 所以直接嵌脚本命令（tmux-cpu 同时提供 cpu 和 ram，无需单独的 tmux-ram 插件）
 set -g @catppuccin_cpu_text " #(~/.tmux/plugins/tmux-cpu/scripts/cpu_percentage.sh)"
 set -g @catppuccin_ram_text " #(~/.tmux/plugins/tmux-cpu/scripts/ram_percentage.sh)"
+{{- else }}
+# Windows/MSYS2：进程 spawn ~0.7s，且 tmux 3.7 的 #() 会在状态栏重绘时反复重跑
+# （实测 status-interval=30 下 12s 跑 15 次 ≈ 每秒跳）。改用常驻守护 statusd.sh，
+# 把值直接写进 *_text（纯文本、无 #()），状态栏刷新零 spawn、零抖动。
+set -g @catppuccin_cpu_text    " …"
+set -g @catppuccin_ram_text    " …"
+set -g @catppuccin_load_text   " …"
+set -g @catppuccin_uptime_text " …"
+run -b '~/.tmux/scripts/statusd.sh'
+{{- end }}
 # gitmux：插件默认 -cfg 指向不存在的 ~/.gitmux.conf 会空输出，去掉 -cfg 用内置默认配置
 # （gitmux 无 Windows 二进制，仅 Linux/macOS 启用）
 {{- if ne .chezmoi.os "windows" }}
@@ -87,6 +98,11 @@ set -g status-right-length 200
 set -g status-right "#{E:@catppuccin_status_gitmux}#{E:@catppuccin_status_cpu}#{E:@catppuccin_status_ram}#{E:@catppuccin_status_uptime}#{E:@catppuccin_status_load}#{E:@catppuccin_status_date_time}"
 {{- else }}
 set -g status-right "#{E:@catppuccin_status_cpu}#{E:@catppuccin_status_ram}#{E:@catppuccin_status_uptime}#{E:@catppuccin_status_load}#{E:@catppuccin_status_date_time}"
+{{- end }}
+
+{{- if eq .chezmoi.os "windows" }}
+# MSYS2 下读 /proc/loadavg 慢，拉长状态栏刷新间隔降低系统负载（默认 15s）
+set -g status-interval 30
 {{- end }}
 
 # Tmux Plugin Manager
