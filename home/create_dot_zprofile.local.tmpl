@@ -4,7 +4,6 @@
 # Claude Code 与 codecompanion.nvim 共用（隐私，不入库）。
 # 必填，否则 Claude Code 回落到官方 api.anthropic.com，报「未登录/认证失败」。
 # 模型名映射已在 ~/.config/shell/models.env（入库），无需在此重复。
-# 注意：token 用 ANTHROPIC_AUTH_TOKEN（Bearer），与 codecompanion.nvim 一致；
-# 若还保留旧的 ANTHROPIC_API_KEY 也不会冲突。
+# 认证用 ANTHROPIC_API_KEY（x-api-key），Claude Code 与 codecompanion.nvim 一致。
 export ANTHROPIC_BASE_URL="https://token.molchip.com"
-export ANTHROPIC_AUTH_TOKEN="sk-你的token"
+export ANTHROPIC_API_KEY="sk-你的token"
