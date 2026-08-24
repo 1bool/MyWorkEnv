@@ -73,36 +73,30 @@ set -g @catppuccin_load_text "#(uptime | awk '{split(substr($0, index($0, \"load
 # 所以直接嵌脚本命令（tmux-cpu 同时提供 cpu 和 ram，无需单独的 tmux-ram 插件）
 set -g @catppuccin_cpu_text " #(~/.tmux/plugins/tmux-cpu/scripts/cpu_percentage.sh)"
 set -g @catppuccin_ram_text " #(~/.tmux/plugins/tmux-cpu/scripts/ram_percentage.sh)"
-{{- else }}
-# Windows/MSYS2：进程 spawn ~0.7s，且 tmux 3.7 的 #() 会在状态栏重绘时反复重跑
-# （实测 status-interval=30 下 12s 跑 15 次 ≈ 每秒跳）。改用常驻守护 statusd.sh，
-# 把值直接写进 *_text（纯文本、无 #()），状态栏刷新零 spawn、零抖动。
-set -g @catppuccin_cpu_text    " …"
-set -g @catppuccin_ram_text    " …"
-set -g @catppuccin_load_text   " …"
-set -g @catppuccin_uptime_text " …"
-run -b '~/.tmux/scripts/statusd.sh'
-{{- end }}
 # gitmux：插件默认 -cfg 指向不存在的 ~/.gitmux.conf 会空输出，去掉 -cfg 用内置默认配置
 # （gitmux 无 Windows 二进制，仅 Linux/macOS 启用）
-{{- if ne .chezmoi.os "windows" }}
 set -g @catppuccin_gitmux_text ' #(gitmux "#{pane_current_path}")'
 {{- end }}
 
 # 状态栏模块
-# 左：会话名 + 当前路径；右：git 状态 + cpu + 内存 + 已运行 + 负载 + 日期
+# Linux：左=会话+路径，右=git+cpu+内存+uptime+负载+时间（全量）
+# Windows：不加 cpu/内存/uptime/负载；图标经 #() 成品字符串输出（避免 tmux 格式串的 PUA 慢路径）
 set -g status-left-length 100
-set -g status-left "#{E:@catppuccin_status_session}#{E:@catppuccin_status_directory}"
 set -g status-right-length 200
 {{- if ne .chezmoi.os "windows" }}
+set -g status-left "#{E:@catppuccin_status_session}#{E:@catppuccin_status_directory}"
 set -g status-right "#{E:@catppuccin_status_gitmux}#{E:@catppuccin_status_cpu}#{E:@catppuccin_status_ram}#{E:@catppuccin_status_uptime}#{E:@catppuccin_status_load}#{E:@catppuccin_status_date_time}"
 {{- else }}
-set -g status-right "#{E:@catppuccin_status_cpu}#{E:@catppuccin_status_ram}#{E:@catppuccin_status_uptime}#{E:@catppuccin_status_load}#{E:@catppuccin_status_date_time}"
+# Windows/MSYS2：PUA 图标走 #() 会闪烁、放格式串会丢输入，改用非 PUA 定宽 Unicode 装饰（»）。
+# cpu/内存/负载/uptime 由 statusd.sh 驻留进程写入 @catppuccin_*_text（值含 %%），经 #{E:...}
+# 二次展开还原成 %；无 #()、无 PUA 图标，状态栏刷新不 spawn、不丢输入。
+run -b '~/.tmux/scripts/statusd.sh'
+set -g status-left "#[fg=#{@thm_crust},bg=#{@thm_green}] » #{session_name} #[fg=#{@thm_crust},bg=#{@thm_rosewater}] » #{pane_current_path} #[fg=#{@thm_fg},bg=default]"
+set -g status-right "#[fg=#{@thm_crust},bg=#{@thm_yellow}] »#{E:@catppuccin_cpu_text} #[fg=#{@thm_crust},bg=#{@thm_red}] »#{E:@catppuccin_ram_text} #[fg=#{@thm_crust},bg=#{@thm_peach}] »#{E:@catppuccin_uptime_text} #[fg=#{@thm_crust},bg=#{@thm_blue}] »#{E:@catppuccin_load_text} #[fg=#{@thm_crust},bg=#{@thm_sapphire}] » %Y-%m-%d %H:%M #[fg=#{@thm_fg},bg=default]"
 {{- end }}
 
 {{- if eq .chezmoi.os "windows" }}
-# MSYS2 下读 /proc/loadavg 慢，拉长状态栏刷新间隔降低系统负载（默认 15s）
-set -g status-interval 30
+set -g status-interval 60
 {{- end }}
 
 # Tmux Plugin Manager
