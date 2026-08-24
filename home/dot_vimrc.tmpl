@@ -4,9 +4,9 @@ if has("win32")
 	set pythonthreedll=python311.dll
 elseif has("win32unix")
 	set pythonthreedll=msys-python3.12.dll
-	map te :ter ++close ++rows=12<CR>
+	map <leader>c :ter ++close ++rows=12<CR>
 else
-	map te :ter ++close ++rows=12<CR>
+	map <leader>c :ter ++close ++rows=12<CR>
 endif
 syntax on
 filetype plugin indent on
@@ -80,7 +80,7 @@ map <silent> <S-Insert> "+gP
 imap <silent> <C-V> <ESC>"+gPa
 cmap <silent> <C-V> <C-R>+
 
-" let mapleader = "\<Space>"
+let mapleader = "\<Space>"
 
 " Easier to switch window
 noremap <C-J> <C-W>j
@@ -90,21 +90,19 @@ noremap <C-L> <C-W>l
 
 " Easier to switch buffer
 set switchbuf=usetab,newtab
-map gn :bn<cr>
-map gp :bp<cr>
-map gx :bd<cr>
+map <leader>n :bn<cr>
+map <leader>p :bp<cr>
+map <leader>x :bd<cr>
 nnoremap <C-TAB> :sbnext<CR>
 nnoremap <C-S-TAB> :sbprevious<CR>
 
-" Open file explorer
-map ge :Lexplore<CR>
+" netrw file explorer settings (use :Lexplore directly)
 let g:netrw_winsize = 40
 let g:netrw_liststyle = 3
 let g:netrw_browse_split = 4
 let g:netrw_banner = 0
 
-" Open buffer explorer
-map gb :BufExplorer<CR>
+" Buffer explorer: use :BufExplorer (list also via <leader>f → :Buffers)
 
 " Man
 runtime ftplugin/man.vim
@@ -162,7 +160,7 @@ function! PluginSetup()
 		let g:tagbar_compact = 1
 		let g:tagbar_indent = 1
 		nnoremap <silent> <F7> :TagbarToggle<CR>
-		nnoremap tt :TagbarToggle<CR>
+		nnoremap <leader>s :TagbarToggle<CR>
 	endif
 	if exists(":NERDTreeToggle")
 		let g:NERDTreeWinSize=40 "设置 NERDTree 子窗口宽度
@@ -175,14 +173,13 @@ function! PluginSetup()
 		let g:NERDTreeChDirMode = 3
 		if exists(":NERDTreeToggleVCS")
 			nnoremap <silent> <F6> :NERDTreeToggleVCS<CR>
-			nnoremap tf :NERDTreeToggleVCS<CR>
+			nnoremap <leader>t :NERDTreeToggleVCS<CR>
 		else
 			nnoremap <silent> <F6> :NERDTreeToggle<CR>
-			nnoremap tf :NERDTreeToggle<CR>
+			nnoremap <leader>t :NERDTreeToggle<CR>
 		endif
 	endif
 if exists(":Rg")
-			nmap gs :Rg<CR>
 			nnoremap <leader>* :Rg <cword><CR>
 		endif
 		" nmap <silent> <Leader>i <Plug>IndentGuidesToggle
@@ -245,7 +242,6 @@ let g:NERDDefaultNesting = 0
 " fzf — fuzzy file finder
 nnoremap <C-p> :Files<CR>
 nnoremap <leader>f :Buffers<CR>
-nnoremap <leader>m :History<CR>
 
 let g:python_highlight_all = 1 " python-syntax
 

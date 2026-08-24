@@ -18,9 +18,9 @@ map({ "n", "v" }, "<C-h>", "<C-w>h", silent)
 map({ "n", "v" }, "<C-l>", "<C-w>l", silent)
 
 -- 缓冲切换
-map("n", "gn", ":bn<CR>", silent)
-map("n", "gp", ":bp<CR>", silent)
-map("n", "gx", ":bd<CR>", silent)
+map("n", "<leader>n", ":bn<CR>", silent)
+map("n", "<leader>p", ":bp<CR>", silent)
+map("n", "<leader>x", ":bd<CR>", silent)
 map("n", "<C-TAB>", ":sbnext<CR>", silent)
 map("n", "<C-S-TAB>", ":sbprevious<CR>", silent)
 
@@ -49,4 +49,4 @@ map("n", "<X1Mouse>", "<C-o>", silent)
 map("n", "<X2Mouse>", "<C-i>", silent)
 
 -- 终端
-map("n", "te", "<cmd>terminal<CR>", silent)
+map("n", "<leader>c", "<cmd>terminal<CR>", silent)

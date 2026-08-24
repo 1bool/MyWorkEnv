@@ -24,9 +24,8 @@ return {
   {
     "nvim-tree/nvim-tree.lua",
     keys = {
-      { "tf", "<cmd>NvimTreeToggle<CR>", desc = "文件树开关" },
+      { "<leader>t", "<cmd>NvimTreeToggle<CR>", desc = "文件树开关" },
       { "<F6>", "<cmd>NvimTreeToggle<CR>", desc = "文件树开关" },
-      { "ge", "<cmd>NvimTreeFocus<CR>", desc = "聚焦文件树" },
     },
     opts = { view = { width = 40 }, update_focused_file = { enable = true } },
   },
@@ -37,12 +36,9 @@ return {
     dependencies = { "nvim-lua/plenary.nvim" },
     keys = {
       { "<C-p>", "<cmd>Telescope find_files<CR>", desc = "找文件" },
-      { "gb", "<cmd>Telescope buffers<CR>", desc = "缓冲列表" },
-      { "gs", "<cmd>Telescope live_grep<CR>", desc = "全局 grep" },
       { "<leader>*", "<cmd>Telescope grep_string<CR>", desc = "搜光标词" },
       { "<leader>f", "<cmd>Telescope buffers<CR>", desc = "缓冲列表" },
-      { "<leader>m", "<cmd>Telescope oldfiles<CR>", desc = "历史" },
-      { "tt", "<cmd>Telescope lsp_document_symbols<CR>", desc = "符号大纲" },
+      { "<leader>s", "<cmd>Telescope lsp_document_symbols<CR>", desc = "符号大纲" },
       { "<F7>", "<cmd>Telescope lsp_document_symbols<CR>", desc = "符号大纲" },
     },
   },
