@@ -137,34 +137,61 @@ return {
   -- ── 语法高亮 / 文本对象 ──
   {
     "nvim-treesitter/nvim-treesitter",
-    version = "*", -- 锁稳定版：master 已把 configs.lua 改名/移除，导致 require('nvim-treesitter.configs') 失败
+    -- Windows(nvim 0.12)：main 新版（ABI-15 语法 + nvim 内置高亮，需系统 tree-sitter CLI）
+    -- Linux(Ubuntu 旧 nvim)：version="*"（0.10.0 tag，configs API，自带编译）
+    version = vim.fn.has("win32") == 0 and "*" or nil,
     build = ":TSUpdate",
     config = function()
-      require("nvim-treesitter.configs").setup({
-        ensure_installed = { "c", "cpp", "python", "bash", "make", "lua", "yaml", "diff", "markdown", "markdown_inline" },
-        highlight = { enable = true },
-        indent = { enable = true },
-      })
+      local langs = { "c", "cpp", "python", "bash", "make", "lua", "yaml", "diff", "markdown" }
+      if vim.fn.has("win32") == 1 then
+        -- 新版 API（main）：parser 装到 <data>/site/parser（在 runtimepath 上），高亮走 nvim 内置 vim.treesitter.start()
+        -- indent（experimental）新版未迁移，暂用内置缩进，需要时再补。
+        require("nvim-treesitter").setup({ install_dir = vim.fn.stdpath("data") .. "/site" })
+        require("nvim-treesitter").install(langs)
+        vim.api.nvim_create_autocmd("FileType", {
+          callback = function() pcall(vim.treesitter.start) end,
+        })
+      else
+        -- 旧版 API（0.10.0 tag）
+        require("nvim-treesitter.configs").setup({
+          ensure_installed = langs,
+          highlight = { enable = true },
+          indent = { enable = true },
+        })
+      end
     end,
   },
   {
     "nvim-treesitter/nvim-treesitter-textobjects",
     dependencies = { "nvim-treesitter/nvim-treesitter" },
     config = function()
-      require("nvim-treesitter.configs").setup({
-        textobjects = {
-          select = {
-            enable = true,
-            lookahead = true,
-            keymaps = {
-              ["af"] = "@function.outer",
-              ["if"] = "@function.inner",
-              ["ac"] = "@class.outer",
-              ["ic"] = "@class.inner",
+      if vim.fn.has("win32") == 1 then
+        -- 新版 API（main）：setup 设选项，keymap 手动绑 select_textobject
+        require("nvim-treesitter-textobjects").setup({ select = { lookahead = true } })
+        local ts_select = require("nvim-treesitter-textobjects.select")
+        for _, m in ipairs({ "x", "o" }) do
+          vim.keymap.set(m, "af", function() ts_select.select_textobject("@function.outer", "textobjects") end)
+          vim.keymap.set(m, "if", function() ts_select.select_textobject("@function.inner", "textobjects") end)
+          vim.keymap.set(m, "ac", function() ts_select.select_textobject("@class.outer", "textobjects") end)
+          vim.keymap.set(m, "ic", function() ts_select.select_textobject("@class.inner", "textobjects") end)
+        end
+      else
+        -- 旧版 API（configs）
+        require("nvim-treesitter.configs").setup({
+          textobjects = {
+            select = {
+              enable = true,
+              lookahead = true,
+              keymaps = {
+                ["af"] = "@function.outer",
+                ["if"] = "@function.inner",
+                ["ac"] = "@class.outer",
+                ["ic"] = "@class.inner",
+              },
             },
           },
-        },
-      })
+        })
+      end
     end,
   },
 

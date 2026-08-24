@@ -11,3 +11,6 @@ nodejs
 starship
 neovim
 clang
+# nvim-treesitter(main) 编译 parser 需要：tree-sitter CLI(≥0.26.1) + C 编译器
+tree-sitter
+gcc
