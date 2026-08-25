@@ -1,5 +1,5 @@
 -- LSP 配置（nvim 0.11+ 内置 vim.lsp.config，替代已弃用的 lspconfig）
--- 语言：C（clangd）、Python（ruff server）
+-- 语言：C（clangd）、Python（basedpyright）
 
 -- LSP 键位（挂到 LspAttach 事件）
 vim.api.nvim_create_autocmd("LspAttach", {
@@ -22,10 +22,10 @@ vim.lsp.config.clangd = {
 }
 vim.lsp.enable("clangd")
 
--- Python：ruff server
-vim.lsp.config.ruff = {
-  cmd = { "ruff", "server" },
+-- Python：basedpyright（完整 LSP：符号/定义/引用/重命名/类型检查；ruff 只做 lint+format，走 nvim-lint/conform）
+vim.lsp.config.basedpyright = {
+  cmd = { "basedpyright-langserver", "--stdio" },
   filetypes = { "python" },
   root_markers = { "pyproject.toml", "setup.py", "requirements.txt" },
 }
-vim.lsp.enable("ruff")
+vim.lsp.enable("basedpyright")

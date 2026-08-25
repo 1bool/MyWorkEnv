@@ -7,6 +7,7 @@ eza
 ripgrep
 fzf
 python-ruff
+basedpyright
 nodejs
 starship
 neovim
