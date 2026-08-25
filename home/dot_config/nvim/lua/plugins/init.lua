@@ -32,7 +32,11 @@ return {
       { "<leader>t", "<cmd>NvimTreeToggle<CR>", desc = "文件树开关" },
       { "<F6>", "<cmd>NvimTreeToggle<CR>", desc = "文件树开关" },
     },
-    opts = { view = { width = 40 }, update_focused_file = { enable = true } },
+    opts = {
+      view = { width = 40 },
+      update_focused_file = { enable = true },
+      reload_on_bufenter = vim.fn.has("win32") == 1, -- Windows fs watcher 易漏刷，进 buffer 时重载
+    },
   },
 
   -- ── 模糊查找 ──
