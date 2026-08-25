@@ -108,6 +108,11 @@ packages:
     elif is_macos; then \
         command -v brew >/dev/null || /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"; \
         brew install $(grep -h -v '^#' packages/base.txt packages/macos.txt) || { echo "  ✗ brew install failed — some packages missing"; exit 1; }; \
+        pip config get global.index-url 2>/dev/null | grep -q tuna.tsinghua || pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple 2>/dev/null || true; \
+        [ -f packages/pip.txt ] && for pkg in $(grep -v '^#' packages/pip.txt); do \
+            command -v "$pkg" >/dev/null 2>&1 && continue; \
+            pip install --user --break-system-packages "$pkg" || true; \
+        done; \
     elif is_debian; then \
         for src in /etc/apt/sources.list /etc/apt/sources.list.d/ubuntu.sources; do \
             [ -f "$$src" ] && sudo sed -i \
