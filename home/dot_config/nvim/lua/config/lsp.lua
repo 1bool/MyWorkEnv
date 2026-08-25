@@ -24,7 +24,9 @@ vim.lsp.enable("clangd")
 
 -- Python：basedpyright（完整 LSP：符号/定义/引用/重命名/类型检查；ruff 只做 lint+format，走 nvim-lint/conform）
 vim.lsp.config.basedpyright = {
-  cmd = { "basedpyright-langserver", "--stdio" },
+  -- MSYS2 的 basedpyright-langserver 是 POSIX shell 脚本，nvim(Windows) spawn 不了，改用 .cmd 启动器
+  cmd = vim.fn.has("win32") == 1 and { "basedpyright-langserver.cmd", "--stdio" }
+    or { "basedpyright-langserver", "--stdio" },
   filetypes = { "python" },
   root_markers = { "pyproject.toml", "setup.py", "requirements.txt" },
 }
