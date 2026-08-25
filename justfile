@@ -12,10 +12,10 @@ gh_proxy := env_var_or_default("GH_PROXY", "https://ghfast.top/")
 default:
     @just --list --unsorted
 
-install: prep bootstrap packages msys2 dotfiles fonts plugins claude-code gitmux
+install: prep bootstrap packages msys2 dotfiles fonts plugins ai gitmux
     @echo "=== MyWorkEnv installed ==="
 
-update: bootstrap bootstrap-update dotfiles-update packages packages-update msys2 fonts-update plugins plugins-update claude-code claude-code-update gitmux-update
+update: bootstrap bootstrap-update dotfiles-update packages packages-update msys2 fonts-update plugins plugins-update ai ai-update gitmux-update
     @echo "=== MyWorkEnv updated ==="
 
 # ── Prep: one-time system setup (passwordless sudo, WSL PATH fix) ──
@@ -349,8 +349,8 @@ plugins-update:
     [ -d ~/.tmux/plugins-manual/catppuccin ] && (cd ~/.tmux/plugins-manual/catppuccin && git pull) || true
     [ -x ~/.tmux/plugins/tpm/bin/update_plugins ] && ~/.tmux/plugins/tpm/bin/update_plugins || true
 
-# ── Claude Code ──
-claude-code:
+# ── AI agents（Claude Code + Codewhale）──
+ai:
     @echo "=== Claude Code ==="; \
     if command -v claude >/dev/null 2>&1; then \
         echo "  ✓ claude (up to date)"; \
@@ -365,11 +365,29 @@ claude-code:
             mkdir -p "$HOME/.local" && npm install -g @anthropic-ai/claude-code --prefix "$HOME/.local" --registry=https://registry.npmmirror.com && ok=1; \
         fi; \
         [ "$ok" -eq 1 ] && echo "  ✓ claude-code installed" || echo "  ✗ claude-code install failed (claude.ai blocked, npm unavailable)"; \
+    fi; \
+    echo "=== Codewhale ==="; \
+    source scripts/detect.sh; \
+    if command -v codewhale >/dev/null 2>&1; then \
+        echo "  ✓ codewhale (up to date)"; \
+    elif is_msys2; then \
+        command -v npm >/dev/null 2>&1 || { echo "  ✗ npm not found — run 'just packages' first"; exit 1; }; \
+        echo "  → npm install -g codewhale (npmmirror)..."; \
+        mkdir -p "$HOME/.local" && npm install -g codewhale --prefix "$HOME/.local" --registry=https://registry.npmmirror.com && echo "  ✓ codewhale installed" || echo "  ✗ codewhale install failed (npm)"; \
+    else \
+        echo "  → codewhale.net/install.sh..."; \
+        curl -fsSL --connect-timeout 30 https://codewhale.net/install.sh | sh && echo "  ✓ codewhale installed" || echo "  ✗ codewhale install failed (install.sh)"; \
     fi
 
-claude-code-update:
+ai-update:
     @echo "=== Claude Code update ==="; \
-    claude update 2>/dev/null && echo "  ✓ claude-code updated" || echo "  ✓ claude-code up to date"
+    claude update 2>/dev/null && echo "  ✓ claude-code updated" || echo "  ✓ claude-code up to date"; \
+    echo "=== Codewhale update ==="; \
+    if command -v codewhale >/dev/null 2>&1; then \
+        codewhale update 2>/dev/null && echo "  ✓ codewhale updated" || echo "  ✗ codewhale update failed"; \
+    else \
+        echo "  codewhale not installed — run 'just ai'"; \
+    fi
 
 # ── gitmux（tmux git 分支状态；无 Windows 二进制，仅 Linux/macOS） ──
 gitmux:

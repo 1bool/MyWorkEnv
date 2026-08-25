@@ -11,7 +11,7 @@ Tested on MSYS2 (UCRT64/CLANG64), Ubuntu, Fedora, and macOS.
 - Tmux with TPM + catppuccin status bar
 - Nerd Fonts (selective download)
 - Cross-platform package management (pacman/apt/dnf/brew)
-- Claude Code integration (MSYS2 shell auto-detection)
+- AI coding agents (Claude Code + Codewhale)
 
 ## Quick Start
 
@@ -42,10 +42,10 @@ cd MyWorkEnv
 | `just msys2` | MSYS2 config (zsh shell, scripts, Claude) |
 | `just migrate` | Remove legacy packages from old system |
 | `just wt-config` | Add profile to Windows Terminal |
-| `just claude-code` | Install Claude Code |
+| `just ai` | Install AI agents (Claude Code + Codewhale) |
 | `just fonts-update` | Force reinstall Nerd Fonts |
 
-Update sub-recipes: `just packages-update`, `just dotfiles-update`, `just plugins-update`, `just bootstrap-update`, `just claude-code-update`
+Update sub-recipes: `just packages-update`, `just dotfiles-update`, `just plugins-update`, `just bootstrap-update`, `just ai-update`
 
 ## Vim Key Bindings
 
