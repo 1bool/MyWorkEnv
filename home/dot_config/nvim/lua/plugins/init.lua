@@ -55,16 +55,15 @@ return {
   -- ── Git ──
   {
     "lewis6991/gitsigns.nvim",
-    keys = {
-      { "<leader>d", "<cmd>Gitsigns diff_this<CR>", desc = "当前文件 diff" },
-    },
+    event = { "BufReadPre", "BufNewFile" }, -- 行号栏 diff 符号要在进 buffer 时就加载（之前 keys 懒加载会漏）
     opts = {},
   },
   {
-    "NeogitOrg/neogit",
-    keys = { { "<leader>g", "<cmd>Neogit<CR>", desc = "Git 状态" } },
-    dependencies = { "nvim-lua/plenary.nvim" },
-    opts = {},
+    "tpope/vim-fugitive",
+    keys = {
+      { "<leader>g", "<cmd>Git<CR>", desc = "Git 状态" },
+      { "<leader>d", "<cmd>Gdiffsplit<CR>", desc = "当前文件 diff" },
+    },
   },
 
   -- ── 补全 ──
@@ -264,10 +263,16 @@ return {
         },
       },
       interactions = {
-        chat = { adapter = { name = "anthropic", model = cc_main_model } },
+        chat = {
+          adapter = { name = "anthropic", model = cc_main_model },
+          -- 默认加载文件工具组，AI 才能直接改/建/删文件（否则只聊天，无工具可用）
+          tools = { opts = { default_tools = { "files" } } },
+        },
         inline = { adapter = { name = "anthropic", model = cc_main_model } },
         background = { adapter = { name = "anthropic", model = cc_fast_model } },
       },
+      -- 非代码文本回复用中文（system prompt 里的语言指令）
+      opts = { language = "Chinese" },
     },
   },
 }
