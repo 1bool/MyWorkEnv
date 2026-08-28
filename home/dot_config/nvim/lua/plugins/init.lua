@@ -49,6 +49,20 @@ return {
       { "<leader>*", "<cmd>Telescope grep_string<CR>", desc = "搜光标词" },
       { "<leader>f", "<cmd>Telescope buffers<CR>", desc = "缓冲列表" },
     },
+    opts = {
+      defaults = {
+        mappings = {
+          i = {
+            ["<C-j>"] = require("telescope.actions").move_selection_next,
+            ["<C-k>"] = require("telescope.actions").move_selection_previous,
+          },
+          n = {
+            ["<C-j>"] = require("telescope.actions").move_selection_next,
+            ["<C-k>"] = require("telescope.actions").move_selection_previous,
+          },
+        },
+      },
+    },
   },
 
   -- ── 符号大纲（右侧固定栏，类似 vim tagbar；可开关，默认不打开） ──
@@ -57,7 +71,7 @@ return {
     branch = vim.fn.has("nvim-0.12") == 1 and nil or "nvim-0.11", -- 仅旧版 nvim(<0.12，Ubuntu) 走 nvim-0.11 分支；0.12+（Windows/mac）用 master
     dependencies = { "nvim-treesitter/nvim-treesitter", "nvim-web-devicons" },
     keys = {
-      { "<leader>s", "<cmd>AerialToggle<CR>", desc = "符号大纲（右侧栏）" },
+      { "<leader>o", "<cmd>AerialToggle<CR>", desc = "符号大纲（右侧栏）" },
       { "<F7>", "<cmd>AerialToggle<CR>", desc = "符号大纲（右侧栏）" },
     },
     opts = {
@@ -217,14 +231,49 @@ return {
   { "kylechui/nvim-surround", opts = {} },
   { "windwp/nvim-autopairs", opts = {} },
   {
-    "ggandor/leap.nvim",
-    keys = { { "s", "<Plug>(leap-forward-to)", desc = "跳转" } },
+    "folke/flash.nvim",
+    event = "VeryLazy",
+    keys = {
+      { "s", mode = { "n", "x", "o" }, function() require("flash").jump() end, desc = "跳转" },
+      { "S", mode = { "n", "x", "o" }, function() require("flash").treesitter() end, desc = "语法跳转" },
+    },
     opts = {},
   },
   { "lukas-reineke/indent-blankline.nvim", main = "ibl", opts = {} },
 
   -- ── 键位提示 ──
   { "folke/which-key.nvim", opts = {} },
+
+  -- ── UI 增强 ──
+  {
+    "folke/noice.nvim",
+    event = "VeryLazy",
+    dependencies = { "MunifTanjim/nui.nvim", "rcarriga/nvim-notify" },
+    opts = {
+      lsp = { override = { ["vim.lsp.util.convert_input_to_markdown_lines"] = true, ["vim.lsp.util.stylize_markdown"] = true } },
+      presets = { bottom_search = true, command_palette = true, long_message_to_split = true },
+    },
+  },
+  {
+    "akinsho/bufferline.nvim",
+    event = "VeryLazy",
+    dependencies = { "nvim-tree/nvim-web-devicons" },
+    opts = { options = { mode = "buffers" } },
+  },
+
+  -- ── 编辑增强 ──
+  {
+    "kevinhwang91/nvim-ufo",
+    event = "VeryLazy",
+    dependencies = { "kevinhwang91/promise-async" },
+    opts = {
+      provider_selector = function() return { "treesitter", "indent" } end,
+    },
+  },
+  {
+    "mbbill/undotree",
+    keys = { { "<leader>u", "<cmd>UndotreeToggle<CR>", desc = "撤销树" } },
+  },
 
   -- ── AI 助手（CodeCompanion） ──
   {
