@@ -64,8 +64,8 @@ set -g @plugin 'tmux-plugins/tmux-cpu'
 # Status bar theme: catppuccin（纯 shell，无 Python 依赖）
 set -g @catppuccin_flavor 'mocha'  # latte / frappe / macchiato / mocha
 # catppuccin 放 plugins-manual（不在 tpm @plugin 里），避免 tpm clean_plugins 误删
-{{- if and (eq .chezmoi.os "windows") .statusIcons }}
-# 无企业限制的机器（statusIcons=true）：tmux-cpu 未装，把 cpu/ram 的动态色覆盖成固定色，
+{{- if eq .chezmoi.os "windows" }}
+# Windows：tmux-cpu 未装，把 cpu/ram 的动态色覆盖成固定色，
 # 否则状态栏会渲染出非法的 #[fg=#{cpu_fg_color}]。
 set -g @catppuccin_status_cpu_text_fg "#{E:@thm_fg}"
 set -g @catppuccin_status_cpu_text_bg "#{E:@thm_surface_0}"
@@ -88,8 +88,7 @@ set -g @catppuccin_gitmux_text ' #(gitmux "#{pane_current_path}")'
 
 # 状态栏模块
 # Linux：左=会话+路径，右=git+cpu+内存+uptime+负载+时间（全量）
-# Windows：statusIcons=true（无企业限制）→ 完整 catppuccin 带图标；否则 → » 装饰 + 无图标（稳）
-# statusIcons 在每台机器的 ~/.config/chezmoi/chezmoi.toml 的 [data] 段里设
+# Windows：完整 catppuccin 带图标（statusd.sh 驻留进程写入动态值）
 set -g status-left-length 100
 set -g status-right-length 200
 {{- if ne .chezmoi.os "windows" }}
@@ -98,14 +97,8 @@ set -g status-right "#{E:@catppuccin_status_gitmux}#{E:@catppuccin_status_cpu}#{
 {{- else }}
 # cpu/内存/负载/uptime 一律由 statusd.sh 驻留进程写入 @catppuccin_*_text（无 #()、无 spawn 抖动）
 run -b '~/.tmux/scripts/statusd.sh'
-{{- if .statusIcons }}
 set -g status-left "#{E:@catppuccin_status_session}#{E:@catppuccin_status_directory}"
 set -g status-right "#{E:@catppuccin_status_cpu}#{E:@catppuccin_status_ram}#{E:@catppuccin_status_uptime}#{E:@catppuccin_status_load}#{E:@catppuccin_status_date_time}"
-{{- else }}
-# 有企业限制的机器：PUA 图标放格式串会丢输入，改用非 PUA 定宽 Unicode 装饰（»）+ 纯文字
-set -g status-left "#[fg=#{@thm_crust},bg=#{@thm_green}] » #{session_name} #[fg=#{@thm_crust},bg=#{@thm_rosewater}] » #{pane_current_path} #[fg=#{@thm_fg},bg=default]"
-set -g status-right "#[fg=#{@thm_crust},bg=#{@thm_yellow}] »cpu#{E:@catppuccin_cpu_text} #[fg=#{@thm_crust},bg=#{@thm_red}] »ram#{E:@catppuccin_ram_text} #[fg=#{@thm_crust},bg=#{@thm_peach}] »up#{E:@catppuccin_uptime_text} #[fg=#{@thm_crust},bg=#{@thm_blue}] »load#{E:@catppuccin_load_text} #[fg=#{@thm_crust},bg=#{@thm_sapphire}] » %Y-%m-%d %H:%M #[fg=#{@thm_fg},bg=default]"
-{{- end }}
 {{- end }}
 
 {{- if eq .chezmoi.os "windows" }}

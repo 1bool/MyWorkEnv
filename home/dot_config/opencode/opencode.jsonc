@@ -1,0 +1,35 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  // 双后端自动切换：由 ~/.zprofile.local 检测 token.molchip.com 可达性，
+  // 设置 OP_MODEL / OP_SMALL_MODEL 走 anthropic 网关或 openai 直连 DeepSeek。
+  "lsp": true,
+  "permission": {
+    "lsp": "allow"
+  },
+  "model": "{env:OP_MODEL}",
+  "small_model": "{env:OP_SMALL_MODEL}",
+  "provider": {
+    "anthropic": {
+      "options": {
+        "baseURL": "{env:ANTHROPIC_BASE_URL}/v1",
+        "apiKey": "{env:ANTHROPIC_API_KEY}"
+      },
+      "models": {
+        "deepseek-v4-pro": { "name": "DeepSeek V4 Pro" },
+        "deepseek-v4-flash": { "name": "DeepSeek V4 Flash" },
+        "kimi-k3": { "name": "Kimi K3" }
+      }
+    },
+    "openai": {
+      "options": {
+        "baseURL": "{env:OPENAI_BASE_URL}",
+        "apiKey": "{env:OPENAI_API_KEY}"
+      },
+      "models": {
+        "deepseek-v4-pro": { "id": "deepseek-chat", "name": "DeepSeek V4 Pro" },
+        "deepseek-v4-flash": { "id": "deepseek-chat", "name": "DeepSeek V4 Flash" },
+        "kimi-k3": { "id": "deepseek-reasoner", "name": "Kimi K3" }
+      }
+    }
+  }
+}

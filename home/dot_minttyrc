@@ -1,5 +1,5 @@
 BoldAsFont=yes
-Font=ZedMono NFM
+Font=IosevkaTermSlab NFM
 FontHeight=12
 FontIsBold=no
 Term=xterm-256color
@@ -20,3 +20,4 @@ Language=@
 Scrollbar=none
 ScrollMod=off
 DimAsFont=yes
+OpaqueWhenFocused=yes
