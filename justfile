@@ -354,7 +354,7 @@ plugins-update:
     [ -d ~/.tmux/plugins-manual/catppuccin ] && (cd ~/.tmux/plugins-manual/catppuccin && git pull) || true
     [ -x ~/.tmux/plugins/tpm/bin/update_plugins ] && ~/.tmux/plugins/tpm/bin/update_plugins || true
 
-# ── AI agents（Claude Code + Codewhale + Plannotator）──
+# ── AI agents（Claude Code + OpenCode + Plannotator）──
 ai:
     @echo "=== Claude Code ==="; \
     if command -v claude >/dev/null 2>&1; then \
@@ -371,17 +371,17 @@ ai:
         fi; \
         [ "$ok" -eq 1 ] && echo "  ✓ claude-code installed" || echo "  ✗ claude-code install failed (claude.ai blocked, npm unavailable)"; \
     fi; \
-    echo "=== Codewhale ==="; \
+    echo "=== OpenCode ==="; \
     source scripts/detect.sh; \
-    if command -v codewhale >/dev/null 2>&1; then \
-        echo "  ✓ codewhale (up to date)"; \
+    if command -v opencode >/dev/null 2>&1; then \
+        echo "  ✓ opencode (up to date)"; \
     elif is_msys2; then \
         command -v npm >/dev/null 2>&1 || { echo "  ✗ npm not found — run 'just packages' first"; exit 1; }; \
-        echo "  → npm install -g codewhale (npmmirror)..."; \
-        mkdir -p "$HOME/.local" && npm install -g codewhale --prefix "$HOME/.local" --registry=https://registry.npmmirror.com && echo "  ✓ codewhale installed" || echo "  ✗ codewhale install failed (npm)"; \
+        echo "  → npm install -g opencode-ai (npmmirror)..."; \
+        mkdir -p "$HOME/.local" && npm install -g opencode-ai --prefix "$HOME/.local" --registry=https://registry.npmmirror.com && echo "  ✓ opencode installed" || echo "  ✗ opencode install failed (npm)"; \
     else \
-        echo "  → codewhale.net/install.sh..."; \
-        curl -fsSL --connect-timeout 30 https://codewhale.net/install.sh | sh && echo "  ✓ codewhale installed" || echo "  ✗ codewhale install failed (install.sh)"; \
+        echo "  → opencode.ai/install..."; \
+        curl -fsSL --connect-timeout 30 https://opencode.ai/install | bash && echo "  ✓ opencode installed" || echo "  ✗ opencode install failed (install.sh)"; \
     fi; \
     echo "=== Plannotator ==="; \
     if command -v claude >/dev/null 2>&1; then \
@@ -394,11 +394,11 @@ ai:
 ai-update:
     @echo "=== Claude Code update ==="; \
     claude update 2>/dev/null && echo "  ✓ claude-code updated" || echo "  ✓ claude-code up to date"; \
-    echo "=== Codewhale update ==="; \
-    if command -v codewhale >/dev/null 2>&1; then \
-        codewhale update 2>/dev/null && echo "  ✓ codewhale updated" || echo "  ✗ codewhale update failed"; \
+    echo "=== OpenCode update ==="; \
+    if command -v opencode >/dev/null 2>&1; then \
+        opencode upgrade 2>/dev/null && echo "  ✓ opencode updated" || echo "  ✗ opencode update failed"; \
     else \
-        echo "  codewhale not installed — run 'just ai'"; \
+        echo "  opencode not installed — run 'just ai'"; \
     fi; \
     echo "=== Plannotator update ==="; \
     if command -v claude >/dev/null 2>&1; then \
