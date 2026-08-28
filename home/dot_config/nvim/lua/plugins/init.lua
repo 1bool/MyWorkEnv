@@ -36,6 +36,7 @@ return {
       view = { width = 40 },
       update_focused_file = { enable = true },
       reload_on_bufenter = vim.fn.has("win32") == 1, -- Windows fs watcher 易漏刷，进 buffer 时重载
+      actions = { open_file = { quit_on_open = true } }, -- 打开文件后自动关闭文件树
     },
   },
 
@@ -47,8 +48,21 @@ return {
       { "<C-p>", "<cmd>Telescope find_files<CR>", desc = "找文件" },
       { "<leader>*", "<cmd>Telescope grep_string<CR>", desc = "搜光标词" },
       { "<leader>f", "<cmd>Telescope buffers<CR>", desc = "缓冲列表" },
-      { "<leader>s", "<cmd>Telescope lsp_document_symbols<CR>", desc = "符号大纲" },
-      { "<F7>", "<cmd>Telescope lsp_document_symbols<CR>", desc = "符号大纲" },
+    },
+  },
+
+  -- ── 符号大纲（右侧固定栏，类似 vim tagbar；可开关，默认不打开） ──
+  {
+    "stevearc/aerial.nvim",
+    branch = vim.fn.has("nvim-0.12") == 1 and nil or "nvim-0.11", -- 仅旧版 nvim(<0.12，Ubuntu) 走 nvim-0.11 分支；0.12+（Windows/mac）用 master
+    dependencies = { "nvim-treesitter/nvim-treesitter", "nvim-web-devicons" },
+    keys = {
+      { "<leader>s", "<cmd>AerialToggle<CR>", desc = "符号大纲（右侧栏）" },
+      { "<F7>", "<cmd>AerialToggle<CR>", desc = "符号大纲（右侧栏）" },
+    },
+    opts = {
+      backends = { "lsp", "treesitter", "markdown", "man" },
+      layout = { default_direction = "right" },
     },
   },
 
