@@ -339,6 +339,14 @@ plugins:
         echo "  installing tmux plugins (tpm)..."; \
         ~/.tmux/plugins/tpm/bin/install_plugins && echo "  ✓ tmux plugins" || echo "  ✗ tmux plugins"; \
     fi; \
+    command -v win32yank >/dev/null 2>&1 || { \
+        uname -s | grep -qiE 'mingw|msys|cygwin' && { \
+            echo "  installing win32yank (nvim clipboard)..."; \
+            mkdir -p ~/.local/bin; T=$(mktemp -d); \
+            curl -fL --connect-timeout 30 "{{ gh_proxy }}https://github.com/equalsraf/win32yank/releases/latest/download/win32yank-x64.zip" -o "$T/w.zip" && \
+            unzip -qo "$T/w.zip" -d "$T" && cp -f "$T/win32yank.exe" ~/.local/bin/ && chmod +x ~/.local/bin/win32yank.exe && echo "  ✓ win32yank" || echo "  ✗ win32yank download failed"; \
+            rm -rf "$T"; \
+        }; }; \
     command -v nvim >/dev/null 2>&1 && { echo "  installing nvim plugins (git)..."; if nvim --headless "+Lazy! sync" +qa; then echo "  ✓ nvim plugins"; else echo "  ✗ nvim plugins sync failed"; fi; };
 
 plugins-update:
