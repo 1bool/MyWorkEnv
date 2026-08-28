@@ -11,7 +11,7 @@ Tested on MSYS2 (UCRT64/CLANG64), Ubuntu, Fedora, and macOS.
 - Tmux with TPM + catppuccin status bar
 - Nerd Fonts (selective download)
 - Cross-platform package management (pacman/apt/dnf/brew)
-- AI coding agents (Claude Code + Codewhale)
+- AI coding agents (Claude Code + Codewhale + Plannotator)
 
 ## Quick Start
 

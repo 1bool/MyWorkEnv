@@ -354,7 +354,7 @@ plugins-update:
     [ -d ~/.tmux/plugins-manual/catppuccin ] && (cd ~/.tmux/plugins-manual/catppuccin && git pull) || true
     [ -x ~/.tmux/plugins/tpm/bin/update_plugins ] && ~/.tmux/plugins/tpm/bin/update_plugins || true
 
-# ── AI agents（Claude Code + Codewhale）──
+# ── AI agents（Claude Code + Codewhale + Plannotator）──
 ai:
     @echo "=== Claude Code ==="; \
     if command -v claude >/dev/null 2>&1; then \
@@ -382,6 +382,13 @@ ai:
     else \
         echo "  → codewhale.net/install.sh..."; \
         curl -fsSL --connect-timeout 30 https://codewhale.net/install.sh | sh && echo "  ✓ codewhale installed" || echo "  ✗ codewhale install failed (install.sh)"; \
+    fi; \
+    echo "=== Plannotator ==="; \
+    if command -v claude >/dev/null 2>&1; then \
+        claude plugin marketplace add github:backnotprop/plannotator --scope user 2>/dev/null || true; \
+        claude plugin install plannotator@plannotator --scope user 2>/dev/null && echo "  ✓ plannotator installed" || echo "  ✓ plannotator (already installed)"; \
+    else \
+        echo "  ⚠ claude not found — skip plannotator"; \
     fi
 
 ai-update:
@@ -392,6 +399,12 @@ ai-update:
         codewhale update 2>/dev/null && echo "  ✓ codewhale updated" || echo "  ✗ codewhale update failed"; \
     else \
         echo "  codewhale not installed — run 'just ai'"; \
+    fi; \
+    echo "=== Plannotator update ==="; \
+    if command -v claude >/dev/null 2>&1; then \
+        claude plugin update plannotator --scope user 2>/dev/null && echo "  ✓ plannotator updated" || echo "  ✓ plannotator up to date"; \
+    else \
+        echo "  ⚠ claude not found — skip plannotator"; \
     fi
 
 # ── gitmux（tmux git 分支状态；无 Windows 二进制，仅 Linux/macOS） ──
