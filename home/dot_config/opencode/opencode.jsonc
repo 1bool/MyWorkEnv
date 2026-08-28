@@ -3,6 +3,10 @@
   "instructions": ["AGENTS.md"],
   // 双后端自动切换：由 ~/.zprofile.local 检测 token.molchip.com 可达性，
   // 设置 OP_MODEL / OP_SMALL_MODEL 走 anthropic 网关或 openai 直连 DeepSeek。
+  // 主模型 OP_MODEL 用于日常对话/编码；辅模型 OP_SMALL_MODEL 仅在轻量任务
+  // （标题/摘要/统计）自动调用以节省成本。两后端主辅模型务必映射到不同 id。
+  // 后端 B（openai）：deepseek-v4-pro（主）/ deepseek-v4-flash（辅），真实 API id。
+  // 后端 A（anthropic）：deepseek-v4-pro（主）/ deepseek-v4-flash（辅），kimi-k3 备用（最强）。
   "lsp": true,
   "permission": {
     "lsp": "allow"
@@ -27,9 +31,8 @@
         "apiKey": "{env:OPENAI_API_KEY}"
       },
       "models": {
-        "deepseek-v4-pro": { "id": "deepseek-chat", "name": "DeepSeek V4 Pro" },
-        "deepseek-v4-flash": { "id": "deepseek-chat", "name": "DeepSeek V4 Flash" },
-        "kimi-k3": { "id": "deepseek-reasoner", "name": "Kimi K3" }
+        "deepseek-v4-pro": { "id": "deepseek-v4-pro", "name": "DeepSeek V4 Pro" },
+        "deepseek-v4-flash": { "id": "deepseek-v4-flash", "name": "DeepSeek V4 Flash" }
       }
     }
   }
