@@ -57,16 +57,16 @@ bootstrap:
 	else CHEZMOI_BIN="$HOME/.local/bin/chezmoi"; fi; \
 	if command -v chezmoi >/dev/null 2>&1 || [ -x "$CHEZMOI_BIN" ]; then echo "  ✓ chezmoi"; \
 	else \
-	    if is_msys2; then \
-	        curl -fsSL --connect-timeout 30 --retry 3 get.chezmoi.io \
+	    DEST="$HOME/.local/bin"; \
+	    if is_msys2; then DEST="$USERPROFILE/.local/bin"; fi; \
+	    set -o pipefail; \
+	    if curl -fsSL --connect-timeout 30 --retry 3 get.chezmoi.io \
 	          | sed "s|https://github.com/|{{ gh_proxy }}https://github.com/|g; s|curl -w '%{http_code}'|curl --http1.1 --connect-timeout 30 --speed-limit 1024 --speed-time 60 -w '%{http_code}'|g; s|-fsSL|-fL|g" \
-	          | bash -s -- -b "$USERPROFILE/.local/bin"; \
+	          | bash -s -- -b "$DEST"; then \
+	        echo "  ✓ chezmoi installed"; \
 	    else \
-	        curl -fsSL --connect-timeout 30 --retry 3 get.chezmoi.io \
-	          | sed "s|https://github.com/|{{ gh_proxy }}https://github.com/|g; s|curl -w '%{http_code}'|curl --http1.1 --connect-timeout 30 --speed-limit 1024 --speed-time 60 -w '%{http_code}'|g; s|-fsSL|-fL|g" \
-	          | bash -s -- -b "$HOME/.local/bin"; \
+	        echo "  ✗ chezmoi install failed (get.chezmoi.io / GH_PROXY unreachable)"; \
 	    fi; \
-	    echo "  ✓ chezmoi installed"; \
 	fi; \
 	if is_msys2; then \
 	    C="${USERPROFILE}/.config/chezmoi/chezmoi.toml"; \
@@ -111,7 +111,7 @@ packages:
         pip config get global.index-url 2>/dev/null | grep -q tuna.tsinghua || pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple 2>/dev/null || true; \
         [ -f packages/pip.txt ] && for pkg in $(grep -v '^#' packages/pip.txt); do \
             command -v "$pkg" >/dev/null 2>&1 && continue; \
-            pip install --user --break-system-packages "$pkg" || true; \
+            if pip install --user --break-system-packages "$pkg"; then echo "    ✓ pip $pkg"; else echo "    ✗ pip $pkg failed"; fi; \
         done; \
     elif is_debian; then \
         for src in /etc/apt/sources.list /etc/apt/sources.list.d/ubuntu.sources; do \
@@ -125,7 +125,7 @@ packages:
         pip config get global.index-url 2>/dev/null | grep -q tuna.tsinghua || pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple 2>/dev/null || true; \
         [ -f packages/pip.txt ] && for pkg in $(grep -v '^#' packages/pip.txt); do \
             command -v "$pkg" >/dev/null 2>&1 && continue; \
-            pip install --user --break-system-packages "$pkg" || true; \
+            if pip install --user --break-system-packages "$pkg"; then echo "    ✓ pip $pkg"; else echo "    ✗ pip $pkg failed"; fi; \
         done; \
     elif is_rhel; then \
         sudo dnf -y install $(grep -h -v '^#' packages/base.txt packages/fedora.txt) || { echo "  ✗ dnf install failed — some packages missing"; exit 1; }; \
@@ -327,8 +327,8 @@ plugins:
         export GIT_CONFIG_VALUE_0="https://github.com/"; \
     fi; \
     if [ -f ~/.vim/autoload/plug.vim ]; then echo "  ✓ vim-plug"; \
-    else curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
-        https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim && echo "  ✓ vim-plug"; fi; \
+    else if curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
+        https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim; then echo "  ✓ vim-plug"; else echo "  ✗ vim-plug download failed"; fi; fi; \
     mkdir -p ~/.vim; cp -f "$(pwd)/home/dot_vim/plugrc.vim" ~/.vim/pluginrc.vim 2>/dev/null && echo "  ✓ pluginrc" || echo "  ✗ pluginrc"; \
     command -v vim >/dev/null 2>&1 && { [ -f ~/.vim/plugged ] && rm ~/.vim/plugged; mkdir -p ~/.vim/plugged; echo "  installing vim plugins (git)..."; vim -e -i NONE -c 'set nomore | PlugInstall | quitall' 2>&1; missing=""; for p in $(grep -oE "^Plug '[^']+'" "$(pwd)/home/dot_vim/plugrc.vim" | cut -d/ -f2 | cut -d"'" -f1); do [ -d "$HOME/.vim/plugged/$p" ] || missing="$missing $p"; done; if [ -n "$missing" ]; then echo "  ✗ vim plugins missing:$missing"; else echo "  ✓ vim plugins"; fi; }; \
     if [ -d ~/.tmux/plugins/tpm ]; then echo "  ✓ tpm"; \
@@ -339,7 +339,7 @@ plugins:
         echo "  installing tmux plugins (tpm)..."; \
         ~/.tmux/plugins/tpm/bin/install_plugins && echo "  ✓ tmux plugins" || echo "  ✗ tmux plugins"; \
     fi; \
-    command -v nvim >/dev/null 2>&1 && { echo "  installing nvim plugins (git)..."; nvim --headless "+Lazy! sync" +qa 2>&1; echo "  ✓ nvim plugins"; };
+    command -v nvim >/dev/null 2>&1 && { echo "  installing nvim plugins (git)..."; if nvim --headless "+Lazy! sync" +qa; then echo "  ✓ nvim plugins"; else echo "  ✗ nvim plugins sync failed"; fi; };
 
 plugins-update:
     @echo "=== Update plugins ==="; \
@@ -348,11 +348,11 @@ plugins-update:
         export GIT_CONFIG_KEY_0="url.{{ gh_proxy }}https://github.com/.insteadOf"; \
         export GIT_CONFIG_VALUE_0="https://github.com/"; \
     fi; \
-    command -v vim >/dev/null 2>&1 && vim -e -i NONE +PlugUpdate +qall! 2>&1 || true; \
-    command -v nvim >/dev/null 2>&1 && nvim --headless "+Lazy! sync" +qa 2>&1 || true; \
-    [ -d ~/.tmux/plugins/tpm ] && (cd ~/.tmux/plugins/tpm && git pull) || true
-    [ -d ~/.tmux/plugins-manual/catppuccin ] && (cd ~/.tmux/plugins-manual/catppuccin && git pull) || true
-    [ -x ~/.tmux/plugins/tpm/bin/update_plugins ] && ~/.tmux/plugins/tpm/bin/update_plugins || true
+    command -v vim >/dev/null 2>&1 && { if vim -e -i NONE +PlugUpdate +qall! 2>&1; then echo "  ✓ vim plugins updated"; else echo "  ✗ vim plugins update failed"; fi; }; \
+    command -v nvim >/dev/null 2>&1 && { if nvim --headless "+Lazy! sync" +qa 2>&1; then echo "  ✓ nvim plugins updated"; else echo "  ✗ nvim plugins update failed"; fi; }; \
+    if [ -d ~/.tmux/plugins/tpm ]; then (cd ~/.tmux/plugins/tpm && git pull) 2>&1 && echo "  ✓ tpm updated" || echo "  ✗ tpm update failed"; else echo "  (tpm not installed — run 'just plugins')"; fi; \
+    if [ -d ~/.tmux/plugins-manual/catppuccin ]; then (cd ~/.tmux/plugins-manual/catppuccin && git pull) 2>&1 && echo "  ✓ catppuccin updated" || echo "  ✗ catppuccin update failed"; else echo "  (catppuccin not installed — run 'just plugins')"; fi; \
+    if [ -x ~/.tmux/plugins/tpm/bin/update_plugins ]; then ~/.tmux/plugins/tpm/bin/update_plugins && echo "  ✓ tmux plugins updated" || echo "  ✗ tmux plugins update failed"; fi
 
 # ── AI agents（Claude Code + OpenCode + Plannotator）──
 ai:
@@ -365,44 +365,47 @@ ai:
             bash /tmp/claude-install.sh && ok=1; \
             rm -f /tmp/claude-install.sh; \
         fi; \
-        if [ "$ok" -ne 1 ] && command -v npm >/dev/null 2>&1; then \
-            echo "  → claude.ai unreachable, trying npm (npmmirror)..."; \
-            mkdir -p "$HOME/.local" && npm install -g @anthropic-ai/claude-code --prefix "$HOME/.local" --registry=https://registry.npmmirror.com && ok=1; \
-        fi; \
-        [ "$ok" -eq 1 ] && echo "  ✓ claude-code installed" || echo "  ✗ claude-code install failed (claude.ai blocked, npm unavailable)"; \
+        [ "$ok" -eq 1 ] && echo "  ✓ claude-code installed" || echo "  ✗ claude-code install failed (claude.ai unreachable)"; \
     fi; \
     echo "=== OpenCode ==="; \
-    source scripts/detect.sh; \
     if command -v opencode >/dev/null 2>&1; then \
         echo "  ✓ opencode (up to date)"; \
-    elif is_msys2; then \
-        command -v npm >/dev/null 2>&1 || { echo "  ✗ npm not found — run 'just packages' first"; exit 1; }; \
-        echo "  → npm install -g opencode-ai (npmmirror)..."; \
-        mkdir -p "$HOME/.local" && npm install -g opencode-ai --prefix "$HOME/.local" --registry=https://registry.npmmirror.com && echo "  ✓ opencode installed" || echo "  ✗ opencode install failed (npm)"; \
     else \
         echo "  → opencode.ai/install..."; \
-        curl -fsSL --connect-timeout 30 https://opencode.ai/install | bash && echo "  ✓ opencode installed" || echo "  ✗ opencode install failed (install.sh)"; \
+        set -o pipefail; curl -fsSL --connect-timeout 30 https://opencode.ai/install | bash && echo "  ✓ opencode installed" || echo "  ✗ opencode install failed (install.sh)"; \
     fi; \
     echo "=== Plannotator ==="; \
     if command -v claude >/dev/null 2>&1; then \
-        claude plugin marketplace add github:backnotprop/plannotator --scope user 2>/dev/null || true; \
-        claude plugin install plannotator@plannotator --scope user 2>/dev/null && echo "  ✓ plannotator installed" || echo "  ✓ plannotator (already installed)"; \
+        claude plugin marketplace add backnotprop/plannotator --scope user >/dev/null 2>&1 || true; \
+        if claude plugin install plannotator@plannotator --scope user; then \
+            echo "  ✓ plannotator installed"; \
+        else \
+            echo "  ✗ plannotator install failed — check claude plugin list"; \
+        fi; \
     else \
         echo "  ⚠ claude not found — skip plannotator"; \
     fi
 
 ai-update:
     @echo "=== Claude Code update ==="; \
-    claude update 2>/dev/null && echo "  ✓ claude-code updated" || echo "  ✓ claude-code up to date"; \
+    if command -v claude >/dev/null 2>&1; then \
+        claude update >/dev/null && echo "  ✓ claude-code updated" || echo "  ✗ claude-code update failed"; \
+    else \
+        echo "  claude not installed — run 'just ai'"; \
+    fi; \
     echo "=== OpenCode update ==="; \
     if command -v opencode >/dev/null 2>&1; then \
-        opencode upgrade 2>/dev/null && echo "  ✓ opencode updated" || echo "  ✗ opencode update failed"; \
+        opencode upgrade && echo "  ✓ opencode updated" || echo "  ✗ opencode update failed"; \
     else \
         echo "  opencode not installed — run 'just ai'"; \
     fi; \
     echo "=== Plannotator update ==="; \
     if command -v claude >/dev/null 2>&1; then \
-        claude plugin update plannotator --scope user 2>/dev/null && echo "  ✓ plannotator updated" || echo "  ✓ plannotator up to date"; \
+        if claude plugin update plannotator@plannotator --scope user; then \
+            echo "  ✓ plannotator updated"; \
+        else \
+            echo "  ✗ plannotator update failed"; \
+        fi; \
     else \
         echo "  ⚠ claude not found — skip plannotator"; \
     fi

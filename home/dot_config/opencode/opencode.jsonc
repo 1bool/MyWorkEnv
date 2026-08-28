@@ -1,5 +1,6 @@
 {
   "$schema": "https://opencode.ai/config.json",
+  "instructions": ["AGENTS.md"],
   // 双后端自动切换：由 ~/.zprofile.local 检测 token.molchip.com 可达性，
   // 设置 OP_MODEL / OP_SMALL_MODEL 走 anthropic 网关或 openai 直连 DeepSeek。
   "lsp": true,

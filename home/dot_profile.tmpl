@@ -18,6 +18,11 @@ if [ -d "$HOME/.local/bin" ] ; then
     PATH="$HOME/.local/bin:$PATH"
 fi
 
+# opencode（AI coding agent）装到 ~/.opencode/bin
+if [ -d "$HOME/.opencode/bin" ] ; then
+    PATH="$HOME/.opencode/bin:$PATH"
+fi
+
 {{- if eq .chezmoi.os "windows" }}
 # chezmoi: isolate config per MSYS2 installation
 export XDG_CONFIG_HOME="$(cygpath -m "$HOME/.config" 2>/dev/null || echo "$HOME/.config")"

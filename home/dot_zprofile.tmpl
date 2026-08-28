@@ -28,6 +28,11 @@ if [ -d "$HOME/.local/bin" ] ; then
     PATH="$HOME/.local/bin:$PATH"
 fi
 
+# opencode（AI coding agent）装到 ~/.opencode/bin
+if [ -d "$HOME/.opencode/bin" ] ; then
+    PATH="$HOME/.opencode/bin:$PATH"
+fi
+
 EDITOR='vim'
 
 # Claude Code 与 codecompanion.nvim 共用：模型映射（单一来源 ~/.config/shell/models.env）
