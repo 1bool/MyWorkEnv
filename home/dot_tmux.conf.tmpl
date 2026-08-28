@@ -88,7 +88,7 @@ set -g @catppuccin_gitmux_text ' #(gitmux "#{pane_current_path}")'
 
 # 状态栏模块
 # Linux：左=会话+路径，右=git+cpu+内存+uptime+负载+时间（全量）
-# Windows：完整 catppuccin 带图标（statusd.sh 驻留进程写入动态值）
+# Windows：no PUA icons（丢输入），改用 » 装饰 + 纯文字（statusd.sh 驻留进程写入动态值）
 set -g status-left-length 100
 set -g status-right-length 200
 {{- if ne .chezmoi.os "windows" }}
@@ -97,8 +97,8 @@ set -g status-right "#{E:@catppuccin_status_gitmux}#{E:@catppuccin_status_cpu}#{
 {{- else }}
 # cpu/内存/负载/uptime 一律由 statusd.sh 驻留进程写入 @catppuccin_*_text（无 #()、无 spawn 抖动）
 run -b '~/.tmux/scripts/statusd.sh'
-set -g status-left "#{E:@catppuccin_status_session}#{E:@catppuccin_status_directory}"
-set -g status-right "#{E:@catppuccin_status_cpu}#{E:@catppuccin_status_ram}#{E:@catppuccin_status_uptime}#{E:@catppuccin_status_load}#{E:@catppuccin_status_date_time}"
+set -g status-left "#[fg=#{@thm_crust},bg=#{@thm_green}] » #{session_name} #[fg=#{@thm_crust},bg=#{@thm_rosewater}] » #{pane_current_path} #[fg=#{@thm_fg},bg=default]"
+set -g status-right "#[fg=#{@thm_crust},bg=#{@thm_yellow}] »cpu#{E:@catppuccin_cpu_text} #[fg=#{@thm_crust},bg=#{@thm_red}] »ram#{E:@catppuccin_ram_text} #[fg=#{@thm_crust},bg=#{@thm_peach}] »up#{E:@catppuccin_uptime_text} #[fg=#{@thm_crust},bg=#{@thm_blue}] »load#{E:@catppuccin_load_text} #[fg=#{@thm_crust},bg=#{@thm_sapphire}] » %Y-%m-%d %H:%M #[fg=#{@thm_fg},bg=default]"
 {{- end }}
 
 {{- if eq .chezmoi.os "windows" }}
