@@ -337,6 +337,7 @@ plugins:
     else git clone --depth 1 https://github.com/catppuccin/tmux ~/.tmux/plugins-manual/catppuccin && echo "  ✓ catppuccin" || echo "  ✗ catppuccin"; fi; \
     if [ -f ~/.tmux.conf ] && [ -x ~/.tmux/plugins/tpm/bin/install_plugins ]; then \
         echo "  installing tmux plugins (tpm)..."; \
+        export TMUX_PLUGIN_MANAGER_PATH="${TMUX_PLUGIN_MANAGER_PATH:-$HOME/.tmux/plugins/}"; \
         ~/.tmux/plugins/tpm/bin/install_plugins && echo "  ✓ tmux plugins" || echo "  ✗ tmux plugins"; \
     fi; \
     command -v win32yank >/dev/null 2>&1 || { \
