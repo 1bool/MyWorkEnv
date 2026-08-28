@@ -41,6 +41,11 @@ if [ -f "$HOME/.config/shell/models.env" ]; then
     . "$HOME/.config/shell/models.env"
 fi
 
+{{- if .isWSL }}
+LANG=zh_CN.UTF-8
+export DISPLAY=:0
+{{- end }}
+
 # load local customizations
 if [ -f "$HOME/.zprofile.local" ]; then
     . "$HOME/.zprofile.local"

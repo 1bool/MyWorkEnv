@@ -13,6 +13,12 @@
   },
   "model": "{env:OP_MODEL}",
   "small_model": "{env:OP_SMALL_MODEL}",
+  "plugin": [
+    ["@plannotator/opencode@latest", {
+      "workflow": "plan-agent",
+      "planningAgents": ["plan"]
+    }]
+  ],
   "provider": {
     "anthropic": {
       "options": {

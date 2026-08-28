@@ -30,9 +30,7 @@ prep:
         echo "$USER ALL=(ALL) NOPASSWD: ALL" | sudo tee "/etc/sudoers.d/nopass_for_$USER" >/dev/null && sudo chmod 0440 "/etc/sudoers.d/nopass_for_$USER" && echo "  ✓ passwordless sudo enabled"; \
     fi; \
     if is_wsl; then \
-        if grep -q 'appendWindowsPath' /etc/wsl.conf 2>/dev/null; then echo "  ✓ /etc/wsl.conf already set"; \
-        else printf '[interop]\nappendWindowsPath = false\n' | sudo tee -a /etc/wsl.conf >/dev/null && echo "  ✓ WSL: appendWindowsPath disabled (restart WSL to apply)"; \
-        fi; \
+        echo "  ✓ WSL: appendWindowsPath 保持默认 (true)，Windows 命令（cmd.exe 等）可直调"; \
     fi
 
 # ── Bootstrap ──
@@ -166,7 +164,8 @@ dotfiles:
     SRC="$(cygpath -m "$(pwd)" 2>/dev/null || echo "$(pwd)")"; \
     CONF="${XDG_CONFIG_HOME:-$(cygpath -m "$HOME/.config" 2>/dev/null || echo "$HOME/.config")}"; \
     mkdir -p "$CONF/chezmoi"; \
-    printf 'sourceDir = "%s/home"\n[data]\n  isWSL = false\n[interpreters.sh]\n  command = "bash"\n[interpreters.bash]\n  command = "bash"\n' "$SRC" > "$CONF/chezmoi/chezmoi.toml"; \
+    if is_wsl; then WSL=true; else WSL=false; fi; \
+    printf 'sourceDir = "%s/home"\n[data]\n  isWSL = %s\n[interpreters.sh]\n  command = "bash"\n[interpreters.bash]\n  command = "bash"\n' "$SRC" "$WSL" > "$CONF/chezmoi/chezmoi.toml"; \
     chezmoi apply --interactive=false
 
 dotfiles-update:
@@ -384,15 +383,35 @@ ai:
         set -o pipefail; curl -fsSL --connect-timeout 30 https://opencode.ai/install | bash && echo "  ✓ opencode installed" || echo "  ✗ opencode install failed (install.sh)"; \
     fi; \
     echo "=== Plannotator ==="; \
+    if command -v plannotator >/dev/null 2>&1; then \
+        echo "  ✓ plannotator CLI (up to date)"; \
+    else \
+        os="$(uname -s)"; arch="$(uname -m)"; \
+        case "$os" in Darwin) os=darwin;; Linux) os=linux;; *) os="";; esac; \
+        case "$arch" in x86_64|amd64) arch=x64;; arm64|aarch64) arch=arm64;; esac; \
+        bin="plannotator-${os}-${arch}"; \
+        base="{{ gh_proxy }}https://github.com/backnotprop/plannotator/releases/latest/download"; \
+        echo "  → 下载 latest ($bin) via GH_PROXY..."; \
+        mkdir -p ~/.local/bin; \
+        if curl -fsSL --connect-timeout 15 --max-time 300 "$base/$bin" -o ~/.local/bin/plannotator; then \
+            expected="$(curl -fsSL --connect-timeout 15 "$base/$bin.sha256" | cut -d' ' -f1)"; \
+            actual="$(sha256sum ~/.local/bin/plannotator | cut -d' ' -f1)"; \
+            if [ -n "$expected" ] && [ "$expected" = "$actual" ]; then \
+                chmod +x ~/.local/bin/plannotator && echo "  ✓ plannotator installed (checksum verified)"; \
+            else \
+                rm -f ~/.local/bin/plannotator; echo "  ✗ plannotator checksum failed"; \
+            fi; \
+        else \
+            rm -f ~/.local/bin/plannotator; echo "  ✗ plannotator download failed (GH_PROXY unreachable)"; \
+        fi; \
+    fi; \
     if command -v claude >/dev/null 2>&1; then \
         claude plugin marketplace add backnotprop/plannotator --scope user >/dev/null 2>&1 || true; \
         if claude plugin install plannotator@plannotator --scope user; then \
-            echo "  ✓ plannotator installed"; \
+            echo "  ✓ plannotator Claude 插件 installed"; \
         else \
-            echo "  ✗ plannotator install failed — check claude plugin list"; \
+            echo "  ✗ plannotator Claude 插件 install failed"; \
         fi; \
-    else \
-        echo "  ⚠ claude not found — skip plannotator"; \
     fi
 
 ai-update:
@@ -409,14 +428,38 @@ ai-update:
         echo "  opencode not installed — run 'just ai'"; \
     fi; \
     echo "=== Plannotator update ==="; \
-    if command -v claude >/dev/null 2>&1; then \
-        if claude plugin update plannotator@plannotator --scope user; then \
-            echo "  ✓ plannotator updated"; \
+    if command -v plannotator >/dev/null 2>&1; then \
+        os="$(uname -s)"; arch="$(uname -m)"; \
+        case "$os" in Darwin) os=darwin;; Linux) os=linux;; *) os="";; esac; \
+        case "$arch" in x86_64|amd64) arch=x64;; arm64|aarch64) arch=arm64;; esac; \
+        bin="plannotator-${os}-${arch}"; \
+        base="{{ gh_proxy }}https://github.com/backnotprop/plannotator/releases/latest/download"; \
+        latest_hash="$(curl -fsSL --connect-timeout 15 "$base/$bin.sha256" 2>/dev/null | cut -d' ' -f1)"; \
+        if [ -z "$latest_hash" ]; then \
+            echo "  ✗ plannotator update check failed (GH_PROXY unreachable)"; \
+        elif [ "$latest_hash" = "$(sha256sum ~/.local/bin/plannotator | cut -d' ' -f1)" ]; then \
+            echo "  ✓ plannotator up to date"; \
         else \
-            echo "  ✗ plannotator update failed"; \
+            echo "  → 下载新版本..."; \
+            if curl -fsSL --connect-timeout 15 --max-time 300 "$base/$bin" -o /tmp/plannotator-new; then \
+                if [ "$latest_hash" = "$(sha256sum /tmp/plannotator-new | cut -d' ' -f1)" ]; then \
+                    chmod +x /tmp/plannotator-new && mv /tmp/plannotator-new ~/.local/bin/plannotator && echo "  ✓ plannotator updated (checksum verified)"; \
+                else \
+                    rm -f /tmp/plannotator-new; echo "  ✗ plannotator checksum failed"; \
+                fi; \
+            else \
+                rm -f /tmp/plannotator-new; echo "  ✗ plannotator update failed"; \
+            fi; \
         fi; \
     else \
-        echo "  ⚠ claude not found — skip plannotator"; \
+        echo "  plannotator not installed — run 'just ai'"; \
+    fi; \
+    if command -v claude >/dev/null 2>&1; then \
+        if claude plugin update plannotator@plannotator --scope user; then \
+            echo "  ✓ plannotator Claude 插件 updated"; \
+        else \
+            echo "  ✗ plannotator Claude 插件 update failed"; \
+        fi; \
     fi
 
 # ── gitmux（tmux git 分支状态；无 Windows 二进制，仅 Linux/macOS） ──
