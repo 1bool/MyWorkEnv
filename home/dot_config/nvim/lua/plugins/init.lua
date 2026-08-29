@@ -334,22 +334,42 @@ return {
       "ClaudeCodeCloseAllDiffs",
     },
     keys = {
-      { "<leader>a", nil, desc = "Claude Code" },
-      { "<leader>ac", "<cmd>ClaudeCode<CR>", desc = "开关终端" },
-      { "<leader>af", "<cmd>ClaudeCodeFocus<CR>", desc = "聚焦/隐藏" },
-      { "<leader>ar", "<cmd>ClaudeCode --resume<CR>", desc = "恢复会话" },
-      { "<leader>aC", "<cmd>ClaudeCode --continue<CR>", desc = "继续会话" },
-      { "<leader>am", "<cmd>ClaudeCodeSelectModel<CR>", desc = "选择模型" },
-      { "<leader>ab", "<cmd>ClaudeCodeAdd %<CR>", desc = "加入当前文件" },
-      { "<leader>as", "<cmd>ClaudeCodeSend<CR>", mode = "v", desc = "选区发给 Claude" },
+      { "<leader>c", nil, desc = "Claude Code" },
+      { "<leader>cc", "<cmd>ClaudeCode<CR>", desc = "开关终端" },
+      { "<leader>cf", "<cmd>ClaudeCodeFocus<CR>", desc = "聚焦/隐藏" },
+      { "<leader>cr", "<cmd>ClaudeCode --resume<CR>", desc = "恢复会话" },
+      { "<leader>cC", "<cmd>ClaudeCode --continue<CR>", desc = "继续会话" },
+      { "<leader>cm", "<cmd>ClaudeCodeSelectModel<CR>", desc = "选择模型" },
+      { "<leader>cb", "<cmd>ClaudeCodeAdd %<CR>", desc = "加入当前文件" },
+      { "<leader>cs", "<cmd>ClaudeCodeSend<CR>", mode = "v", desc = "选区发给 Claude" },
       {
-        "<leader>as",
+        "<leader>cs",
         "<cmd>ClaudeCodeTreeAdd<CR>",
         desc = "加入文件",
         ft = { "NvimTree", "neo-tree", "oil", "netrw" },
       },
-      { "<leader>aa", "<cmd>ClaudeCodeDiffAccept<CR>", desc = "接受 diff" },
-      { "<leader>ad", "<cmd>ClaudeCodeDiffDeny<CR>", desc = "拒绝 diff" },
+      { "<leader>ca", "<cmd>ClaudeCodeDiffAccept<CR>", desc = "接受 diff" },
+      { "<leader>cd", "<cmd>ClaudeCodeDiffDeny<CR>", desc = "拒绝 diff" },
     },
+  },
+
+  -- ── AI 助手（opencode.nvim：OpenCode 集成，<leader>a 系列） ──
+  {
+    "nickjvandyke/opencode.nvim",
+    version = "*",
+    config = function()
+      vim.keymap.set({ "n", "x" }, "<leader>ai", function() require("opencode").ask("@this: ") end, { desc = "提问 OpenCode" })
+      vim.keymap.set({ "n", "x" }, "<leader>as", function() require("opencode").select() end, { desc = "选择 OpenCode" })
+      vim.keymap.set({ "n", "x" }, "<leader>ap", function() require("opencode").prompt() end, { desc = "提示 OpenCode" })
+      vim.keymap.set({ "n", "x" }, "go", function() return require("opencode").operator("@this ") end, { expr = true, desc = "追加范围到 OpenCode" })
+    end,
+  },
+
+  -- ── AI 助手（editor-context：让 OpenCode agent 读取 nvim 光标/选区/诊断） ──
+  {
+    "talldan/opencode-nvim-editor-context",
+    config = function()
+      require("editor-context").setup()
+    end,
   },
 }

@@ -1,3 +1,5 @@
+ThemeFile=solarized-light
+ThemeDark=solarized-dark
 BoldAsFont=yes
 Font=IosevkaTermSlab NFM
 FontHeight=12

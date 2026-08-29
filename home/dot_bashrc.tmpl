@@ -123,6 +123,26 @@ function dirdiff()
 # Starship prompt
 eval "$(starship init bash)"
 
+# editor-context：按 tmux window 隔离 nvim server，让同一 window 的 opencode 自动连上对应 nvim。
+# 同一 window 的两个 pane（一个 nvim、一个 opencode）自动配对；不同 window 互不干扰。
+# Windows/MSYS2 用 TCP 端口；Linux/macOS 用 unix socket 文件（XDG_RUNTIME_DIR 或 /tmp）。
+if [ -n "$TMUX" ]; then
+  _nvim_win=$(tmux display-message -p '#{window_id}' 2>/dev/null | tr -dc '0-9')
+  _nvim_win="${_nvim_win:-0}"
+else
+  _nvim_win=0
+fi
+{{- if eq .chezmoi.os "windows" }}
+export NVIM_SOCKET="127.0.0.1:$((6770 + ${_nvim_win}))"
+{{- else }}
+export NVIM_SOCKET="${XDG_RUNTIME_DIR:-/tmp}/nvim.$USER.w${_nvim_win}"
+{{- end }}
+unset _nvim_win
+nvim() {
+  [ -S "$NVIM_SOCKET" ] && rm -f "$NVIM_SOCKET"
+  command nvim --listen "$NVIM_SOCKET" "$@"
+}
+
 if [ -f ~/.bashrc.local ]; then
   . ~/.bashrc.local
 fi

@@ -18,7 +18,8 @@
     ["@plannotator/opencode@latest", {
       "workflow": "plan-agent",
       "planningAgents": ["plan"]
-    }]
+    }],
+    "opencode-nvim-editor-context"
   ],
   "provider": {
     "anthropic": {
