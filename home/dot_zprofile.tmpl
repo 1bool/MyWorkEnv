@@ -12,7 +12,9 @@ export XDG_CONFIG_HOME="$(cygpath -m "$HOME/.config" 2>/dev/null || echo "$HOME/
 export PATH="$(cygpath -u "$USERPROFILE/.local/bin" 2>/dev/null || echo "$USERPROFILE/.local/bin"):$PATH"
 	{{- if env "MSYSTEM" }}
 	# add MSYS2 sbin for system daemons (e.g. unfsd)
-	export PATH="/ucrt64/sbin:$PATH"
+	if [ -d "${MSYSTEM_PREFIX}/sbin" ]; then
+		export PATH="${MSYSTEM_PREFIX}/sbin:$PATH"
+	fi
 	# Claude Code: use MSYS2 home for config
 	export CLAUDE_CONFIG_DIR="$(cygpath -w "$HOME/.claude")"
 	{{- end }}
