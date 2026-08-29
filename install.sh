@@ -15,6 +15,13 @@ if is_msys2; then
     export XDG_CONFIG_HOME="$(cygpath -m "$HOME/.config" 2>/dev/null || echo "$HOME/.config")"
     # native Windows exes (chezmoi, etc.) live in USERPROFILE, needs Unix path
     export PATH="$(cygpath -u "$USERPROFILE/.local/bin" 2>/dev/null || echo "$USERPROFILE/.local/bin"):$PATH"
+    # 配置国内镜像，避免下面装 just 时 pacman 走原始 repo.msys2.org
+    setup_msys2_mirror
+fi
+
+if is_debian; then
+    # 配置国内镜像，避免下面装 just 时 apt 走原始 archive.ubuntu.com
+    setup_debian_mirror
 fi
 
 # Install just if not present

@@ -38,12 +38,14 @@ bootstrap:
 	@echo "=== Bootstrap ==="; \
 	source scripts/detect.sh; \
 	if is_msys2; then \
+	    if ! command -v unzip >/dev/null || ! command -v git >/dev/null; then setup_msys2_mirror; fi; \
 	    command -v unzip >/dev/null || pacman -S --noconfirm unzip; \
 	    command -v git   >/dev/null || pacman -S --noconfirm git; \
 	elif is_macos; then \
 	    command -v unzip >/dev/null || brew install unzip; \
 	    command -v git   >/dev/null || brew install git; \
 	elif is_debian; then \
+	    if ! command -v unzip >/dev/null || ! command -v git >/dev/null; then setup_debian_mirror; fi; \
 	    command -v unzip >/dev/null || { sudo apt-get update && sudo apt-get -y install unzip; }; \
 	    command -v git   >/dev/null || { sudo apt-get -y install git; }; \
 	elif is_rhel; then \
@@ -83,15 +85,6 @@ packages:
     @echo "=== Packages ==="; \
     source scripts/detect.sh; \
     if is_msys2; then \
-        grep -q '^\[ucrt64\]' /etc/pacman.conf 2>/dev/null || \
-            printf '[options]\nHoldPkg= pacman\nArchitecture= auto\nColor\nCheckSpace\nParallelDownloads= 5\nSigLevel= Required\nLocalFileSigLevel= Optional\n[%s]\nInclude= /etc/pacman.d/mirrorlist.mingw\n[msys]\nInclude= /etc/pacman.d/mirrorlist.msys\n' "${MSYSTEM,,}" > /etc/pacman.conf; \
-        echo 'Server = https://mirrors.tuna.tsinghua.edu.cn/msys2/mingw/$repo/' > /etc/pacman.d/mirrorlist.mingw; \
-        echo 'Server = https://mirrors.ustc.edu.cn/msys2/mingw/$repo/' >> /etc/pacman.d/mirrorlist.mingw; \
-        echo 'Server = https://mirror.nju.edu.cn/msys2/mingw/$repo/' >> /etc/pacman.d/mirrorlist.mingw; \
-        echo 'Server = https://repo.msys2.org/mingw/$repo/' >> /etc/pacman.d/mirrorlist.mingw; \
-        echo 'Server = https://mirrors.tuna.tsinghua.edu.cn/msys2/msys/$arch/' > /etc/pacman.d/mirrorlist.msys; \
-        echo 'Server = https://mirrors.ustc.edu.cn/msys2/msys/$arch/' >> /etc/pacman.d/mirrorlist.msys; \
-        echo 'Server = https://repo.msys2.org/msys/$arch/' >> /etc/pacman.d/mirrorlist.msys; \
         pacman -Sy --noconfirm --needed; \
         pacman -S --noconfirm --needed $(grep -v '^#' packages/base.txt) $(grep -v '^#' packages/cygwin-msys.txt) || { echo "  ✗ pacman install failed — some packages missing"; exit 1; }; \
         if [ -n "${MINGW_PACKAGE_PREFIX:-}" ]; then \
@@ -112,12 +105,6 @@ packages:
             if pip install --user --break-system-packages "$pkg"; then echo "    ✓ pip $pkg"; else echo "    ✗ pip $pkg failed"; fi; \
         done; \
     elif is_debian; then \
-        for src in /etc/apt/sources.list /etc/apt/sources.list.d/ubuntu.sources; do \
-            [ -f "$src" ] && sudo sed -i \
-                -e 's|https\?://[^/]*archive.ubuntu.com|https://mirrors.tuna.tsinghua.edu.cn|g' \
-                -e 's|https\?://security.ubuntu.com|https://mirrors.tuna.tsinghua.edu.cn|g' \
-                "$src"; \
-        done; \
         sudo apt-get update; \
         sudo apt-get -y install $(grep -h -v '^#' packages/base.txt packages/debian.txt) || { echo "  ✗ apt install failed — some packages missing"; exit 1; }; \
         pip config get global.index-url 2>/dev/null | grep -q tuna.tsinghua || pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple 2>/dev/null || true; \
