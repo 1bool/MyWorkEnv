@@ -438,8 +438,35 @@ ai:
 
 ai-update:
     @echo "=== Claude Code update ==="; \
+    source scripts/detect.sh; \
     if command -v claude >/dev/null 2>&1; then \
-        claude update >/dev/null && echo "  ✓ claude-code updated" || echo "  ✗ claude-code update failed"; \
+        local_ver="$(claude --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1)"; \
+        latest_tag=""; \
+        for u in "https://api.github.com/repos/anthropics/claude-code/releases/latest" "{{ gh_proxy }}https://api.github.com/repos/anthropics/claude-code/releases/latest"; do \
+            latest_tag="$(curl -fsSL --connect-timeout 5 --max-time 8 "$u" 2>/dev/null | grep '"tag_name"' | head -1 | cut -d'"' -f4)"; \
+            [ -n "$latest_tag" ] && break; \
+        done; \
+        latest_ver="${latest_tag#v}"; \
+        if [ -n "$latest_ver" ] && [ "$local_ver" = "$latest_ver" ]; then \
+            echo "  ✓ claude-code up to date ($local_ver)"; \
+        else \
+            echo "  → 更新 claude-code (${latest_ver:-latest}) via GH_PROXY..."; \
+            cc_arch="$(uname -m)"; \
+            case "$cc_arch" in x86_64|amd64) cc_arch=x64;; arm64|aarch64) cc_arch=arm64;; esac; \
+            cc_base="{{ gh_proxy }}https://github.com/anthropics/claude-code/releases/latest/download"; \
+            T=$(mktemp -d); \
+            if is_msys2; then \
+                cc_dest="$USERPROFILE/.local/bin"; mkdir -p "$cc_dest"; \
+                curl -fL --connect-timeout 30 --max-time 600 "$cc_base/claude-win32-${cc_arch}.zip" -o "$T/cc.zip" && \
+                unzip -qo "$T/cc.zip" -d "$T" && cp -f "$T/claude.exe" "$cc_dest/" && echo "  ✓ claude-code updated" || echo "  ✗ claude-code download failed (GH_PROXY unreachable)"; \
+            else \
+                cc_os="$(uname -s)"; case "$cc_os" in Darwin) cc_os=darwin;; Linux) cc_os=linux;; *) cc_os="";; esac; \
+                cc_dest="$HOME/.local/bin"; mkdir -p "$cc_dest"; \
+                curl -fL --connect-timeout 30 --max-time 600 "$cc_base/claude-${cc_os}-${cc_arch}.tar.gz" -o "$T/cc.tgz" && \
+                tar xzf "$T/cc.tgz" -C "$cc_dest" && chmod +x "$cc_dest/claude" && echo "  ✓ claude-code updated" || echo "  ✗ claude-code download failed (GH_PROXY unreachable)"; \
+            fi; \
+            rm -rf "$T"; \
+        fi; \
     else \
         echo "  claude not installed — run 'just ai'"; \
     fi; \
@@ -492,20 +519,30 @@ gitmux:
     if is_msys2; then echo "  (Windows — gitmux 无二进制，跳过)"; exit 0; fi; \
     if command -v gitmux >/dev/null 2>&1; then echo "  ✓ gitmux"; exit 0; fi; \
     mkdir -p ~/.local/bin; \
-    ver="$(curl -fsSL https://api.github.com/repos/arl/gitmux/releases/latest | grep -o '"tag_name": *"[^"]*"' | head -1 | cut -d'"' -f4)"; \
+    ver=""; \
+    for u in "https://api.github.com/repos/arl/gitmux/releases/latest" "{{ gh_proxy }}https://api.github.com/repos/arl/gitmux/releases/latest"; do \
+        ver="$(curl -fsSL --connect-timeout 5 --max-time 8 "$u" 2>/dev/null | grep -o '"tag_name": *"[^"]*"' | head -1 | cut -d'"' -f4)"; \
+        [ -n "$ver" ] && break; \
+    done; \
+    if [ -z "$ver" ]; then echo "  ✗ gitmux version check failed"; exit 0; fi; \
     case "$(uname -m)" in x86_64) goarch=amd64;; arm64|aarch64) goarch=arm64;; *) goarch="$(uname -m)";; esac; \
     if is_macos; then asset="macOS_${goarch}"; else asset="linux_${goarch}"; fi; \
-    curl -fL --progress-bar "https://github.com/arl/gitmux/releases/download/$ver/gitmux_${ver}_${asset}.tar.gz" -o /tmp/gitmux.tar.gz && \
+    curl -fL --connect-timeout 30 --max-time 300 "{{ gh_proxy }}https://github.com/arl/gitmux/releases/download/$ver/gitmux_${ver}_${asset}.tar.gz" -o /tmp/gitmux.tar.gz && \
     tar xzf /tmp/gitmux.tar.gz -C ~/.local/bin gitmux && rm -f /tmp/gitmux.tar.gz && echo "  ✓ gitmux $ver ($asset)" || echo "  ✗ gitmux"
 
 gitmux-update:
     @echo "=== gitmux update ==="; \
     source scripts/detect.sh; \
     if is_msys2; then echo "  (Windows — gitmux 无二进制，跳过)"; exit 0; fi; \
-    ver="$(curl -fsSL https://api.github.com/repos/arl/gitmux/releases/latest | grep -o '"tag_name": *"[^"]*"' | head -1 | cut -d'"' -f4)"; \
+    ver=""; \
+    for u in "https://api.github.com/repos/arl/gitmux/releases/latest" "{{ gh_proxy }}https://api.github.com/repos/arl/gitmux/releases/latest"; do \
+        ver="$(curl -fsSL --connect-timeout 5 --max-time 8 "$u" 2>/dev/null | grep -o '"tag_name": *"[^"]*"' | head -1 | cut -d'"' -f4)"; \
+        [ -n "$ver" ] && break; \
+    done; \
+    if [ -z "$ver" ]; then echo "  ✗ gitmux version check failed"; exit 0; fi; \
     case "$(uname -m)" in x86_64) goarch=amd64;; arm64|aarch64) goarch=arm64;; *) goarch="$(uname -m)";; esac; \
     if is_macos; then asset="macOS_${goarch}"; else asset="linux_${goarch}"; fi; \
-    curl -fL --progress-bar "https://github.com/arl/gitmux/releases/download/$ver/gitmux_${ver}_${asset}.tar.gz" -o /tmp/gitmux.tar.gz && \
+    curl -fL --connect-timeout 30 --max-time 300 "{{ gh_proxy }}https://github.com/arl/gitmux/releases/download/$ver/gitmux_${ver}_${asset}.tar.gz" -o /tmp/gitmux.tar.gz && \
     tar xzf /tmp/gitmux.tar.gz -C ~/.local/bin gitmux && rm -f /tmp/gitmux.tar.gz && echo "  ✓ gitmux $ver ($asset)" || echo "  ✗ gitmux update failed"
 
 # ── Windows Terminal profile ──
