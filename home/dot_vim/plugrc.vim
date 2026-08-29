@@ -35,5 +35,10 @@ Plug 'tpope/vim-vividchalk'
 Plug 'itchyny/landscape.vim'
 Plug 'jonathanfilip/vim-lucius'
 Plug 'rakr/vim-one'
+Plug 'catppuccin/vim', { 'as': 'catppuccin' }
+Plug 'ghifarit53/tokyonight-vim'
+Plug 'sainnhe/everforest'
+Plug 'jan-warchol/selenized', { 'rtp': 'editors/vim' }
+Plug 'joshdick/onedark.vim'
 Plug 'ryanoasis/vim-devicons'
 " Plug 'madox2/vim-ai'

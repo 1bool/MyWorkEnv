@@ -1,0 +1,34 @@
+
+## name:     Catppuccin Mintty Macchiato
+## author:   Justus0405
+## license:  MIT
+## upstream: https://github.com/Justus0405/mintty/blob/main/themes/catppuccin-macchiato
+
+CursorColour=     244, 219, 214
+
+BackgroundColour= 36, 39, 58
+ForegroundColour= 202, 211, 245
+
+BoldBlack=        184, 192, 224
+Black=            165, 173, 203
+
+BoldRed=          237, 135, 150
+Red=              237, 135, 150
+
+BoldGreen=        166, 218, 149
+Green=            166, 218, 149
+
+BoldYellow=       238, 212, 159
+Yellow=           238, 212, 159
+
+BoldBlue=         138, 173, 244
+Blue=             138, 173, 244
+
+BoldMagenta=      198, 160, 246
+Magenta=          198, 160, 246
+
+BoldCyan=         139, 213, 202
+Cyan=             139, 213, 202
+
+BoldWhite=        73, 77, 100
+White=            91, 96, 120

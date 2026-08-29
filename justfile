@@ -538,4 +538,5 @@ wt-config: packages
     source scripts/detect.sh; \
     is_msys2 || { echo "Windows only."; exit 0; }; \
     command -v python >/dev/null 2>&1 || { echo "Python required. Run 'just packages' first."; exit 1; }; \
-    python scripts/wt-add-profile.py
+    python scripts/wt-add-profile.py; \
+    python scripts/wt-add-themes.py

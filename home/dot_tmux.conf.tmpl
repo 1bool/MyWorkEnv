@@ -63,6 +63,20 @@ set -g @plugin 'tmux-plugins/tmux-cpu'
 
 # Status bar theme: catppuccin（纯 shell，无 Python 依赖）
 set -g @catppuccin_flavor 'mocha'  # latte / frappe / macchiato / mocha
+# 主题切换：PREFIX + T 循环切换 flavor（mocha → macchiato → frappe → latte）；
+# 不用 prefix+t（那是默认 clock-mode），大写 T 空闲且好记（T=Theme）
+bind T run-shell 'c=$(tmux show-option -gv @catppuccin_flavor); case $c in mocha) n=macchiato;; macchiato) n=frappe;; frappe) n=latte;; *) n=mocha;; esac; tmux set-option -g @catppuccin_flavor $n; tmux set-option -g @catppuccin_reset true; tmux run-shell ~/.tmux/plugins-manual/catppuccin/catppuccin.tmux; tmux display-message "catppuccin: $n"'
+# 跟随终端明暗（catppuccin 官方推荐：client-dark-theme/light-theme hook）：dark → mocha，light → latte
+set-hook -g client-dark-theme {
+  set -g @catppuccin_flavor "mocha"
+  set -g @catppuccin_reset "true"
+  run '~/.tmux/plugins-manual/catppuccin/catppuccin.tmux'
+}
+set-hook -g client-light-theme {
+  set -g @catppuccin_flavor "latte"
+  set -g @catppuccin_reset "true"
+  run '~/.tmux/plugins-manual/catppuccin/catppuccin.tmux'
+}
 # catppuccin 放 plugins-manual（不在 tpm @plugin 里），避免 tpm clean_plugins 误删
 {{- if eq .chezmoi.os "windows" }}
 # Windows：tmux-cpu 未装，把 cpu/ram 的动态色覆盖成固定色，

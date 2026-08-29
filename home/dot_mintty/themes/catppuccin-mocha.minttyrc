@@ -1,0 +1,34 @@
+
+## name:     Catppuccin Mintty Mocha
+## author:   Justus0405
+## license:  MIT
+## upstream: https://github.com/Justus0405/mintty/blob/main/themes/catppuccin-mocha
+
+CursorColour=     245, 224, 220
+
+BackgroundColour= 30, 30, 46
+ForegroundColour= 205, 214, 244
+
+BoldBlack=        186, 194, 222
+Black=            166, 173, 200
+
+BoldRed=          243, 139, 168
+Red=              243, 139, 168
+
+BoldGreen=        166, 227, 161
+Green=            166, 227, 161
+
+BoldYellow=       249, 226, 175
+Yellow=           249, 226, 175
+
+BoldBlue=         137, 180, 250
+Blue=             137, 180, 250
+
+BoldMagenta=      203, 166, 247
+Magenta=          203, 166, 247
+
+BoldCyan=         148, 226, 213
+Cyan=             148, 226, 213
+
+BoldWhite=        69, 71, 90
+White=            88, 91, 112

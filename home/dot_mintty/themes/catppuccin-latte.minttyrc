@@ -1,0 +1,34 @@
+
+## name:     Catppuccin Mintty Latte
+## author:   Justus0405
+## license:  MIT
+## upstream: https://github.com/Justus0405/mintty/blob/main/themes/catppuccin-latte
+
+CursorColour=     220, 138, 120
+
+BackgroundColour= 239, 241, 245
+ForegroundColour= 76, 79, 105
+
+BoldBlack=        172, 176, 190
+Black=            188, 192, 204
+
+BoldRed=          210, 15, 57
+Red=              210, 15, 57
+
+BoldGreen=        64, 160, 43
+Green=            64, 160, 43
+
+BoldYellow=       223, 142, 29
+Yellow=           223, 142, 29
+
+BoldBlue=         30, 102, 245
+Blue=             30, 102, 245
+
+BoldMagenta=      136, 57, 239
+Magenta=          136, 57, 239
+
+BoldCyan=         23, 146, 153
+Cyan=             23, 146, 153
+
+BoldWhite=        92, 95, 119
+White=            108, 111, 133

@@ -1,7 +1,7 @@
 -- lazy.nvim 插件清单（全原生；语言工具走系统包）
 
 return {
-  -- ── 主题（solarized8：高对比 dark 模式） ──
+  -- ── 主题（默认 solarized8；其余立即加载不抢 colorscheme，<leader>sc 打开 themery 菜单切换） ──
   {
     "lifepillar/vim-solarized8",
     name = "solarized8",
@@ -10,6 +10,51 @@ return {
       vim.o.background = "dark"
       vim.cmd.colorscheme("solarized8")
     end,
+  },
+  { "catppuccin/nvim", name = "catppuccin", lazy = false },
+  { "folke/tokyonight.nvim", name = "tokyonight", lazy = false },
+  { "neanias/everforest-nvim", name = "everforest", lazy = false },
+  { "ChrisMGeo/lagoon.nvim", name = "lagoon", lazy = false },
+  { "calind/selenized.nvim", name = "selenized", lazy = false },
+  { "navarasu/onedark.nvim", name = "onedark", lazy = false },
+  { "NLKNguyen/papercolor-theme", name = "papercolor", lazy = false },
+
+  -- ── 主题菜单 + 跟随系统（themery 管选择/持久化；auto-dark-mode 跟随系统 light/dark） ──
+  {
+    "zaldih/themery.nvim",
+    lazy = false,
+    keys = { { "<leader>sc", "<cmd>Themery<CR>", desc = "切换主题" } },
+    config = function()
+      require("themery").setup({
+        themes = {
+          "solarized8",
+          { name = "papercolor", colorscheme = "PaperColor" },
+          { name = "catppuccin", colorscheme = "catppuccin", before = [[ require("catppuccin").setup({ flavour = "auto" }) ]] },
+          { name = "tokyonight", colorscheme = "tokyonight", before = [[ require("tokyonight").setup({ style = "night" }) ]] },
+          "everforest",
+          "lagoon",
+          "selenized",
+          { name = "onedark", colorscheme = "onedark", before = [[ require("onedark").setup({ style = "dark" }) ]] },
+        },
+        livePreview = true,
+      })
+    end,
+  },
+  {
+    "f-person/auto-dark-mode.nvim",
+    lazy = false,
+    opts = {
+      -- 跟随系统：切 background 后重放当前 colorscheme（solarized8/catppuccin/tokyonight/
+      -- everforest/selenized 都读 background 自动切 light/dark；lagoon 纯 dark 不受影响）
+      set_dark_mode = function()
+        vim.api.nvim_set_option_value("background", "dark", {})
+        if vim.g.colors_name then pcall(vim.cmd, "colorscheme " .. vim.g.colors_name) end
+      end,
+      set_light_mode = function()
+        vim.api.nvim_set_option_value("background", "light", {})
+        if vim.g.colors_name then pcall(vim.cmd, "colorscheme " .. vim.g.colors_name) end
+      end,
+    },
   },
 
   -- ── 状态栏 / 图标 ──

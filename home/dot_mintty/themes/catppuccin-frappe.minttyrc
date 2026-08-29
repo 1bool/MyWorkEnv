@@ -1,0 +1,34 @@
+
+## name:     Catppuccin Mintty Frappé
+## author:   Justus0405
+## license:  MIT
+## upstream: https://github.com/Justus0405/mintty/blob/main/themes/catppuccin-frappe
+
+CursorColour=     242, 213, 207
+
+BackgroundColour= 48, 52, 70
+ForegroundColour= 198, 208, 245
+
+BoldBlack=        181, 191, 226
+Black=            165, 173, 206
+
+BoldRed=          231, 130, 132
+Red=              231, 130, 132
+
+BoldGreen=        166, 209, 137
+Green=            166, 209, 137
+
+BoldYellow=       229, 200, 144
+Yellow=           229, 200, 144
+
+BoldBlue=         140, 170, 238
+Blue=             140, 170, 238
+
+BoldMagenta=      202, 158, 230
+Magenta=          202, 158, 230
+
+BoldCyan=         129, 200, 190
+Cyan=             129, 200, 190
+
+BoldWhite=        81, 87, 109
+White=            98, 104, 128
