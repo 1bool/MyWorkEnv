@@ -308,9 +308,11 @@ clean:
 plugins:
     @echo "=== Plugins ==="; \
     if [ -n "{{ gh_proxy }}" ]; then \
-        export GIT_CONFIG_COUNT=1; \
+        export GIT_CONFIG_COUNT=2; \
         export GIT_CONFIG_KEY_0="url.{{ gh_proxy }}https://github.com/.insteadOf"; \
         export GIT_CONFIG_VALUE_0="https://github.com/"; \
+        export GIT_CONFIG_KEY_1="url.{{ gh_proxy }}https://github.com/.insteadOf"; \
+        export GIT_CONFIG_VALUE_1="https://git::@github.com/"; \
     fi; \
     if [ -f ~/.vim/autoload/plug.vim ]; then echo "  ✓ vim-plug"; \
     else if curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
@@ -339,9 +341,11 @@ plugins:
 plugins-update:
     @echo "=== Update plugins ==="; \
     if [ -n "{{ gh_proxy }}" ]; then \
-        export GIT_CONFIG_COUNT=1; \
+        export GIT_CONFIG_COUNT=2; \
         export GIT_CONFIG_KEY_0="url.{{ gh_proxy }}https://github.com/.insteadOf"; \
         export GIT_CONFIG_VALUE_0="https://github.com/"; \
+        export GIT_CONFIG_KEY_1="url.{{ gh_proxy }}https://github.com/.insteadOf"; \
+        export GIT_CONFIG_VALUE_1="https://git::@github.com/"; \
     fi; \
     command -v vim >/dev/null 2>&1 && { if vim -e -i NONE +PlugUpdate +qall! 2>&1; then echo "  ✓ vim plugins updated"; else echo "  ✗ vim plugins update failed"; fi; }; \
     command -v nvim >/dev/null 2>&1 && { if nvim --headless "+Lazy! sync" +qa 2>&1; then echo "  ✓ nvim plugins updated"; else echo "  ✗ nvim plugins update failed"; fi; }; \
