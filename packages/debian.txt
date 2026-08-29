@@ -6,6 +6,7 @@ curl
 wget
 eza
 ripgrep
+fd-find
 fzf
 gh
 fontconfig

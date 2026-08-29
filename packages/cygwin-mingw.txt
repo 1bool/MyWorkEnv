@@ -5,6 +5,7 @@ ctags
 python-psutil
 eza
 ripgrep
+fd
 fzf
 python-ruff
 basedpyright

@@ -5,6 +5,7 @@ wget
 macvim
 eza
 ripgrep
+fd
 fzf
 gh
 ruff

@@ -113,10 +113,10 @@ packages:
         done; \
     elif is_debian; then \
         for src in /etc/apt/sources.list /etc/apt/sources.list.d/ubuntu.sources; do \
-            [ -f "$$src" ] && sudo sed -i \
-                -e 's|http://[^/]*archive.ubuntu.com|https://mirrors.tuna.tsinghua.edu.cn|g' \
-                -e 's|http://security.ubuntu.com|https://mirrors.tuna.tsinghua.edu.cn|g' \
-                "$$src"; \
+            [ -f "$src" ] && sudo sed -i \
+                -e 's|https\?://[^/]*archive.ubuntu.com|https://mirrors.tuna.tsinghua.edu.cn|g' \
+                -e 's|https\?://security.ubuntu.com|https://mirrors.tuna.tsinghua.edu.cn|g' \
+                "$src"; \
         done; \
         sudo apt-get update; \
         sudo apt-get -y install $(grep -h -v '^#' packages/base.txt packages/debian.txt) || { echo "  ✗ apt install failed — some packages missing"; exit 1; }; \
