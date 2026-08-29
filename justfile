@@ -365,15 +365,36 @@ plugins-update:
 # ── AI agents（Claude Code + OpenCode + Plannotator）──
 ai:
     @echo "=== Claude Code ==="; \
+    source scripts/detect.sh; \
     if command -v claude >/dev/null 2>&1; then \
         echo "  ✓ claude (up to date)"; \
     else \
         ok=0; \
-        if curl -fsSL --connect-timeout 30 https://claude.ai/install.sh -o /tmp/claude-install.sh 2>/dev/null; then \
-            bash /tmp/claude-install.sh && ok=1; \
+        if curl -fsSL --connect-timeout 8 --max-time 10 https://claude.ai/install.sh -o /tmp/claude-install.sh 2>/dev/null; then \
+            if head -c 512 /tmp/claude-install.sh | grep -qiE '<html|<!doctype'; then \
+                echo "  (claude.ai 被墙/地区限制，回退 GitHub releases)"; \
+            elif bash /tmp/claude-install.sh; then \
+                ok=1; echo "  ✓ claude-code installed (claude.ai/install.sh)"; \
+            fi; \
             rm -f /tmp/claude-install.sh; \
         fi; \
-        [ "$ok" -eq 1 ] && echo "  ✓ claude-code installed" || echo "  ✗ claude-code install failed (claude.ai unreachable)"; \
+        if [ "$ok" -ne 1 ]; then \
+            cc_arch="$(uname -m)"; \
+            case "$cc_arch" in x86_64|amd64) cc_arch=x64;; arm64|aarch64) cc_arch=arm64;; esac; \
+            cc_base="{{ gh_proxy }}https://github.com/anthropics/claude-code/releases/latest/download"; \
+            T=$(mktemp -d); \
+            if is_msys2; then \
+                cc_dest="$USERPROFILE/.local/bin"; mkdir -p "$cc_dest"; \
+                curl -fL --connect-timeout 30 --max-time 600 "$cc_base/claude-win32-${cc_arch}.zip" -o "$T/cc.zip" && \
+                unzip -qo "$T/cc.zip" -d "$T" && cp -f "$T/claude.exe" "$cc_dest/" && echo "  ✓ claude-code installed (GitHub releases)" || echo "  ✗ claude-code download failed (GH_PROXY unreachable)"; \
+            else \
+                cc_os="$(uname -s)"; case "$cc_os" in Darwin) cc_os=darwin;; Linux) cc_os=linux;; *) cc_os="";; esac; \
+                cc_dest="$HOME/.local/bin"; mkdir -p "$cc_dest"; \
+                curl -fL --connect-timeout 30 --max-time 600 "$cc_base/claude-${cc_os}-${cc_arch}.tar.gz" -o "$T/cc.tgz" && \
+                tar xzf "$T/cc.tgz" -C "$cc_dest" && chmod +x "$cc_dest/claude" && echo "  ✓ claude-code installed (GitHub releases)" || echo "  ✗ claude-code download failed (GH_PROXY unreachable)"; \
+            fi; \
+            rm -rf "$T"; \
+        fi; \
     fi; \
     echo "=== OpenCode ==="; \
     if command -v opencode >/dev/null 2>&1; then \
@@ -387,22 +408,23 @@ ai:
         echo "  ✓ plannotator CLI (up to date)"; \
     else \
         os="$(uname -s)"; arch="$(uname -m)"; \
-        case "$os" in Darwin) os=darwin;; Linux) os=linux;; *) os="";; esac; \
+        case "$os" in Darwin) os=darwin;; Linux) os=linux;; MINGW*|MSYS*|CYGWIN*) os=win32;; *) os="";; esac; \
         case "$arch" in x86_64|amd64) arch=x64;; arm64|aarch64) arch=arm64;; esac; \
         bin="plannotator-${os}-${arch}"; \
+        local_bin=plannotator; [ "$os" = win32 ] && { bin="${bin}.exe"; local_bin=plannotator.exe; }; \
         base="{{ gh_proxy }}https://github.com/backnotprop/plannotator/releases/latest/download"; \
         echo "  → 下载 latest ($bin) via GH_PROXY..."; \
         mkdir -p ~/.local/bin; \
-        if curl -fsSL --connect-timeout 15 --max-time 300 "$base/$bin" -o ~/.local/bin/plannotator; then \
+        if curl -fsSL --connect-timeout 15 --max-time 300 "$base/$bin" -o ~/.local/bin/"$local_bin"; then \
             expected="$(curl -fsSL --connect-timeout 15 "$base/$bin.sha256" | cut -d' ' -f1)"; \
-            actual="$(sha256sum ~/.local/bin/plannotator | cut -d' ' -f1)"; \
+            actual="$(sha256sum ~/.local/bin/"$local_bin" | cut -d' ' -f1)"; \
             if [ -n "$expected" ] && [ "$expected" = "$actual" ]; then \
-                chmod +x ~/.local/bin/plannotator && echo "  ✓ plannotator installed (checksum verified)"; \
+                chmod +x ~/.local/bin/"$local_bin" && echo "  ✓ plannotator installed (checksum verified)"; \
             else \
-                rm -f ~/.local/bin/plannotator; echo "  ✗ plannotator checksum failed"; \
+                rm -f ~/.local/bin/"$local_bin"; echo "  ✗ plannotator checksum failed"; \
             fi; \
         else \
-            rm -f ~/.local/bin/plannotator; echo "  ✗ plannotator download failed (GH_PROXY unreachable)"; \
+            rm -f ~/.local/bin/"$local_bin"; echo "  ✗ plannotator download failed (GH_PROXY unreachable)"; \
         fi; \
     fi; \
     if command -v claude >/dev/null 2>&1; then \
@@ -430,20 +452,21 @@ ai-update:
     echo "=== Plannotator update ==="; \
     if command -v plannotator >/dev/null 2>&1; then \
         os="$(uname -s)"; arch="$(uname -m)"; \
-        case "$os" in Darwin) os=darwin;; Linux) os=linux;; *) os="";; esac; \
+        case "$os" in Darwin) os=darwin;; Linux) os=linux;; MINGW*|MSYS*|CYGWIN*) os=win32;; *) os="";; esac; \
         case "$arch" in x86_64|amd64) arch=x64;; arm64|aarch64) arch=arm64;; esac; \
         bin="plannotator-${os}-${arch}"; \
+        local_bin=plannotator; [ "$os" = win32 ] && { bin="${bin}.exe"; local_bin=plannotator.exe; }; \
         base="{{ gh_proxy }}https://github.com/backnotprop/plannotator/releases/latest/download"; \
         latest_hash="$(curl -fsSL --connect-timeout 15 "$base/$bin.sha256" 2>/dev/null | cut -d' ' -f1)"; \
         if [ -z "$latest_hash" ]; then \
             echo "  ✗ plannotator update check failed (GH_PROXY unreachable)"; \
-        elif [ "$latest_hash" = "$(sha256sum ~/.local/bin/plannotator | cut -d' ' -f1)" ]; then \
+        elif [ "$latest_hash" = "$(sha256sum ~/.local/bin/"$local_bin" | cut -d' ' -f1)" ]; then \
             echo "  ✓ plannotator up to date"; \
         else \
             echo "  → 下载新版本..."; \
             if curl -fsSL --connect-timeout 15 --max-time 300 "$base/$bin" -o /tmp/plannotator-new; then \
                 if [ "$latest_hash" = "$(sha256sum /tmp/plannotator-new | cut -d' ' -f1)" ]; then \
-                    chmod +x /tmp/plannotator-new && mv /tmp/plannotator-new ~/.local/bin/plannotator && echo "  ✓ plannotator updated (checksum verified)"; \
+                    chmod +x /tmp/plannotator-new && mv /tmp/plannotator-new ~/.local/bin/"$local_bin" && echo "  ✓ plannotator updated (checksum verified)"; \
                 else \
                     rm -f /tmp/plannotator-new; echo "  ✗ plannotator checksum failed"; \
                 fi; \

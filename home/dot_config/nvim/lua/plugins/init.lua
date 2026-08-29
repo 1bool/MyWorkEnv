@@ -1,14 +1,5 @@
 -- lazy.nvim 插件清单（全原生；语言工具走系统包）
 
--- 与 ~/.config/shell/models.env 导出的模型 env 联动（单一来源；不设兜底）
--- Claude Code 用 model[...] 标注上下文窗口（如 deepseek-v4-pro[1m]），但发给 API 时只发基础名；
--- 网关只注册了 deepseek-v4-pro（无 [1m]），带 [1m] 会报 model_not_found，故这里同样剥掉 [...]。
-local function strip_ctx(name)
-  return name and name:gsub("%[[^%]]*%]$", "") or name
-end
-local cc_main_model = strip_ctx(os.getenv("ANTHROPIC_MODEL"))
-local cc_fast_model = strip_ctx(os.getenv("ANTHROPIC_DEFAULT_HAIKU_MODEL"))
-
 return {
   -- ── 主题（solarized8：高对比 dark 模式） ──
   {
@@ -275,67 +266,45 @@ return {
     keys = { { "<leader>u", "<cmd>UndotreeToggle<CR>", desc = "撤销树" } },
   },
 
-  -- ── AI 助手（CodeCompanion） ──
+  -- ── AI 助手（claudecode.nvim：Claude Code 官方 IDE 协议集成） ──
   {
-    "olimorris/codecompanion.nvim",
-    dependencies = { "nvim-lua/plenary.nvim", "nvim-treesitter/nvim-treesitter" },
-    keys = {
-      { "<leader>aa", "<cmd>CodeCompanionChat<CR>", desc = "AI 对话" },
-      { "<leader>ai", "<cmd>CodeCompanion<CR>", desc = "AI 内联改写" },
+    "coder/claudecode.nvim",
+    dependencies = { "folke/snacks.nvim" },
+    config = true,
+    -- cmd 让 lazy.nvim 生成命令桩，:ClaudeCode* 在首次按键前即可用
+    cmd = {
+      "ClaudeCode",
+      "ClaudeCodeFocus",
+      "ClaudeCodeSelectModel",
+      "ClaudeCodeAdd",
+      "ClaudeCodeSend",
+      "ClaudeCodeTreeAdd",
+      "ClaudeCodeStatus",
+      "ClaudeCodeStart",
+      "ClaudeCodeStop",
+      "ClaudeCodeOpen",
+      "ClaudeCodeClose",
+      "ClaudeCodeDiffAccept",
+      "ClaudeCodeDiffDeny",
+      "ClaudeCodeCloseAllDiffs",
     },
-    opts = {
-      -- 隐私：token / base_url 从 ~/.zprofile.local 导出的环境变量读取，不进仓库。
-      -- 模型名从 ~/.config/shell/models.env 导出的 env 读取（与 Claude Code 共用同一来源）。
-      adapters = {
-        http = {
-          anthropic = function()
-            -- 网关 base_url 可能带尾斜杠；若直接用 "${url}/v1/messages" 会拼成 //v1/messages（404/200 错误路由），
-            -- 这里先去掉尾斜杠，保证单斜杠 /v1/messages（真实端点，无鉴权时返回 401）。
-            local base = os.getenv("ANTHROPIC_BASE_URL") or ""
-            base = base:gsub("/+$", "")
-            return require("codecompanion.adapters").extend("anthropic", {
-              env = {
-                api_key = "ANTHROPIC_API_KEY",
-              },
-              url = base .. "/v1/messages",
-              headers = {
-                ["x-api-key"] = "${api_key}",
-              },
-              -- 网关不支持 GET /v1/models（404），禁用模型列表拉取，改用 env 静态列表
-              schema = {
-                model = {
-                  choices = function()
-                    local models = {}
-                    for _, var in ipairs({
-                      "ANTHROPIC_MODEL",
-                      "ANTHROPIC_DEFAULT_SONNET_MODEL",
-                      "ANTHROPIC_DEFAULT_HAIKU_MODEL",
-                      "ANTHROPIC_DEFAULT_OPUS_MODEL",
-                    }) do
-                      local name = strip_ctx(os.getenv(var))
-                      if name and name ~= "" then
-                        models[name] = { opts = {} }
-                      end
-                    end
-                    return models
-                  end,
-                },
-              },
-            })
-          end,
-        },
+    keys = {
+      { "<leader>a", nil, desc = "Claude Code" },
+      { "<leader>ac", "<cmd>ClaudeCode<CR>", desc = "开关终端" },
+      { "<leader>af", "<cmd>ClaudeCodeFocus<CR>", desc = "聚焦/隐藏" },
+      { "<leader>ar", "<cmd>ClaudeCode --resume<CR>", desc = "恢复会话" },
+      { "<leader>aC", "<cmd>ClaudeCode --continue<CR>", desc = "继续会话" },
+      { "<leader>am", "<cmd>ClaudeCodeSelectModel<CR>", desc = "选择模型" },
+      { "<leader>ab", "<cmd>ClaudeCodeAdd %<CR>", desc = "加入当前文件" },
+      { "<leader>as", "<cmd>ClaudeCodeSend<CR>", mode = "v", desc = "选区发给 Claude" },
+      {
+        "<leader>as",
+        "<cmd>ClaudeCodeTreeAdd<CR>",
+        desc = "加入文件",
+        ft = { "NvimTree", "neo-tree", "oil", "netrw" },
       },
-      interactions = {
-        chat = {
-          adapter = { name = "anthropic", model = cc_main_model },
-          -- 默认加载文件工具组，AI 才能直接改/建/删文件（否则只聊天，无工具可用）
-          tools = { opts = { default_tools = { "files" } } },
-        },
-        inline = { adapter = { name = "anthropic", model = cc_main_model } },
-        background = { adapter = { name = "anthropic", model = cc_fast_model } },
-      },
-      -- 非代码文本回复用中文（system prompt 里的语言指令）
-      opts = { language = "Chinese" },
+      { "<leader>aa", "<cmd>ClaudeCodeDiffAccept<CR>", desc = "接受 diff" },
+      { "<leader>ad", "<cmd>ClaudeCodeDiffDeny<CR>", desc = "拒绝 diff" },
     },
   },
 }
