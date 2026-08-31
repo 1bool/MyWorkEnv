@@ -277,6 +277,25 @@ return {
   },
   { "lukas-reineke/indent-blankline.nvim", main = "ibl", opts = {} },
 
+  -- ── 终端 ──
+  {
+    "akinsho/toggleterm.nvim",
+    version = "*",
+    cmd = "ToggleTerm",
+    keys = {
+      { "<leader>tt", "<cmd>ToggleTerm<CR>", desc = "开关终端" },
+      { "<leader>tf", "<cmd>ToggleTerm direction=float<CR>", desc = "浮动终端" },
+      { "<leader>th", "<cmd>ToggleTerm direction=horizontal<CR>", desc = "水平终端" },
+    },
+    config = function()
+      require("toggleterm").setup({
+        size = 20,
+        open_mapping = [[<C-\>]],
+        direction = "horizontal",
+      })
+    end,
+  },
+
   -- ── 键位提示 ──
   { "folke/which-key.nvim", opts = {} },
 
