@@ -377,6 +377,18 @@ return {
     "nickjvandyke/opencode.nvim",
     version = "*",
     config = function()
+      -- 修复 opencode.nvim Windows 下 server discovery 用 vim.fn.json_decode 在 fast event 报 E5560（上游 bug）。
+      -- 改成 vim.json.decode（Lua 版，允许 fast event 调用）；升级插件后此函数会重打补丁。
+      local win_lua = vim.fn.stdpath("data") .. "/lazy/opencode.nvim/lua/opencode/server/discovery/process/windows.lua"
+      local f = io.open(win_lua, "r")
+      if f then
+        local c = f:read("*a")
+        f:close()
+        if c:find("vim.fn.json_decode", 1, true) then
+          local w = io.open(win_lua, "w")
+          if w then w:write(c:gsub("vim.fn.json_decode", "vim.json.decode")) w:close() end
+        end
+      end
       vim.keymap.set({ "n", "x" }, "<leader>ai", function() require("opencode").ask("@this: ") end, { desc = "提问 OpenCode" })
       vim.keymap.set({ "n", "x" }, "<leader>as", function() require("opencode").select() end, { desc = "选择 OpenCode" })
       vim.keymap.set({ "n", "x" }, "<leader>ap", function() require("opencode").prompt() end, { desc = "提示 OpenCode" })
