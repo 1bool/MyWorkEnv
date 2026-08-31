@@ -2,12 +2,10 @@
   "$schema": "https://opencode.ai/config.json",
   "instructions": ["AGENTS.md"],
   "shell": "bash",
-  // 双后端自动切换：由 ~/.zprofile.local 检测 token.molchip.com 可达性，
-  // 设置 OP_MODEL / OP_SMALL_MODEL 走 anthropic 网关或 openai 直连 DeepSeek。
+  // 双后端（token.molchip.com 网关 / DeepSeek 直连）统一走 Anthropic 协议，
+  // 由 ~/.zshrc.local 的 ANTHROPIC_BASE_URL / ANTHROPIC_API_KEY 环境变量驱动。
   // 主模型 OP_MODEL 用于日常对话/编码；辅模型 OP_SMALL_MODEL 仅在轻量任务
-  // （标题/摘要/统计）自动调用以节省成本。两后端主辅模型务必映射到不同 id。
-  // 后端 B（openai）：deepseek-v4-pro（主）/ deepseek-v4-flash（辅），真实 API id。
-  // 后端 A（anthropic）：deepseek-v4-pro（主）/ deepseek-v4-flash（辅），kimi-k3 备用（最强）。
+  // （标题/摘要/统计）自动调用以节省成本。kimi-k3 为最强档，/models 切换（仅后端 A）。
   "lsp": true,
   "permission": {
     "lsp": "allow"
@@ -20,5 +18,18 @@
       "planningAgents": ["plan"]
     }],
     "opencode-nvim-editor-context"
-  ]
+  ],
+  "provider": {
+    "anthropic": {
+      "options": {
+        "baseURL": "{env:ANTHROPIC_BASE_URL}/v1",
+        "apiKey": "{env:ANTHROPIC_API_KEY}"
+      },
+      "models": {
+        "deepseek-v4-pro": { "name": "DeepSeek V4 Pro" },
+        "deepseek-v4-flash": { "name": "DeepSeek V4 Flash" },
+        "kimi-k3": { "name": "Kimi K3" }
+      }
+    }
+  }
 }
