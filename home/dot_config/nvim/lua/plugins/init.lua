@@ -334,7 +334,11 @@ return {
   {
     "coder/claudecode.nvim",
     dependencies = { "folke/snacks.nvim" },
-    config = true,
+    opts = {
+      terminal = {
+        split_width_percentage = 0.45, -- 终端宽度 45%（默认 30% 太窄）
+      },
+    },
     -- cmd 让 lazy.nvim 生成命令桩，:ClaudeCode* 在首次按键前即可用
     cmd = {
       "ClaudeCode",
