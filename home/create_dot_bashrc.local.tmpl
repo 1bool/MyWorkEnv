@@ -1,3 +1,39 @@
-# ~/.bashrc.local — machine-specific bash customizations
-# This file is sourced by ~/.bashrc (chezmoi-managed)
-# Add your own aliases, environment variables, etc. here
+# ~/.bashrc.local — 本机 bash 交互式 shell 配置
+# 此文件由 chezmoi create_ 模板首次生成，不会覆盖本地修改。
+# 调整后生效：source ~/.bashrc.local
+
+# ── AI 后端配置（隐私，不入库） ──
+# OpenCode 支持双后端切换：注释掉当前后端，取消注释另一个后端即可。
+# Claude Code 仅支持 Anthropic 协议，无法切换后端，始终使用后端 A。
+#
+# 环境变量说明：
+#   ANTHROPIC_BASE_URL            Claude Code / OpenCode 后端 A 网关地址
+#   ANTHROPIC_API_KEY             Claude Code / OpenCode 后端 A API key
+#   ANTHROPIC_MODEL               Claude Code 默认模型
+#   ANTHROPIC_DEFAULT_SONNET_MODEL  Claude Code Sonnet 档模型
+#   ANTHROPIC_DEFAULT_HAIKU_MODEL   Claude Code Haiku 档模型
+#   ANTHROPIC_SMALL_FAST_MODEL      Claude Code 轻量快速模型
+#   ANTHROPIC_DEFAULT_OPUS_MODEL    Claude Code Opus 档模型
+#   OP_MODEL                      OpenCode 主模型（provider/model-id）
+#   OP_SMALL_MODEL                OpenCode 辅模型（轻量任务自动调用）
+#   OPENAI_BASE_URL               OpenCode 后端 B 直连地址
+#   OPENAI_API_KEY                OpenCode 后端 B API key
+
+# === 后端 A：token.molchip.com 网关（Anthropic 协议）===
+#export ANTHROPIC_BASE_URL="https://token.molchip.com"
+#export ANTHROPIC_API_KEY="sk-你的token"
+# Claude Code 模型档位
+#export ANTHROPIC_MODEL="deepseek-v4-pro[1m]"
+#export ANTHROPIC_DEFAULT_SONNET_MODEL="deepseek-v4-pro[1m]"
+#export ANTHROPIC_DEFAULT_HAIKU_MODEL="deepseek-v4-flash"
+#export ANTHROPIC_SMALL_FAST_MODEL="deepseek-v4-flash"
+#export ANTHROPIC_DEFAULT_OPUS_MODEL="kimi-k3"
+# OpenCode 模型
+#export OP_MODEL="anthropic/deepseek-v4-pro"
+#export OP_SMALL_MODEL="anthropic/deepseek-v4-flash"
+
+# === 后端 B：DeepSeek 直连（OpenAI 协议，仅 OpenCode 可用）===
+#export OPENAI_BASE_URL="https://api.deepseek.com/v1"
+#export OPENAI_API_KEY="sk-你的deepseek-key"
+#export OP_MODEL="openai/deepseek-v4-pro"
+#export OP_SMALL_MODEL="openai/deepseek-v4-flash"

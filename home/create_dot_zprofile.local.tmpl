@@ -1,18 +1,3 @@
 # ~/.zprofile.local — machine-specific zprofile customizations
 # This file is sourced by ~/.zprofile (chezmoi-managed)
-
-# ── AI 后端选择（隐私，不入库） ──
-# 模型名映射见 ~/.config/shell/models.env（入库）。
-# 切换后端：注释掉当前后端，取消注释另一个后端即可。
-
-# === 后端 A：token.molchip.com 网关（Anthropic 协议） ===
-export ANTHROPIC_BASE_URL="https://token.molchip.com"
-export ANTHROPIC_API_KEY="sk-你的token"
-export OP_MODEL="anthropic/deepseek-v4-pro"
-export OP_SMALL_MODEL="anthropic/deepseek-v4-flash"
-
-# === 后端 B：DeepSeek 直连（OpenAI 协议） ===
-#export OPENAI_BASE_URL="https://api.deepseek.com/v1"
-#export OPENAI_API_KEY="sk-你的deepseek-key"
-#export OP_MODEL="openai/deepseek-v4-pro"
-#export OP_SMALL_MODEL="openai/deepseek-v4-flash"
+# Add your own PATH additions, environment variables, etc. here

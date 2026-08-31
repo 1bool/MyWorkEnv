@@ -37,12 +37,6 @@ fi
 
 EDITOR='vim'
 
-# Claude Code：模型映射（单一来源 ~/.config/shell/models.env）
-# 隐私的 token/base_url 仍在 ~/.zprofile.local（不入库）
-if [ -f "$HOME/.config/shell/models.env" ]; then
-    . "$HOME/.config/shell/models.env"
-fi
-
 {{- if .isWSL }}
 LANG=zh_CN.UTF-8
 export DISPLAY=:0
