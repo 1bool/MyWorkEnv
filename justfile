@@ -277,7 +277,7 @@ clean:
     for d in ~/.vim/plugged/*/; do \
         [ -d "$d" ] || continue; \
         dn=$(basename "$d"); keep=0; \
-        for p in $(grep -oE "^Plug '[^']+'" "$(pwd)/home/dot_vim/plugrc.vim" | cut -d/ -f2 | cut -d"'" -f1); do \
+        for p in $(sed -n "s/.*'as': *'\([^']*\)'.*/\1/p; t end; s|^Plug '[^']*/\([^']*\)'.*|\1|p; :end" "$(pwd)/home/dot_vim/plugrc.vim"); do \
             [ "$dn" = "$p" ] && { keep=1; break; }; \
         done; \
         [ "$keep" -eq 0 ] && rm -rf "$d" && echo "  del: $dn/"; \
@@ -318,7 +318,7 @@ plugins:
     else if curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
         https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim; then echo "  ✓ vim-plug"; else echo "  ✗ vim-plug download failed"; fi; fi; \
     mkdir -p ~/.vim; cp -f "$(pwd)/home/dot_vim/plugrc.vim" ~/.vim/pluginrc.vim 2>/dev/null && echo "  ✓ pluginrc" || echo "  ✗ pluginrc"; \
-    command -v vim >/dev/null 2>&1 && { [ -f ~/.vim/plugged ] && rm ~/.vim/plugged; mkdir -p ~/.vim/plugged; echo "  installing vim plugins (git)..."; vim +PlugInstall +qall; missing=""; for p in $(grep -oE "^Plug '[^']+'" "$(pwd)/home/dot_vim/plugrc.vim" | cut -d/ -f2 | cut -d"'" -f1); do [ -d "$HOME/.vim/plugged/$p" ] || missing="$missing $p"; done; if [ -n "$missing" ]; then echo "  ✗ vim plugins missing:$missing"; else echo "  ✓ vim plugins"; fi; }; \
+    command -v vim >/dev/null 2>&1 && { [ -f ~/.vim/plugged ] && rm ~/.vim/plugged; mkdir -p ~/.vim/plugged; echo "  installing vim plugins (git)..."; vim +PlugInstall +qall; missing=""; for p in $(sed -n "s/.*'as': *'\([^']*\)'.*/\1/p; t end; s|^Plug '[^']*/\([^']*\)'.*|\1|p; :end" "$(pwd)/home/dot_vim/plugrc.vim"); do [ -d "$HOME/.vim/plugged/$p" ] || missing="$missing $p"; done; if [ -n "$missing" ]; then echo "  ✗ vim plugins missing:$missing"; else echo "  ✓ vim plugins"; fi; }; \
     if [ -d ~/.tmux/plugins/tpm ]; then echo "  ✓ tpm"; \
     else git clone --depth 1 https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm && echo "  ✓ tpm" || echo "  ✗ tpm"; fi; \
     if [ -d ~/.tmux/plugins-manual/catppuccin ]; then echo "  ✓ catppuccin"; \
@@ -347,7 +347,7 @@ plugins-update:
         export GIT_CONFIG_KEY_1="url.{{ gh_proxy }}https://github.com/.insteadOf"; \
         export GIT_CONFIG_VALUE_1="https://git::@github.com/"; \
     fi; \
-    command -v vim >/dev/null 2>&1 && { if vim -e -i NONE +PlugUpdate +qall! 2>&1; then echo "  ✓ vim plugins updated"; else echo "  ✗ vim plugins update failed"; fi; }; \
+    command -v vim >/dev/null 2>&1 && { if vim +PlugUpdate +qall 2>&1; then echo "  ✓ vim plugins updated"; else echo "  ✗ vim plugins update failed"; fi; }; \
     command -v nvim >/dev/null 2>&1 && { if nvim --headless "+Lazy! sync" +qa 2>&1; then echo "  ✓ nvim plugins updated"; else echo "  ✗ nvim plugins update failed"; fi; }; \
     if [ -d ~/.tmux/plugins/tpm ]; then (cd ~/.tmux/plugins/tpm && git pull) 2>&1 && echo "  ✓ tpm updated" || echo "  ✗ tpm update failed"; else echo "  (tpm not installed — run 'just plugins')"; fi; \
     if [ -d ~/.tmux/plugins-manual/catppuccin ]; then (cd ~/.tmux/plugins-manual/catppuccin && git pull) 2>&1 && echo "  ✓ catppuccin updated" || echo "  ✗ catppuccin update failed"; else echo "  (catppuccin not installed — run 'just plugins')"; fi; \
