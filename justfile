@@ -391,8 +391,24 @@ ai:
     if command -v opencode >/dev/null 2>&1; then \
         echo "  ✓ opencode (up to date)"; \
     else \
-        echo "  → opencode.ai/install..."; \
-        set -o pipefail; curl -fsSL --connect-timeout 30 https://opencode.ai/install | bash && echo "  ✓ opencode installed" || echo "  ✗ opencode install failed (install.sh)"; \
+        echo "  → 安装 opencode via GH_PROXY..."; \
+        oc_os="$(uname -s)"; oc_arch="$(uname -m)"; \
+        case "$oc_os" in Darwin) oc_os=darwin;; Linux) oc_os=linux;; MINGW*|MSYS*|CYGWIN*) oc_os=windows;; *) oc_os="";; esac; \
+        case "$oc_arch" in x86_64|amd64) oc_arch=x64;; arm64|aarch64) oc_arch=arm64;; esac; \
+        oc_ext=".zip"; [ "$oc_os" = linux ] && oc_ext=".tar.gz"; \
+        oc_filename="opencode-${oc_os}-${oc_arch}${oc_ext}"; \
+        oc_base="{{ gh_proxy }}https://github.com/anomalyco/opencode/releases/latest/download"; \
+        T=$(mktemp -d); mkdir -p ~/.opencode/bin; \
+        if curl -fL --connect-timeout 30 --max-time 600 "$oc_base/$oc_filename" -o "$T/$oc_filename"; then \
+            if [ "$oc_os" = linux ]; then \
+                tar xzf "$T/$oc_filename" -C "$T" && cp -f "$T/opencode" ~/.opencode/bin/ && chmod +x ~/.opencode/bin/opencode && echo "  ✓ opencode installed"; \
+            else \
+                unzip -qo "$T/$oc_filename" -d "$T" && cp -f "$T/opencode.exe" ~/.opencode/bin/ && echo "  ✓ opencode installed"; \
+            fi; \
+        else \
+            echo "  ✗ opencode download failed (GH_PROXY unreachable)"; \
+        fi; \
+        rm -rf "$T"; \
     fi; \
     echo "=== Plannotator ==="; \
     if command -v plannotator >/dev/null 2>&1; then \
@@ -463,7 +479,34 @@ ai-update:
     fi; \
     echo "=== OpenCode update ==="; \
     if command -v opencode >/dev/null 2>&1; then \
-        opencode upgrade && echo "  ✓ opencode updated" || echo "  ✗ opencode update failed"; \
+        local_ver="$(opencode --version 2>/dev/null | head -1)"; \
+        latest_ver=""; \
+        for u in "https://api.github.com/repos/anomalyco/opencode/releases/latest" "{{ gh_proxy }}https://api.github.com/repos/anomalyco/opencode/releases/latest"; do \
+            latest_ver="$(curl -fsSL --connect-timeout 5 --max-time 8 "$u" 2>/dev/null | sed -n 's/.*"tag_name": *"v\([^"]*\)".*/\1/p' | head -1)"; \
+            [ -n "$latest_ver" ] && break; \
+        done; \
+        if [ -n "$latest_ver" ] && [ "$local_ver" = "$latest_ver" ]; then \
+            echo "  ✓ opencode up to date ($local_ver)"; \
+        else \
+            echo "  → 更新 opencode (${latest_ver:-latest}) via GH_PROXY..."; \
+            oc_os="$(uname -s)"; oc_arch="$(uname -m)"; \
+            case "$oc_os" in Darwin) oc_os=darwin;; Linux) oc_os=linux;; MINGW*|MSYS*|CYGWIN*) oc_os=windows;; *) oc_os="";; esac; \
+            case "$oc_arch" in x86_64|amd64) oc_arch=x64;; arm64|aarch64) oc_arch=arm64;; esac; \
+            oc_ext=".zip"; [ "$oc_os" = linux ] && oc_ext=".tar.gz"; \
+            oc_filename="opencode-${oc_os}-${oc_arch}${oc_ext}"; \
+            oc_base="{{ gh_proxy }}https://github.com/anomalyco/opencode/releases/latest/download"; \
+            T=$(mktemp -d); \
+            if curl -fL --connect-timeout 30 --max-time 600 "$oc_base/$oc_filename" -o "$T/$oc_filename"; then \
+                if [ "$oc_os" = linux ]; then \
+                    tar xzf "$T/$oc_filename" -C "$T" && cp -f "$T/opencode" ~/.opencode/bin/ && chmod +x ~/.opencode/bin/opencode && echo "  ✓ opencode updated ($latest_ver)"; \
+                else \
+                    unzip -qo "$T/$oc_filename" -d "$T" && cp -f "$T/opencode.exe" ~/.opencode/bin/ && echo "  ✓ opencode updated ($latest_ver)"; \
+                fi; \
+            else \
+                echo "  ✗ opencode download failed (GH_PROXY unreachable)"; \
+            fi; \
+            rm -rf "$T"; \
+        fi; \
     else \
         echo "  opencode not installed — run 'just ai'"; \
     fi; \
