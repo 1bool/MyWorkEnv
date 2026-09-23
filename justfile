@@ -336,7 +336,9 @@ plugins:
             unzip -qo "$T/w.zip" -d "$T" && cp -f "$T/win32yank.exe" "$USERPROFILE/.local/bin/" && chmod +x "$USERPROFILE/.local/bin/win32yank.exe" && echo "  ✓ win32yank" || echo "  ✗ win32yank download failed"; \
             rm -rf "$T"; \
         }; }; \
-    command -v nvim >/dev/null 2>&1 && { echo "  installing nvim plugins (git)..."; if nvim --headless "+Lazy! sync" +qa; then echo "  ✓ nvim plugins"; else echo "  ✗ nvim plugins sync failed"; fi; };
+    command -v nvim >/dev/null 2>&1 && { echo "  installing nvim plugins (git)..."; if nvim --headless "+Lazy! sync" +qa; then echo "  ✓ nvim plugins"; else echo "  ✗ nvim plugins sync failed"; fi; }; \
+    if command -v lua-language-server >/dev/null 2>&1; then echo "  ✓ lua-language-server"; \
+    else if source scripts/detect.sh && install_lua_ls; then echo "  ✓ lua-language-server"; else echo "  ✗ lua-language-server download failed"; fi; fi
 
 plugins-update:
     @echo "=== Update plugins ==="; \
@@ -351,7 +353,8 @@ plugins-update:
     command -v nvim >/dev/null 2>&1 && { if nvim --headless "+Lazy! sync" +qa 2>&1; then echo "  ✓ nvim plugins updated"; else echo "  ✗ nvim plugins update failed"; fi; }; \
     if [ -d ~/.tmux/plugins/tpm ]; then (cd ~/.tmux/plugins/tpm && git pull) 2>&1 && echo "  ✓ tpm updated" || echo "  ✗ tpm update failed"; else echo "  (tpm not installed — run 'just plugins')"; fi; \
     if [ -d ~/.tmux/plugins-manual/catppuccin ]; then (cd ~/.tmux/plugins-manual/catppuccin && git pull) 2>&1 && echo "  ✓ catppuccin updated" || echo "  ✗ catppuccin update failed"; else echo "  (catppuccin not installed — run 'just plugins')"; fi; \
-    if [ -x ~/.tmux/plugins/tpm/bin/update_plugins ]; then ~/.tmux/plugins/tpm/bin/update_plugins all && echo "  ✓ tmux plugins updated" || echo "  ✗ tmux plugins update failed"; fi
+    if [ -x ~/.tmux/plugins/tpm/bin/update_plugins ]; then ~/.tmux/plugins/tpm/bin/update_plugins all && echo "  ✓ tmux plugins updated" || echo "  ✗ tmux plugins update failed"; fi; \
+    if { source scripts/detect.sh && install_lua_ls; }; then echo "  ✓ lua-language-server updated"; else echo "  ✗ lua-language-server update failed"; fi
 
 # ── AI agents（Claude Code + OpenCode + Plannotator）──
 ai:

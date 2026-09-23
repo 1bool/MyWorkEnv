@@ -18,6 +18,11 @@ if [ -d "$HOME/.local/bin" ] ; then
     PATH="$HOME/.local/bin:$PATH"
 fi
 
+# lua-language-server (LuaLS)：启动器在 lua-ls/bin，与 main.lua/meta 同目录部署
+if [ -d "$HOME/.local/bin/lua-ls/bin" ] ; then
+    PATH="$HOME/.local/bin/lua-ls/bin:$PATH"
+fi
+
 # opencode（AI coding agent）装到 ~/.opencode/bin
 if [ -d "$HOME/.opencode/bin" ] ; then
     PATH="$HOME/.opencode/bin:$PATH"

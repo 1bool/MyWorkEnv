@@ -1,5 +1,5 @@
 -- LSP 配置（nvim 0.11+ 内置 vim.lsp.config，替代已弃用的 lspconfig）
--- 语言：C（clangd）、Python（basedpyright）
+-- 语言：C（clangd）、Python（basedpyright）、Lua（lua-language-server）
 
 -- LSP 键位（挂到 LspAttach 事件）
 vim.api.nvim_create_autocmd("LspAttach", {
@@ -31,3 +31,13 @@ vim.lsp.config.basedpyright = {
   root_markers = { "pyproject.toml", "setup.py", "requirements.txt" },
 }
 vim.lsp.enable("basedpyright")
+
+-- Lua：lua-language-server（LuaLS；配置 nvim 自身的 init.lua 开发）
+vim.lsp.config.lua_ls = {
+  -- 非 Windows 是 ELF/Mach-O 独立二进制；Windows 下是 .exe 启动器
+  cmd = vim.fn.has("win32") == 1 and { "lua-language-server.exe" }
+    or { "lua-language-server" },
+  filetypes = { "lua" },
+  root_markers = { ".luarc.json", ".git" },
+}
+vim.lsp.enable("lua_ls")
