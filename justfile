@@ -438,6 +438,13 @@ ai:
         fi; \
     fi; \
     if command -v claude >/dev/null 2>&1; then \
+        if [ -n "{{ gh_proxy }}" ]; then \
+            export GIT_CONFIG_COUNT=2; \
+            export GIT_CONFIG_KEY_0="url.{{ gh_proxy }}https://github.com/.insteadOf"; \
+            export GIT_CONFIG_VALUE_0="https://github.com/"; \
+            export GIT_CONFIG_KEY_1="url.{{ gh_proxy }}https://github.com/.insteadOf"; \
+            export GIT_CONFIG_VALUE_1="https://git::@github.com/"; \
+        fi; \
         claude plugin marketplace add backnotprop/plannotator --scope user >/dev/null 2>&1 || true; \
         if claude plugin install plannotator@plannotator --scope user; then \
             echo "  ✓ plannotator Claude 插件 installed"; \
@@ -451,28 +458,27 @@ ai-update:
     source scripts/detect.sh; \
     if command -v claude >/dev/null 2>&1; then \
         local_ver="$(claude --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1)"; \
-        latest_tag=""; \
-        for u in "https://api.github.com/repos/anthropics/claude-code/releases/latest" "{{ gh_proxy }}https://api.github.com/repos/anthropics/claude-code/releases/latest"; do \
-            latest_tag="$(curl -fsSL --connect-timeout 5 --max-time 8 "$u" 2>/dev/null | grep '"tag_name"' | head -1 | cut -d'"' -f4)"; \
-            [ -n "$latest_tag" ] && break; \
-        done; \
+        cc_arch="$(uname -m)"; \
+        case "$cc_arch" in x86_64|amd64) cc_arch=x64;; arm64|aarch64) cc_arch=arm64;; esac; \
+        if is_msys2; then cc_file="claude-win32-${cc_arch}.zip"; \
+        else cc_os="$(uname -s)"; case "$cc_os" in Darwin) cc_os=darwin;; Linux) cc_os=linux;; *) cc_os="";; esac; cc_file="claude-${cc_os}-${cc_arch}.tar.gz"; fi; \
+        cc_base="{{ gh_proxy }}https://github.com/anthropics/claude-code/releases/latest/download"; \
+        latest_tag="$(curl -sI --connect-timeout 15 --max-time 40 "$cc_base/$cc_file" 2>/dev/null | grep -i '^location' | head -1 | grep -oE '/releases/download/[^/]+' | sed 's|.*/||')"; \
         latest_ver="${latest_tag#v}"; \
-        if [ -n "$latest_ver" ] && [ "$local_ver" = "$latest_ver" ]; then \
+        if [ -z "$latest_ver" ]; then \
+            echo "  ✗ 无法检测 claude-code 最新版本，跳过更新"; \
+        elif [ "$local_ver" = "$latest_ver" ]; then \
             echo "  ✓ claude-code up to date ($local_ver)"; \
         else \
-            echo "  → 更新 claude-code (${latest_ver:-latest}) via GH_PROXY..."; \
-            cc_arch="$(uname -m)"; \
-            case "$cc_arch" in x86_64|amd64) cc_arch=x64;; arm64|aarch64) cc_arch=arm64;; esac; \
-            cc_base="{{ gh_proxy }}https://github.com/anthropics/claude-code/releases/latest/download"; \
+            echo "  → 更新 claude-code ($latest_ver) via GH_PROXY..."; \
             T=$(mktemp -d); \
             if is_msys2; then \
                 cc_dest="$USERPROFILE/.local/bin"; mkdir -p "$cc_dest"; \
-                curl -fL --connect-timeout 30 --max-time 600 "$cc_base/claude-win32-${cc_arch}.zip" -o "$T/cc.zip" && \
+                curl -fL --connect-timeout 30 --max-time 600 "$cc_base/$cc_file" -o "$T/cc.zip" && \
                 unzip -qo "$T/cc.zip" -d "$T" && cp -f "$T/claude.exe" "$cc_dest/" && echo "  ✓ claude-code updated" || echo "  ✗ claude-code download failed (GH_PROXY unreachable)"; \
             else \
-                cc_os="$(uname -s)"; case "$cc_os" in Darwin) cc_os=darwin;; Linux) cc_os=linux;; *) cc_os="";; esac; \
                 cc_dest="$HOME/.local/bin"; mkdir -p "$cc_dest"; \
-                curl -fL --connect-timeout 30 --max-time 600 "$cc_base/claude-${cc_os}-${cc_arch}.tar.gz" -o "$T/cc.tgz" && \
+                curl -fL --connect-timeout 30 --max-time 600 "$cc_base/$cc_file" -o "$T/cc.tgz" && \
                 tar xzf "$T/cc.tgz" -C "$cc_dest" && chmod +x "$cc_dest/claude" && echo "  ✓ claude-code updated" || echo "  ✗ claude-code download failed (GH_PROXY unreachable)"; \
             fi; \
             rm -rf "$T"; \
@@ -483,21 +489,20 @@ ai-update:
     echo "=== OpenCode update ==="; \
     if command -v opencode >/dev/null 2>&1; then \
         local_ver="$(opencode --version 2>/dev/null | head -1)"; \
-        latest_ver=""; \
-        for u in "https://api.github.com/repos/anomalyco/opencode/releases/latest" "{{ gh_proxy }}https://api.github.com/repos/anomalyco/opencode/releases/latest"; do \
-            latest_ver="$(curl -fsSL --connect-timeout 5 --max-time 8 "$u" 2>/dev/null | sed -n 's/.*"tag_name": *"v\([^"]*\)".*/\1/p' | head -1)"; \
-            [ -n "$latest_ver" ] && break; \
-        done; \
-        if [ -n "$latest_ver" ] && [ "$local_ver" = "$latest_ver" ]; then \
+        oc_os="$(uname -s)"; oc_arch="$(uname -m)"; \
+        case "$oc_os" in Darwin) oc_os=darwin;; Linux) oc_os=linux;; MINGW*|MSYS*|CYGWIN*) oc_os=windows;; *) oc_os="";; esac; \
+        case "$oc_arch" in x86_64|amd64) oc_arch=x64;; arm64|aarch64) oc_arch=arm64;; esac; \
+        oc_ext=".zip"; [ "$oc_os" = linux ] && oc_ext=".tar.gz"; \
+        oc_filename="opencode-${oc_os}-${oc_arch}${oc_ext}"; \
+        oc_base="{{ gh_proxy }}https://github.com/anomalyco/opencode/releases/latest/download"; \
+        latest_tag="$(curl -sI --connect-timeout 15 --max-time 40 "$oc_base/$oc_filename" 2>/dev/null | grep -i '^location' | head -1 | grep -oE '/releases/download/[^/]+' | sed 's|.*/||')"; \
+        latest_ver="${latest_tag#v}"; \
+        if [ -z "$latest_ver" ]; then \
+            echo "  ✗ 无法检测 opencode 最新版本，跳过更新"; \
+        elif [ "$local_ver" = "$latest_ver" ]; then \
             echo "  ✓ opencode up to date ($local_ver)"; \
         else \
-            echo "  → 更新 opencode (${latest_ver:-latest}) via GH_PROXY..."; \
-            oc_os="$(uname -s)"; oc_arch="$(uname -m)"; \
-            case "$oc_os" in Darwin) oc_os=darwin;; Linux) oc_os=linux;; MINGW*|MSYS*|CYGWIN*) oc_os=windows;; *) oc_os="";; esac; \
-            case "$oc_arch" in x86_64|amd64) oc_arch=x64;; arm64|aarch64) oc_arch=arm64;; esac; \
-            oc_ext=".zip"; [ "$oc_os" = linux ] && oc_ext=".tar.gz"; \
-            oc_filename="opencode-${oc_os}-${oc_arch}${oc_ext}"; \
-            oc_base="{{ gh_proxy }}https://github.com/anomalyco/opencode/releases/latest/download"; \
+            echo "  → 更新 opencode ($latest_ver) via GH_PROXY..."; \
             T=$(mktemp -d); \
             if curl -fL --connect-timeout 30 --max-time 600 "$oc_base/$oc_filename" -o "$T/$oc_filename"; then \
                 if [ "$oc_os" = linux ]; then \
@@ -542,6 +547,13 @@ ai-update:
         echo "  plannotator not installed — run 'just ai'"; \
     fi; \
     if command -v claude >/dev/null 2>&1; then \
+        if [ -n "{{ gh_proxy }}" ]; then \
+            export GIT_CONFIG_COUNT=2; \
+            export GIT_CONFIG_KEY_0="url.{{ gh_proxy }}https://github.com/.insteadOf"; \
+            export GIT_CONFIG_VALUE_0="https://github.com/"; \
+            export GIT_CONFIG_KEY_1="url.{{ gh_proxy }}https://github.com/.insteadOf"; \
+            export GIT_CONFIG_VALUE_1="https://git::@github.com/"; \
+        fi; \
         if claude plugin update plannotator@plannotator --scope user; then \
             echo "  ✓ plannotator Claude 插件 updated"; \
         else \
