@@ -554,6 +554,10 @@ ai-update:
             export GIT_CONFIG_KEY_1="url.{{ gh_proxy }}https://github.com/.insteadOf"; \
             export GIT_CONFIG_VALUE_1="https://git::@github.com/"; \
         fi; \
+        MP="$HOME/.claude/plugins/marketplaces/plannotator"; \
+        if [ -d "$MP/.git" ]; then \
+            (cd "$MP" && git fetch --depth 1 origin main >/dev/null 2>&1 && git reset --hard origin/main >/dev/null 2>&1) && echo "  ✓ plannotator marketplace 已刷新" || echo "  (marketplace 手动刷新失败，交给 claude 处理)"; \
+        fi; \
         if claude plugin update plannotator@plannotator --scope user; then \
             echo "  ✓ plannotator Claude 插件 updated"; \
         else \
