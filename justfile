@@ -85,7 +85,7 @@ packages:
     @echo "=== Packages ==="; \
     source scripts/detect.sh; \
     if is_msys2; then \
-        pacman -Sy --noconfirm --needed; \
+        pacman -Syu --noconfirm; \
         pacman -S --noconfirm --needed $(grep -v '^#' packages/base.txt) $(grep -v '^#' packages/cygwin-msys.txt) || { echo "  ✗ pacman install failed — some packages missing"; exit 1; }; \
         if [ -n "${MINGW_PACKAGE_PREFIX:-}" ]; then \
             MINGW=""; \
@@ -503,7 +503,7 @@ ai-update:
             echo "  ✓ opencode up to date ($local_ver)"; \
         else \
             echo "  → 更新 opencode ($latest_ver) via GH_PROXY..."; \
-            T=$(mktemp -d); \
+            T=$(mktemp -d); mkdir -p ~/.opencode/bin; \
             if curl -fL --connect-timeout 30 --max-time 600 "$oc_base/$oc_filename" -o "$T/$oc_filename"; then \
                 if [ "$oc_os" = linux ]; then \
                     tar xzf "$T/$oc_filename" -C "$T" && cp -f "$T/opencode" ~/.opencode/bin/ && chmod +x ~/.opencode/bin/opencode && echo "  ✓ opencode updated ($latest_ver)"; \
