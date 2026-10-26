@@ -67,6 +67,10 @@ install_lua_ls() {
     done
     [ -n "$ver" ] || { echo "  ✗ lua-language-server version check failed"; return 1; }
     dest="${LUALS_DIR:-$HOME/.local/bin/lua-ls}"
+    # 已装且版本一致则跳过（幂等，避免每次重新下载）
+    if [ -x "$dest/bin/lua-language-server" ] && [ -f "$dest/.version" ] && [ "$(cat "$dest/.version" 2>/dev/null)" = "$ver" ]; then
+        return 0
+    fi
     local url="${proxy}https://github.com/LuaLS/lua-language-server/releases/download/${ver}/lua-language-server-${ver}-${asset}.${ext}"
     local T; T=$(mktemp -d)
     if curl -fL --connect-timeout 30 --max-time 600 "$url" -o "$T/lua-ls.$ext"; then
@@ -79,6 +83,7 @@ install_lua_ls() {
         rm -rf "$T"
         local bindir="$dest/bin"
         [ -x "$bindir/lua-language-server" ] || [ -x "$bindir/lua-language-server.exe" ] || { echo "  ✗ lua-language-server binary missing"; return 1; }
+        printf '%s' "$ver" > "$dest/.version"
         case ":$PATH:" in *":$bindir:"*) ;; *) export PATH="$bindir:$PATH" ;; esac
         return 0
     fi

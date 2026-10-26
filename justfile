@@ -318,7 +318,7 @@ plugins:
     else if curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
         https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim; then echo "  ✓ vim-plug"; else echo "  ✗ vim-plug download failed"; fi; fi; \
     mkdir -p ~/.vim; cp -f "$(pwd)/home/dot_vim/plugrc.vim" ~/.vim/pluginrc.vim 2>/dev/null && echo "  ✓ pluginrc" || echo "  ✗ pluginrc"; \
-    command -v vim >/dev/null 2>&1 && { [ -f ~/.vim/plugged ] && rm ~/.vim/plugged; mkdir -p ~/.vim/plugged; echo "  installing vim plugins (git)..."; vim +PlugInstall +qall; missing=""; for p in $(sed -n "s/.*'as': *'\([^']*\)'.*/\1/p; t end; s|^Plug '[^']*/\([^']*\)'.*|\1|p; :end" "$(pwd)/home/dot_vim/plugrc.vim"); do [ -d "$HOME/.vim/plugged/$p" ] || missing="$missing $p"; done; if [ -n "$missing" ]; then echo "  ✗ vim plugins missing:$missing"; else echo "  ✓ vim plugins"; fi; }; \
+    command -v vim >/dev/null 2>&1 && { mkdir -p ~/.vim/plugged; missing=""; for p in $(sed -n "s/.*'as': *'\([^']*\)'.*/\1/p; t end; s|^Plug '[^']*/\([^']*\)'.*|\1|p; :end" "$(pwd)/home/dot_vim/plugrc.vim"); do [ -d "$HOME/.vim/plugged/$p" ] || missing="$missing $p"; done; if [ -n "$missing" ]; then echo "  installing missing vim plugins (git):$missing"; vim +PlugInstall +qall; else echo "  ✓ vim plugins"; fi; }; \
     if [ -d ~/.tmux/plugins/tpm ]; then echo "  ✓ tpm"; \
     else git clone --depth 1 https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm && echo "  ✓ tpm" || echo "  ✗ tpm"; fi; \
     if [ -d ~/.tmux/plugins-manual/catppuccin ]; then echo "  ✓ catppuccin"; \
@@ -337,7 +337,7 @@ plugins:
             rm -rf "$T"; \
         }; }; \
     command -v nvim >/dev/null 2>&1 && { echo "  installing nvim plugins (git)..."; if nvim --headless "+Lazy! sync" +qa; then echo "  ✓ nvim plugins"; else echo "  ✗ nvim plugins sync failed"; fi; }; \
-    if command -v lua-language-server >/dev/null 2>&1; then echo "  ✓ lua-language-server"; \
+    if [ -x "$HOME/.local/bin/lua-ls/bin/lua-language-server" ]; then echo "  ✓ lua-language-server"; \
     else if source scripts/detect.sh && install_lua_ls; then echo "  ✓ lua-language-server"; else echo "  ✗ lua-language-server download failed"; fi; fi
 
 plugins-update:
