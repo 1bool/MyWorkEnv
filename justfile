@@ -378,7 +378,7 @@ ai:
             cc_base="{{ gh_proxy }}https://github.com/anthropics/claude-code/releases/latest/download"; \
             T=$(mktemp -d); \
             if is_msys2; then \
-                cc_dest="$USERPROFILE/.local/bin"; mkdir -p "$cc_dest"; \
+                cc_dest="$HOME/.local/bin"; mkdir -p "$cc_dest"; \
                 curl -fL --connect-timeout 30 --max-time 600 "$cc_base/claude-win32-${cc_arch}.zip" -o "$T/cc.zip" && \
                 unzip -qo "$T/cc.zip" -d "$T" && cp -f "$T/claude.exe" "$cc_dest/" && echo "  ✓ claude-code installed (GitHub releases)" || echo "  ✗ claude-code download failed (GH_PROXY unreachable)"; \
             else \
@@ -401,12 +401,12 @@ ai:
         oc_ext=".zip"; [ "$oc_os" = linux ] && oc_ext=".tar.gz"; \
         oc_filename="opencode-${oc_os}-${oc_arch}${oc_ext}"; \
         oc_base="{{ gh_proxy }}https://github.com/anomalyco/opencode/releases/latest/download"; \
-        T=$(mktemp -d); mkdir -p ~/.opencode/bin; \
+        T=$(mktemp -d); mkdir -p ~/.local/bin; \
         if curl -fL --connect-timeout 30 --max-time 600 "$oc_base/$oc_filename" -o "$T/$oc_filename"; then \
             if [ "$oc_os" = linux ]; then \
-                tar xzf "$T/$oc_filename" -C "$T" && cp -f "$T/opencode" ~/.opencode/bin/ && chmod +x ~/.opencode/bin/opencode && echo "  ✓ opencode installed"; \
+                tar xzf "$T/$oc_filename" -C "$T" && cp -f "$T/opencode" ~/.local/bin/ && chmod +x ~/.local/bin/opencode && echo "  ✓ opencode installed"; \
             else \
-                unzip -qo "$T/$oc_filename" -d "$T" && cp -f "$T/opencode.exe" ~/.opencode/bin/ && echo "  ✓ opencode installed"; \
+                unzip -qo "$T/$oc_filename" -d "$T" && cp -f "$T/opencode.exe" ~/.local/bin/ && echo "  ✓ opencode installed"; \
             fi; \
         else \
             echo "  ✗ opencode download failed (GH_PROXY unreachable)"; \
@@ -473,7 +473,7 @@ ai-update:
             echo "  → 更新 claude-code ($latest_ver) via GH_PROXY..."; \
             T=$(mktemp -d); \
             if is_msys2; then \
-                cc_dest="$USERPROFILE/.local/bin"; mkdir -p "$cc_dest"; \
+                cc_dest="$HOME/.local/bin"; mkdir -p "$cc_dest"; \
                 curl -fL --connect-timeout 30 --max-time 600 "$cc_base/$cc_file" -o "$T/cc.zip" && \
                 unzip -qo "$T/cc.zip" -d "$T" && cp -f "$T/claude.exe" "$cc_dest/" && echo "  ✓ claude-code updated" || echo "  ✗ claude-code download failed (GH_PROXY unreachable)"; \
             else \
@@ -503,12 +503,12 @@ ai-update:
             echo "  ✓ opencode up to date ($local_ver)"; \
         else \
             echo "  → 更新 opencode ($latest_ver) via GH_PROXY..."; \
-            T=$(mktemp -d); mkdir -p ~/.opencode/bin; \
+            T=$(mktemp -d); mkdir -p ~/.local/bin; \
             if curl -fL --connect-timeout 30 --max-time 600 "$oc_base/$oc_filename" -o "$T/$oc_filename"; then \
                 if [ "$oc_os" = linux ]; then \
-                    tar xzf "$T/$oc_filename" -C "$T" && cp -f "$T/opencode" ~/.opencode/bin/ && chmod +x ~/.opencode/bin/opencode && echo "  ✓ opencode updated ($latest_ver)"; \
+                    tar xzf "$T/$oc_filename" -C "$T" && cp -f "$T/opencode" ~/.local/bin/ && chmod +x ~/.local/bin/opencode && echo "  ✓ opencode updated ($latest_ver)"; \
                 else \
-                    unzip -qo "$T/$oc_filename" -d "$T" && cp -f "$T/opencode.exe" ~/.opencode/bin/ && echo "  ✓ opencode updated ($latest_ver)"; \
+                    unzip -qo "$T/$oc_filename" -d "$T" && cp -f "$T/opencode.exe" ~/.local/bin/ && echo "  ✓ opencode updated ($latest_ver)"; \
                 fi; \
             else \
                 echo "  ✗ opencode download failed (GH_PROXY unreachable)"; \
