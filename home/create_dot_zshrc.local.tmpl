@@ -1,30 +1,15 @@
-# ~/.zshrc.local — 本机 zsh 交互式 shell 配置
-# 此文件由 chezmoi create_ 模板首次生成，不会覆盖本地修改。
-# 调整后生效：source ~/.zshrc.local
-
-# ── AI 后端配置（隐私，不入库） ──
-# 切换后端：只改下面 AI_BACKEND 一行（A 或 B），无需注释代码块。
-# opencode 与 claude-code 都走 Anthropic 协议、共用 ANTHROPIC_* 变量，两后端都可用。
-# 把 sk-你的xxx-key 换成真实 key。
+# ~/.zshrc.local — 本机敏感/机器相关配置（不入库；chezmoi create_ 首次生成，不覆盖本地修改）
+# 在 ~/.zshrc 末尾被 source，可覆盖前面的模型等配置；本文件只放后端 baseURL/key 与必要覆盖。
+# 切换后端：只改 AI_BACKEND（A 或 B）。把 sk-你的xxx-key 换成真实 key。
 
 AI_BACKEND=A  # A = token.molchip.com 网关；B = DeepSeek 直连
 
 if [[ "$AI_BACKEND" == "A" ]]; then
-  # 后端 A：token.molchip.com 网关（Anthropic 协议，三档含 kimi-k3）
   export ANTHROPIC_BASE_URL="https://token.molchip.com"
   export ANTHROPIC_API_KEY="sk-你的molchip-key"
-  export ANTHROPIC_DEFAULT_OPUS_MODEL="kimi-k3"
+  export ANTHROPIC_DEFAULT_OPUS_MODEL="kimi-k3"   # A 网关三档，opus 用 kimi
 elif [[ "$AI_BACKEND" == "B" ]]; then
-  # 后端 B：DeepSeek 直连（Anthropic 兼容端点，两档）
   export ANTHROPIC_BASE_URL="https://api.deepseek.com/anthropic"
   export ANTHROPIC_API_KEY="sk-你的deepseek-key"
-  export ANTHROPIC_DEFAULT_OPUS_MODEL="deepseek-v4-pro[1m]"  # DeepSeek 无 kimi，opus 落到 pro
+  # B 直连无 kimi，opus 沿用 ~/.zshrc 的默认 pro[1m]
 fi
-
-# ── 两后端共用（不随开关变） ──
-export ANTHROPIC_MODEL="deepseek-v4-pro[1m]"
-export ANTHROPIC_DEFAULT_SONNET_MODEL="deepseek-v4-pro[1m]"
-export ANTHROPIC_DEFAULT_HAIKU_MODEL="deepseek-v4-flash"
-export ANTHROPIC_SMALL_FAST_MODEL="deepseek-v4-flash"
-export OP_MODEL="anthropic/deepseek-v4-pro"
-export OP_SMALL_MODEL="anthropic/deepseek-v4-flash"

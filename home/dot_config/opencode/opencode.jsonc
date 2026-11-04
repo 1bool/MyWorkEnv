@@ -4,14 +4,19 @@
   "shell": "bash",
   // 双后端（token.molchip.com 网关 / DeepSeek 直连）统一走 Anthropic 协议，
   // 由 ~/.zshrc.local 的 ANTHROPIC_BASE_URL / ANTHROPIC_API_KEY 环境变量驱动。
-  // 主模型 OP_MODEL 用于日常对话/编码；辅模型 OP_SMALL_MODEL 仅在轻量任务
-  // （标题/摘要/统计）自动调用以节省成本。kimi-k3 为最强档，/models 切换（仅后端 A）。
+  // 模型均在本文件指定（不依赖 .zshrc 的 OP_MODEL）：默认/轻量(small_model)=flash，
+  // plan agent=pro，build agent=flash；kimi-k3 最强档，/models 手动切换（仅后端 A）。
   "lsp": true,
   "permission": {
     "lsp": "allow"
   },
-  "model": "{env:OP_MODEL}",
-  "small_model": "{env:OP_SMALL_MODEL}",
+  "model": "anthropic/deepseek-v4-flash",
+  "small_model": "anthropic/deepseek-v4-flash",
+  // plan（只读规划）用 Pro（强推理），build（执行）用 Flash（快/省）。
+  "agent": {
+    "plan":  { "model": "anthropic/deepseek-v4-pro" },
+    "build": { "model": "anthropic/deepseek-v4-flash" }
+  },
   "plugin": [
     ["@plannotator/opencode@latest", {
       "workflow": "plan-agent",
@@ -26,8 +31,8 @@
         "apiKey": "{env:ANTHROPIC_API_KEY}"
       },
       "models": {
-        "deepseek-v4-pro": { "name": "DeepSeek V4 Pro" },
-        "deepseek-v4-flash": { "name": "DeepSeek V4 Flash" },
+        "deepseek-v4-pro": { "name": "DeepSeek V4 Pro", "limit": { "context": 1000000, "output": 64000 } },
+        "deepseek-v4-flash": { "name": "DeepSeek V4 Flash", "limit": { "context": 1000000, "output": 64000 } },
         "kimi-k3": { "name": "Kimi K3" }
       }
     }

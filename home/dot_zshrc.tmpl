@@ -85,6 +85,15 @@ nvim() {
   command nvim --listen "$NVIM_SOCKET" "$@"
 }
 
+# ── AI 模型配置（可入库；密钥/后端在 ~/.zshrc.local）──
+# .zshrc.local 在文件末尾 source，可覆盖这里的值（如 A 后端把 opus 覆盖成 kimi-k3）。
+export ANTHROPIC_MODEL="deepseek-v4-pro[1m]"
+export ANTHROPIC_DEFAULT_SONNET_MODEL="deepseek-v4-pro[1m]"
+export ANTHROPIC_DEFAULT_HAIKU_MODEL="deepseek-v4-flash[1m]"
+export ANTHROPIC_SMALL_FAST_MODEL="deepseek-v4-flash[1m]"
+export ANTHROPIC_DEFAULT_OPUS_MODEL="deepseek-v4-pro[1m]"
+
+# ── 本机敏感/覆盖配置（最后 source，可覆盖上面的模型等）──
 if [ -f ~/.zshrc.local ]; then
   . ~/.zshrc.local
 fi
