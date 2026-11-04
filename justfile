@@ -158,7 +158,15 @@ dotfiles:
 dotfiles-update:
     @echo "=== Update dotfiles ==="; \
     source scripts/detect.sh; ensure_user_bin; \
-    git pull --ff-only || echo "  (git pull failed — see error above; likely uncommitted changes or network)"; \
+    if [ -n "$(git status --porcelain)" ]; then \
+        echo "  (工作区有未提交改动，跳过 git pull)"; \
+    else \
+        ok=0; for i in 1 2 3; do \
+            if git pull --ff-only; then ok=1; break; fi; \
+            echo "  git pull 第 $i 次失败，3s 后重试..."; sleep 3; \
+        done; \
+        [ "$ok" = 1 ] || echo "  (git pull failed after 3 tries — network/SSH)"; \
+    fi; \
     chezmoi apply --interactive=false
 
 # ── Nerd Fonts (download + install) ──
