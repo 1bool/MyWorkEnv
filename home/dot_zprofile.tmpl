@@ -37,7 +37,7 @@ LANG=zh_CN.UTF-8
 export DISPLAY=:0
 {{- end }}
 
-# load local customizations
-if [ -f "$HOME/.zprofile.local" ]; then
-    . "$HOME/.zprofile.local"
+# load machine-specific env (bash/zsh 登录共用 ~/.profile.local)
+if [ -f "$HOME/.profile.local" ]; then
+    . "$HOME/.profile.local"
 fi
