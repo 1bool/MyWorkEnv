@@ -24,8 +24,7 @@ if [ -d "$HOME/.local/bin/lua-ls/bin" ] ; then
 fi
 
 {{- if eq .chezmoi.os "windows" }}
-# chezmoi: isolate config per MSYS2 installation
-export XDG_CONFIG_HOME="$(cygpath -m "$HOME/.config" 2>/dev/null || echo "$HOME/.config")"
+# XDG_CONFIG_HOME / CLAUDE_CONFIG_DIR 由 .bashrc 统一设置（bash 登录会 source 它）
 # add Windows user bin for native exes (chezmoi etc.)
 BIN="$(cygpath -u "$USERPROFILE/.local/bin" 2>/dev/null || echo "$USERPROFILE/.local/bin")"
 if [ -d "$BIN" ]; then
@@ -36,8 +35,6 @@ fi
 	if [ -d "${MSYSTEM_PREFIX}/sbin" ]; then
 		PATH="${MSYSTEM_PREFIX}/sbin:$PATH"
 	fi
-	# Claude Code: use MSYS2 home for config
-	export CLAUDE_CONFIG_DIR="$(cygpath -w "$HOME/.claude")"
 	{{- end }}
 {{- end }}
 

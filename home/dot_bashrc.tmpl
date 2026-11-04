@@ -11,7 +11,7 @@ alias vi='vim'
 export XDG_CONFIG_HOME="$(cygpath -m "$HOME/.config" 2>/dev/null || echo "$HOME/.config")"
 {{- if env "MSYSTEM" }}
 # MSYS 启动的 bash：claude 用 MSYS home 下的 .claude（Windows cmd 启动不读本文件，仍用 %USERPROFILE%）
-export CLAUDE_CONFIG_DIR="$(cygpath -w "$HOME/.claude")"
+export CLAUDE_CONFIG_DIR="$(cygpath -w "$HOME/.claude" 2>/dev/null || echo "$HOME/.claude")"
 {{- end }}
 {{- end }}
 
