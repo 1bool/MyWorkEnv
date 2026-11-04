@@ -25,19 +25,34 @@ return {
     lazy = false,
     keys = { { "<leader>sc", "<cmd>Themery<CR>", desc = "切换主题" } },
     config = function()
-      require("themery").setup({
-        themes = {
-          "solarized8",
-          { name = "papercolor", colorscheme = "PaperColor" },
-          { name = "catppuccin", colorscheme = "catppuccin", before = [[ require("catppuccin").setup({ flavour = "auto" }) ]] },
-          { name = "tokyonight", colorscheme = "tokyonight", before = [[ require("tokyonight").setup({ style = "night" }) ]] },
-          "everforest",
-          "lagoon",
-          "selenized",
-          { name = "onedark", colorscheme = "onedark", before = [[ require("onedark").setup({ style = "dark" }) ]] },
-        },
-        livePreview = true,
-      })
+      -- themery.nvim 未设 themeConfigFile 时会误报 “themeConfigFile 已废弃” 警告：
+      -- checkDeprecatedConfig 前 normalizePaths 用 fnamemodify(nil,":p") 得到非空垃圾路径
+      -- （Windows 下为 "...\v:\null"），故每次启动都打印。上游 main 未修。
+      -- 不修改插件文件（改了会被 lazy 视为本地改动、阻塞更新），仅在本 setup 期间过滤该条。
+      local _msg = require("themery.constants").MSG_INFO.THEME_CONFIG_FILE_DEPRECATED
+      local _print = print
+      print = function(...)
+        local a = { ... }
+        if #a == 1 and a[1] == _msg then return end
+        return _print(...)
+      end
+      local ok, err = pcall(function()
+        require("themery").setup({
+          themes = {
+            "solarized8",
+            { name = "papercolor", colorscheme = "PaperColor" },
+            { name = "catppuccin", colorscheme = "catppuccin", before = [[ require("catppuccin").setup({ flavour = "auto" }) ]] },
+            { name = "tokyonight", colorscheme = "tokyonight", before = [[ require("tokyonight").setup({ style = "night" }) ]] },
+            "everforest",
+            "lagoon",
+            "selenized",
+            { name = "onedark", colorscheme = "onedark", before = [[ require("onedark").setup({ style = "dark" }) ]] },
+          },
+          livePreview = true,
+        })
+      end)
+      print = _print
+      if not ok then error(err) end
     end,
   },
   {
@@ -381,18 +396,6 @@ return {
     "nickjvandyke/opencode.nvim",
     version = "*",
     config = function()
-      -- 修复 opencode.nvim Windows 下 server discovery 用 vim.fn.json_decode 在 fast event 报 E5560（上游 bug）。
-      -- 改成 vim.json.decode（Lua 版，允许 fast event 调用）；升级插件后此函数会重打补丁。
-      local win_lua = vim.fn.stdpath("data") .. "/lazy/opencode.nvim/lua/opencode/server/discovery/process/windows.lua"
-      local f = io.open(win_lua, "r")
-      if f then
-        local c = f:read("*a")
-        f:close()
-        if c:find("vim.fn.json_decode", 1, true) then
-          local w = io.open(win_lua, "w")
-          if w then w:write(c:gsub("vim.fn.json_decode", "vim.json.decode")) w:close() end
-        end
-      end
       vim.keymap.set({ "n", "x" }, "<leader>ai", function() require("opencode").ask("@this: ") end, { desc = "提问 OpenCode" })
       vim.keymap.set({ "n", "x" }, "<leader>as", function() require("opencode").select() end, { desc = "选择 OpenCode" })
       vim.keymap.set({ "n", "x" }, "<leader>ap", function() require("opencode").prompt() end, { desc = "提示 OpenCode" })
