@@ -1,0 +1,9 @@
+# ~/.zshenv — zsh 每个进程都加载（含非登录 / 非交互）。
+# 只放基础 env，保证从任意方式启动的 claude / opencode 都指向 MSYS2 home。
+{{- if eq .chezmoi.os "windows" }}
+export XDG_CONFIG_HOME="$(cygpath -m "$HOME/.config" 2>/dev/null || echo "$HOME/.config")"
+{{- if env "MSYSTEM" }}
+# Claude Code 用 MSYS2 home 下的 .claude（而非 %USERPROFILE%\.claude）
+export CLAUDE_CONFIG_DIR="$(cygpath -w "$HOME/.claude")"
+{{- end }}
+{{- end }}

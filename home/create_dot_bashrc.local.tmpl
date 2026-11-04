@@ -1,15 +1,7 @@
-# ~/.bashrc.local — 本机敏感/机器相关配置（不入库；chezmoi create_ 首次生成，不覆盖本地修改）
-# 在 ~/.bashrc 末尾被 source，可覆盖前面的模型等配置；此处只放后端 baseURL/key 与必要覆盖。
-# 切换后端：只改 AI_BACKEND（A 或 B）。把 sk-你的xxx-key 换成真实 key。
+# ~/.bashrc.local — bash 侧复用 ~/.zshrc.local 的公共 AI 配置（A/B 后端 baseURL/key）
+# 本文件只放 bash 专用覆盖；被 source 的 ~/.zshrc.local 必须保持 bash/zsh 兼容语法
+# （只使用 [[ ]] / export / $(...) / . 等两边都支持的语法，勿加 setopt/数组等 zsh 专有写法）。
+[ -f ~/.zshrc.local ] && . ~/.zshrc.local
 
-AI_BACKEND=A  # A = token.molchip.com 网关；B = DeepSeek 直连
-
-if [[ "$AI_BACKEND" == "A" ]]; then
-  export ANTHROPIC_BASE_URL="https://token.molchip.com"
-  export ANTHROPIC_API_KEY="sk-你的molchip-key"
-  export ANTHROPIC_DEFAULT_OPUS_MODEL="kimi-k3"   # A 网关三档，opus 用 kimi
-elif [[ "$AI_BACKEND" == "B" ]]; then
-  export ANTHROPIC_BASE_URL="https://api.deepseek.com/anthropic"
-  export ANTHROPIC_API_KEY="sk-你的deepseek-key"
-  # B 直连无 kimi，opus 沿用 ~/.bashrc 的默认 pro[1m]
-fi
+# bash 专用覆盖（示例，填真实值后取消注释）
+# export TESTLINK_KEY=你的-testlink-key
