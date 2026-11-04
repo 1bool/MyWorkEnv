@@ -316,11 +316,13 @@ clean:
 plugins:
     @echo "=== Plugins ==="; \
     if [ -n "{{ gh_proxy }}" ]; then \
-        export GIT_CONFIG_COUNT=2; \
+        export GIT_CONFIG_COUNT=3; \
         export GIT_CONFIG_KEY_0="url.{{ gh_proxy }}https://github.com/.insteadOf"; \
         export GIT_CONFIG_VALUE_0="https://github.com/"; \
         export GIT_CONFIG_KEY_1="url.{{ gh_proxy }}https://github.com/.insteadOf"; \
-        export GIT_CONFIG_VALUE_1="https://git::@github.com/"; \
+        export GIT_CONFIG_VALUE_1="git@github.com:"; \
+        export GIT_CONFIG_KEY_2="url.{{ gh_proxy }}https://github.com/.insteadOf"; \
+        export GIT_CONFIG_VALUE_2="ssh://git@github.com/"; \
     fi; \
     if [ -f ~/.vim/autoload/plug.vim ]; then echo "  ✓ vim-plug"; \
     else if curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
@@ -351,11 +353,13 @@ plugins:
 plugins-update:
     @echo "=== Update plugins ==="; \
     if [ -n "{{ gh_proxy }}" ]; then \
-        export GIT_CONFIG_COUNT=2; \
+        export GIT_CONFIG_COUNT=3; \
         export GIT_CONFIG_KEY_0="url.{{ gh_proxy }}https://github.com/.insteadOf"; \
         export GIT_CONFIG_VALUE_0="https://github.com/"; \
         export GIT_CONFIG_KEY_1="url.{{ gh_proxy }}https://github.com/.insteadOf"; \
-        export GIT_CONFIG_VALUE_1="https://git::@github.com/"; \
+        export GIT_CONFIG_VALUE_1="git@github.com:"; \
+        export GIT_CONFIG_KEY_2="url.{{ gh_proxy }}https://github.com/.insteadOf"; \
+        export GIT_CONFIG_VALUE_2="ssh://git@github.com/"; \
     fi; \
     command -v vim >/dev/null 2>&1 && { if vim +PlugUpdate +qall 2>&1; then echo "  ✓ vim plugins updated"; else echo "  ✗ vim plugins update failed"; fi; }; \
     command -v nvim >/dev/null 2>&1 && { if nvim --headless "+Lazy! sync" +qa 2>&1; then echo "  ✓ nvim plugins updated"; else echo "  ✗ nvim plugins update failed"; fi; }; \
@@ -433,7 +437,7 @@ ai:
         base="{{ gh_proxy }}https://github.com/backnotprop/plannotator/releases/latest/download"; \
         echo "  → 下载 latest ($bin) via GH_PROXY..."; \
         mkdir -p ~/.local/bin; \
-        if curl -fsSL --connect-timeout 15 --max-time 300 "$base/$bin" -o ~/.local/bin/"$local_bin"; then \
+        if curl -fL --progress-bar --connect-timeout 15 --max-time 300 "$base/$bin" -o ~/.local/bin/"$local_bin"; then \
             expected="$(curl -fsSL --connect-timeout 15 "$base/$bin.sha256" | cut -d' ' -f1)"; \
             actual="$(sha256sum ~/.local/bin/"$local_bin" | cut -d' ' -f1)"; \
             if [ -n "$expected" ] && [ "$expected" = "$actual" ]; then \
@@ -447,14 +451,16 @@ ai:
     fi; \
     if command -v claude >/dev/null 2>&1; then \
         if [ -n "{{ gh_proxy }}" ]; then \
-            export GIT_CONFIG_COUNT=2; \
+            export GIT_CONFIG_COUNT=3; \
             export GIT_CONFIG_KEY_0="url.{{ gh_proxy }}https://github.com/.insteadOf"; \
             export GIT_CONFIG_VALUE_0="https://github.com/"; \
             export GIT_CONFIG_KEY_1="url.{{ gh_proxy }}https://github.com/.insteadOf"; \
-            export GIT_CONFIG_VALUE_1="https://git::@github.com/"; \
+            export GIT_CONFIG_VALUE_1="git@github.com:"; \
+            export GIT_CONFIG_KEY_2="url.{{ gh_proxy }}https://github.com/.insteadOf"; \
+            export GIT_CONFIG_VALUE_2="ssh://git@github.com/"; \
         fi; \
-        claude plugin marketplace add backnotprop/plannotator --scope user >/dev/null 2>&1 || true; \
-        if claude plugin install plannotator@plannotator --scope user; then \
+        timeout 120 claude plugin marketplace add backnotprop/plannotator --scope user >/dev/null 2>&1 || true; \
+        if timeout 300 claude plugin install plannotator@plannotator --scope user; then \
             echo "  ✓ plannotator Claude 插件 installed"; \
         else \
             echo "  ✗ plannotator Claude 插件 install failed"; \
@@ -541,7 +547,7 @@ ai-update:
             echo "  ✓ plannotator up to date"; \
         else \
             echo "  → 下载新版本..."; \
-            if curl -fsSL --connect-timeout 15 --max-time 300 "$base/$bin" -o /tmp/plannotator-new; then \
+            if curl -fL --progress-bar --connect-timeout 15 --max-time 300 "$base/$bin" -o /tmp/plannotator-new; then \
                 if [ "$latest_hash" = "$(sha256sum /tmp/plannotator-new | cut -d' ' -f1)" ]; then \
                     chmod +x /tmp/plannotator-new && mv /tmp/plannotator-new ~/.local/bin/"$local_bin" && echo "  ✓ plannotator updated (checksum verified)"; \
                 else \
@@ -556,17 +562,19 @@ ai-update:
     fi; \
     if command -v claude >/dev/null 2>&1; then \
         if [ -n "{{ gh_proxy }}" ]; then \
-            export GIT_CONFIG_COUNT=2; \
+            export GIT_CONFIG_COUNT=3; \
             export GIT_CONFIG_KEY_0="url.{{ gh_proxy }}https://github.com/.insteadOf"; \
             export GIT_CONFIG_VALUE_0="https://github.com/"; \
             export GIT_CONFIG_KEY_1="url.{{ gh_proxy }}https://github.com/.insteadOf"; \
-            export GIT_CONFIG_VALUE_1="https://git::@github.com/"; \
+            export GIT_CONFIG_VALUE_1="git@github.com:"; \
+            export GIT_CONFIG_KEY_2="url.{{ gh_proxy }}https://github.com/.insteadOf"; \
+            export GIT_CONFIG_VALUE_2="ssh://git@github.com/"; \
         fi; \
         MP="$HOME/.claude/plugins/marketplaces/plannotator"; \
         if [ -d "$MP/.git" ]; then \
-            (cd "$MP" && git fetch --depth 1 origin main >/dev/null 2>&1 && git reset --hard origin/main >/dev/null 2>&1) && echo "  ✓ plannotator marketplace 已刷新" || echo "  (marketplace 手动刷新失败，交给 claude 处理)"; \
+            (cd "$MP" && timeout 300 git fetch --depth 1 origin main >/dev/null 2>&1 && git reset --hard origin/main >/dev/null 2>&1) && echo "  ✓ plannotator marketplace 已刷新" || echo "  (marketplace 手动刷新失败，交给 claude 处理)"; \
         fi; \
-        if claude plugin update plannotator@plannotator --scope user; then \
+        if timeout 300 claude plugin update plannotator@plannotator --scope user; then \
             echo "  ✓ plannotator Claude 插件 updated"; \
         else \
             echo "  ✗ plannotator Claude 插件 update failed"; \
