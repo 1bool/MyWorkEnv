@@ -310,7 +310,12 @@ clean:
     rm -f ~/.config/chezmoi/chezmoi.yaml ~/.config/chezmoi/chezmoi.json 2>/dev/null; \
     rm -f ~/README.md ~/install.sh ~/justfile 2>/dev/null; \
     rm -rf ~/packages ~/scripts ~/bin ~/vim ~/.config/chezmoi/chezmoistate.boltdb 2>/dev/null; \
-    [ -x ~/.tmux/plugins/tpm/bin/clean_plugins ] && ~/.tmux/plugins/tpm/bin/clean_plugins || true; \
+    if [ -x ~/.tmux/plugins/tpm/bin/clean_plugins ]; then \
+        export TMUX_PLUGIN_MANAGER_PATH="${TMUX_PLUGIN_MANAGER_PATH:-$HOME/.tmux/plugins/}"; \
+        tmux start-server 2>/dev/null || true; \
+        tmux set-environment -g TMUX_PLUGIN_MANAGER_PATH "$TMUX_PLUGIN_MANAGER_PATH" 2>/dev/null || true; \
+        ~/.tmux/plugins/tpm/bin/clean_plugins || true; \
+    fi; \
     command -v nvim >/dev/null 2>&1 && nvim --headless "+Lazy! clean" +qa 2>&1 || true; \
     echo "=== Clean complete ==="
 plugins:
@@ -336,6 +341,8 @@ plugins:
     if [ -f ~/.tmux.conf ] && [ -x ~/.tmux/plugins/tpm/bin/install_plugins ]; then \
         echo "  installing tmux plugins (tpm)..."; \
         export TMUX_PLUGIN_MANAGER_PATH="${TMUX_PLUGIN_MANAGER_PATH:-$HOME/.tmux/plugins/}"; \
+        tmux start-server 2>/dev/null || true; \
+        tmux set-environment -g TMUX_PLUGIN_MANAGER_PATH "$TMUX_PLUGIN_MANAGER_PATH" 2>/dev/null || true; \
         ~/.tmux/plugins/tpm/bin/install_plugins && echo "  ✓ tmux plugins" || echo "  ✗ tmux plugins"; \
     fi; \
     command -v win32yank >/dev/null 2>&1 || { \
@@ -365,7 +372,12 @@ plugins-update:
     command -v nvim >/dev/null 2>&1 && { if nvim --headless "+Lazy! sync" +qa 2>&1; then echo "  ✓ nvim plugins updated"; else echo "  ✗ nvim plugins update failed"; fi; }; \
     if [ -d ~/.tmux/plugins/tpm ]; then (cd ~/.tmux/plugins/tpm && git pull) 2>&1 && echo "  ✓ tpm updated" || echo "  ✗ tpm update failed"; else echo "  (tpm not installed — run 'just plugins')"; fi; \
     if [ -d ~/.tmux/plugins-manual/catppuccin ]; then (cd ~/.tmux/plugins-manual/catppuccin && git pull) 2>&1 && echo "  ✓ catppuccin updated" || echo "  ✗ catppuccin update failed"; else echo "  (catppuccin not installed — run 'just plugins')"; fi; \
-    if [ -x ~/.tmux/plugins/tpm/bin/update_plugins ]; then ~/.tmux/plugins/tpm/bin/update_plugins all && echo "  ✓ tmux plugins updated" || echo "  ✗ tmux plugins update failed"; fi; \
+    if [ -x ~/.tmux/plugins/tpm/bin/update_plugins ]; then \
+        export TMUX_PLUGIN_MANAGER_PATH="${TMUX_PLUGIN_MANAGER_PATH:-$HOME/.tmux/plugins/}"; \
+        tmux start-server 2>/dev/null || true; \
+        tmux set-environment -g TMUX_PLUGIN_MANAGER_PATH "$TMUX_PLUGIN_MANAGER_PATH" 2>/dev/null || true; \
+        ~/.tmux/plugins/tpm/bin/update_plugins all && echo "  ✓ tmux plugins updated" || echo "  ✗ tmux plugins update failed"; \
+    fi; \
     if { source scripts/detect.sh && install_lua_ls; }; then echo "  ✓ lua-language-server updated"; else echo "  ✗ lua-language-server update failed"; fi
 
 # ── AI agents（Claude Code + OpenCode + Plannotator）──
@@ -459,12 +471,14 @@ ai:
             export GIT_CONFIG_KEY_2="url.{{ gh_proxy }}https://github.com/.insteadOf"; \
             export GIT_CONFIG_VALUE_2="ssh://git@github.com/"; \
         fi; \
-        timeout 120 claude plugin marketplace add backnotprop/plannotator --scope user >/dev/null 2>&1 || true; \
-        if timeout 300 claude plugin install plannotator@plannotator --scope user; then \
-            echo "  ✓ plannotator Claude 插件 installed"; \
+        timeout -k 10 120 claude plugin marketplace add backnotprop/plannotator --scope user </dev/null >/dev/null 2>&1 || true; \
+        cc_log="$(mktemp)"; \
+        if timeout -k 10 300 claude plugin install plannotator@plannotator --scope user -y </dev/null >"$cc_log" 2>&1; then \
+            cat "$cc_log"; echo "  ✓ plannotator Claude 插件 installed"; \
         else \
-            echo "  ✗ plannotator Claude 插件 install failed"; \
+            cat "$cc_log"; echo "  ✗ plannotator Claude 插件 install failed"; \
         fi; \
+        rm -f "$cc_log"; \
     fi
 
 ai-update:
@@ -574,11 +588,13 @@ ai-update:
         if [ -d "$MP/.git" ]; then \
             (cd "$MP" && timeout 300 git fetch --depth 1 origin main >/dev/null 2>&1 && git reset --hard origin/main >/dev/null 2>&1) && echo "  ✓ plannotator marketplace 已刷新" || echo "  (marketplace 手动刷新失败，交给 claude 处理)"; \
         fi; \
-        if timeout 300 claude plugin update plannotator@plannotator --scope user; then \
-            echo "  ✓ plannotator Claude 插件 updated"; \
+        cc_log="$(mktemp)"; \
+        if timeout -k 10 300 claude plugin update plannotator@plannotator --scope user -y </dev/null >"$cc_log" 2>&1; then \
+            cat "$cc_log"; echo "  ✓ plannotator Claude 插件 updated"; \
         else \
-            echo "  ✗ plannotator Claude 插件 update failed"; \
+            cat "$cc_log"; echo "  ✗ plannotator Claude 插件 update failed"; \
         fi; \
+        rm -f "$cc_log"; \
     fi
 
 # ── gitmux（tmux git 分支状态；无 Windows 二进制，仅 Linux/macOS） ──
