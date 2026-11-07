@@ -24,6 +24,11 @@ if is_debian; then
     setup_debian_mirror
 fi
 
+# Pick the fastest working GitHub proxy (cached, see scripts/proxy.sh)
+if command -v curl >/dev/null 2>&1; then
+    export GH_PROXY="$(bash scripts/proxy.sh detect)"
+fi
+
 # Install just if not present
 if ! command -v just &>/dev/null; then
     echo "Installing just..."

@@ -8,7 +8,7 @@
 #
 # 启动：~/.tmux.conf 里 `run -b '~/.tmux/scripts/statusd.sh'`（继承 $TMUX socket）。
 # 单实例：按 socket 用 PID 文件防重复启动（prefix+r 重载不会叠加）。
-# 退出：tmux server 退出时 `tmux set-option` 会失败 → break 循环 → trap 清锁。
+# 退出：tmux server 退出（连续多次写入失败）→ break 循环 → trap 清锁。
 
 set -u
 export LANG=C LC_ALL=C
@@ -24,10 +24,12 @@ if [ -f "$LOCK" ]; then
   [ -n "$opid" ] && kill -0 "$opid" 2>/dev/null && exit 0
 fi
 echo "$$" > "$LOCK"
-trap 'rm -f "$LOCK"' EXIT
-trap 'exit 0' INT TERM
+# 只删除属于自己的锁：旧实例退出时不要误删新实例刚写的锁
+trap '[ "$(cat "$LOCK" 2>/dev/null)" = "$$" ] && rm -f "$LOCK"' EXIT
+trap 'exit 0' INT TERM HUP
 
 pt=0; pi=0   # cpu 基线（跨轮采样，间隔约一个循环周期，比 1s 采样更平滑）
+fails=0
 
 while :; do
   # cpu：/proc/stat 首行 "cpu user nice system idle"，idle 是第 4 个值（$5）。
@@ -63,14 +65,18 @@ while :; do
   d=$((s/86400)); h=$(((s%86400)/3600)); m=$(((s%3600)/60))
   up=""; [ "$d" -gt 0 ] && up="${d}d "; [ "$h" -gt 0 ] && up="${up}${h}h "; up="${up}${m}m"
 
-  # 一次性写入 tmux（单次 spawn，不在状态栏刷新路径上）；
-  # 失败说明 tmux server 已退出 → break 退出循环，trap 会清掉锁文件。
+  # 一次性写入 tmux（单次 spawn，不在状态栏刷新路径上）。
+  # 刚随 tmux server 启动时可能短暂连不上，重试几次再判定 server 已退出。
   if ! tmux set-option -g @catppuccin_cpu_text " $cpu" \; \
        set-option -g @catppuccin_ram_text " $ram" \; \
        set-option -g @catppuccin_load_text " $load" \; \
        set-option -g @catppuccin_uptime_text " $up" 2>/dev/null; then
-    break
+    fails=$((fails + 1))
+    [ "$fails" -ge 5 ] && break
+    sleep 2
+    continue
   fi
+  fails=0
 
   sleep 30
 done

@@ -5,17 +5,27 @@
 
 set shell := ["bash", "-c"]
 
-# GitHub 加速镜像前缀（国内直连慢/被墙）。环境变量 GH_PROXY 可覆盖。
-# 关闭加速：把默认值改成空字符串 ""。
-gh_proxy := env_var_or_default("GH_PROXY", "https://ghfast.top/")
+# GitHub 加速镜像前缀（国内直连慢/被墙）。
+# 启动时自动探测最快可用的代理（30 分钟内复用缓存，见 scripts/proxy.sh）。
+# 手工指定：GH_PROXY=<前缀>；锁定不探测：GH_PROXY_LOCK=1（空值=直连）。
+gh_proxy := `bash scripts/proxy.sh detect`
 
 default:
     @just --list --unsorted
 
-install: prep bootstrap packages msys2 dotfiles fonts plugins ai gitmux
+# 探测并列出各 GitHub 代理的可用性与耗时
+proxy:
+    @bash scripts/proxy.sh list
+
+# 打印本次运行选用的 GitHub 代理（update/install 的首个依赖）
+[private]
+proxy-info:
+    @p="{{ gh_proxy }}"; echo "GitHub proxy: ${p:-<direct>}"
+
+install: proxy-info prep bootstrap packages msys2 dotfiles fonts plugins ai gitmux
     @echo "=== MyWorkEnv installed ==="
 
-update: bootstrap bootstrap-update dotfiles-update packages packages-update msys2 fonts-update plugins plugins-update ai ai-update gitmux-update
+update: proxy-info bootstrap bootstrap-update dotfiles-update packages packages-update msys2 fonts-update plugins plugins-update ai ai-update gitmux-update
     @echo "=== MyWorkEnv updated ==="
 
 # ── Prep: one-time system setup (passwordless sudo, WSL PATH fix) ──
@@ -78,7 +88,30 @@ bootstrap:
 bootstrap-update:
     @echo "  chezmoi: checking..."; \
     source scripts/detect.sh; ensure_user_bin; \
-    chezmoi upgrade && echo "    ✓ upgraded" || echo "    ✓ up to date"
+    if ! command -v chezmoi >/dev/null 2>&1; then echo "    ✗ chezmoi not found"; exit 0; fi; \
+    CHEZMOI_ERR=""; \
+    if CHEZMOI_ERR=$(chezmoi upgrade 2>&1); then echo "    ✓ upgraded"; \
+    elif printf '%s' "$CHEZMOI_ERR" | grep -q "cannot determine upgrade method"; then \
+        LATEST=$(chezmoi doctor 2>/dev/null | awk '$2=="latest-version"{print $3}'); \
+        CURRENT=$(chezmoi --version 2>/dev/null | sed -n 's/.*version \(v[0-9.]*\).*/\1/p'); \
+        if [ -n "$LATEST" ] && [ "$LATEST" = "$CURRENT" ]; then \
+            echo "    ✓ up to date ($CURRENT)"; exit 0; \
+        fi; \
+        echo "    (手动安装的二进制无法自升级，重装 ${LATEST:-最新版})..."; \
+        DEST="$HOME/.local/bin"; \
+        if is_msys2; then DEST="$USERPROFILE/.local/bin"; fi; \
+        set -o pipefail; \
+        if curl -fsSL --connect-timeout 30 --retry 3 get.chezmoi.io \
+              | sed "s|https://github.com/|{{ gh_proxy }}https://github.com/|g; s|curl -w '%{http_code}'|curl --http1.1 --connect-timeout 30 --speed-limit 1024 --speed-time 60 -w '%{http_code}'|g; s|-fsSL|-fL|g" \
+              | bash -s -- -b "$DEST"; then \
+            echo "    ✓ reinstalled latest"; \
+        else \
+            echo "    ✗ chezmoi reinstall failed (get.chezmoi.io / GH_PROXY unreachable)"; \
+        fi; \
+    else \
+        printf '%s\n' "$CHEZMOI_ERR" | sed 's/^/    /'; \
+        echo "    ✓ up to date"; \
+    fi
 
 # ── System packages ──
 packages:
@@ -97,7 +130,14 @@ packages:
             echo "  (MSYS — no MINGW_PACKAGE_PREFIX, skipping mingw packages)"; \
         fi; \
     elif is_macos; then \
-        command -v brew >/dev/null || /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"; \
+        if ! command -v brew >/dev/null 2>&1; then \
+            brew_script=""; \
+            for u in "{{ gh_proxy }}https://raw.githubusercontent.com/Homebrew/install/master/install.sh" "https://raw.githubusercontent.com/Homebrew/install/master/install.sh"; do \
+                brew_script="$(curl -fsSL --connect-timeout 10 --max-time 60 "$u" 2>/dev/null)" && [ -n "$brew_script" ] && break; \
+            done; \
+            if [ -n "$brew_script" ]; then NONINTERACTIVE=1 /bin/bash -c "$brew_script"; \
+            else echo "  ✗ Homebrew install script download failed"; exit 1; fi; \
+        fi; \
         brew install $(grep -h -v '^#' packages/base.txt packages/macos.txt) || { echo "  ✗ brew install failed — some packages missing"; exit 1; }; \
         pip config get global.index-url 2>/dev/null | grep -q tuna.tsinghua || pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple 2>/dev/null || true; \
         [ -f packages/pip.txt ] && for pkg in $(grep -v '^#' packages/pip.txt); do \
@@ -161,10 +201,24 @@ dotfiles-update:
     if [ -n "$(git status --porcelain)" ]; then \
         echo "  (工作区有未提交改动，跳过 git pull)"; \
     else \
+        if [ -n "{{ gh_proxy }}" ]; then \
+            export GIT_CONFIG_COUNT=3; \
+            export GIT_CONFIG_KEY_0="url.{{ gh_proxy }}https://github.com/.insteadOf"; \
+            export GIT_CONFIG_VALUE_0="https://github.com/"; \
+            export GIT_CONFIG_KEY_1="url.{{ gh_proxy }}https://github.com/.insteadOf"; \
+            export GIT_CONFIG_VALUE_1="git@github.com:"; \
+            export GIT_CONFIG_KEY_2="url.{{ gh_proxy }}https://github.com/.insteadOf"; \
+            export GIT_CONFIG_VALUE_2="ssh://git@github.com/"; \
+        fi; \
         ok=0; for i in 1 2 3; do \
             if git pull --ff-only; then ok=1; break; fi; \
             echo "  git pull 第 $i 次失败，3s 后重试..."; sleep 3; \
         done; \
+        if [ "$ok" != 1 ] && [ -n "{{ gh_proxy }}" ]; then \
+            echo "  (代理拉取失败，改用直连重试)"; \
+            unset GIT_CONFIG_COUNT GIT_CONFIG_KEY_0 GIT_CONFIG_VALUE_0 GIT_CONFIG_KEY_1 GIT_CONFIG_VALUE_1 GIT_CONFIG_KEY_2 GIT_CONFIG_VALUE_2; \
+            git pull --ff-only && ok=1 || true; \
+        fi; \
         [ "$ok" = 1 ] || echo "  (git pull failed after 3 tries — network/SSH)"; \
     fi; \
     chezmoi apply --interactive=false
@@ -320,6 +374,7 @@ clean:
     echo "=== Clean complete ==="
 plugins:
     @echo "=== Plugins ==="; \
+    source scripts/detect.sh; \
     if [ -n "{{ gh_proxy }}" ]; then \
         export GIT_CONFIG_COUNT=3; \
         export GIT_CONFIG_KEY_0="url.{{ gh_proxy }}https://github.com/.insteadOf"; \
@@ -330,8 +385,9 @@ plugins:
         export GIT_CONFIG_VALUE_2="ssh://git@github.com/"; \
     fi; \
     if [ -f ~/.vim/autoload/plug.vim ]; then echo "  ✓ vim-plug"; \
-    else if curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
-        https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim; then echo "  ✓ vim-plug"; else echo "  ✗ vim-plug download failed"; fi; fi; \
+    else ok=0; for u in "{{ gh_proxy }}https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim" "https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim"; do \
+        curl -fLo ~/.vim/autoload/plug.vim --create-dirs "$u" 2>/dev/null && { ok=1; break; }; \
+    done; [ "$ok" = 1 ] && echo "  ✓ vim-plug" || echo "  ✗ vim-plug download failed"; fi; \
     mkdir -p ~/.vim; cp -f "$(pwd)/home/dot_vim/plugrc.vim" ~/.vim/pluginrc.vim 2>/dev/null && echo "  ✓ pluginrc" || echo "  ✗ pluginrc"; \
     command -v vim >/dev/null 2>&1 && { mkdir -p ~/.vim/plugged; missing=""; for p in $(sed -n "s/.*'as': *'\([^']*\)'.*/\1/p; t end; s|^Plug '[^']*/\([^']*\)'.*|\1|p; :end" "$(pwd)/home/dot_vim/plugrc.vim"); do [ -d "$HOME/.vim/plugged/$p" ] || missing="$missing $p"; done; if [ -n "$missing" ]; then echo "  installing missing vim plugins (git):$missing"; vim +PlugInstall +qall; else echo "  ✓ vim plugins"; fi; }; \
     if [ -d ~/.tmux/plugins/tpm ]; then echo "  ✓ tpm"; \
@@ -353,12 +409,14 @@ plugins:
             unzip -qo "$T/w.zip" -d "$T" && cp -f "$T/win32yank.exe" "$USERPROFILE/.local/bin/" && chmod +x "$USERPROFILE/.local/bin/win32yank.exe" && echo "  ✓ win32yank" || echo "  ✗ win32yank download failed"; \
             rm -rf "$T"; \
         }; }; \
+    stash_dirty_nvim_plugins; \
     command -v nvim >/dev/null 2>&1 && { echo "  installing nvim plugins (git)..."; if nvim --headless "+Lazy! sync" +qa; then echo "  ✓ nvim plugins"; else echo "  ✗ nvim plugins sync failed"; fi; }; \
     if [ -x "$HOME/.local/bin/lua-ls/bin/lua-language-server" ]; then echo "  ✓ lua-language-server"; \
     else if source scripts/detect.sh && install_lua_ls; then echo "  ✓ lua-language-server"; else echo "  ✗ lua-language-server download failed"; fi; fi
 
 plugins-update:
     @echo "=== Update plugins ==="; \
+    source scripts/detect.sh; \
     if [ -n "{{ gh_proxy }}" ]; then \
         export GIT_CONFIG_COUNT=3; \
         export GIT_CONFIG_KEY_0="url.{{ gh_proxy }}https://github.com/.insteadOf"; \
@@ -369,6 +427,7 @@ plugins-update:
         export GIT_CONFIG_VALUE_2="ssh://git@github.com/"; \
     fi; \
     command -v vim >/dev/null 2>&1 && { if vim +PlugUpdate +qall 2>&1; then echo "  ✓ vim plugins updated"; else echo "  ✗ vim plugins update failed"; fi; }; \
+    stash_dirty_nvim_plugins; \
     command -v nvim >/dev/null 2>&1 && { if nvim --headless "+Lazy! sync" +qa 2>&1; then echo "  ✓ nvim plugins updated"; else echo "  ✗ nvim plugins update failed"; fi; }; \
     if [ -d ~/.tmux/plugins/tpm ]; then (cd ~/.tmux/plugins/tpm && git pull) 2>&1 && echo "  ✓ tpm updated" || echo "  ✗ tpm update failed"; else echo "  (tpm not installed — run 'just plugins')"; fi; \
     if [ -d ~/.tmux/plugins-manual/catppuccin ]; then (cd ~/.tmux/plugins-manual/catppuccin && git pull) 2>&1 && echo "  ✓ catppuccin updated" || echo "  ✗ catppuccin update failed"; else echo "  (catppuccin not installed — run 'just plugins')"; fi; \
@@ -491,8 +550,7 @@ ai-update:
         if is_msys2; then cc_file="claude-win32-${cc_arch}.zip"; \
         else cc_os="$(uname -s)"; case "$cc_os" in Darwin) cc_os=darwin;; Linux) cc_os=linux;; *) cc_os="";; esac; cc_file="claude-${cc_os}-${cc_arch}.tar.gz"; fi; \
         cc_base="{{ gh_proxy }}https://github.com/anthropics/claude-code/releases/latest/download"; \
-        latest_tag="$(curl -sI --connect-timeout 15 --max-time 40 "$cc_base/$cc_file" 2>/dev/null | grep -i '^location' | head -1 | grep -oE '/releases/download/[^/]+' | sed 's|.*/||')"; \
-        latest_ver="${latest_tag#v}"; \
+        latest_ver="$(github_latest_tag anthropics/claude-code "$cc_file")"; \
         if [ -z "$latest_ver" ]; then \
             echo "  ✗ 无法检测 claude-code 最新版本，跳过更新"; \
         elif [ "$local_ver" = "$latest_ver" ]; then \
@@ -523,8 +581,7 @@ ai-update:
         oc_ext=".zip"; [ "$oc_os" = linux ] && oc_ext=".tar.gz"; \
         oc_filename="opencode-${oc_os}-${oc_arch}${oc_ext}"; \
         oc_base="{{ gh_proxy }}https://github.com/anomalyco/opencode/releases/latest/download"; \
-        latest_tag="$(curl -sI --connect-timeout 15 --max-time 40 "$oc_base/$oc_filename" 2>/dev/null | grep -i '^location' | head -1 | grep -oE '/releases/download/[^/]+' | sed 's|.*/||')"; \
-        latest_ver="${latest_tag#v}"; \
+        latest_ver="$(github_latest_tag anomalyco/opencode "$oc_filename")"; \
         if [ -z "$latest_ver" ]; then \
             echo "  ✗ 无法检测 opencode 最新版本，跳过更新"; \
         elif [ "$local_ver" = "$latest_ver" ]; then \

@@ -11,12 +11,20 @@
 
 source /etc/os-release 2>/dev/null || true
 
+# GitHub 代理探测（gh_proxy_detect 等）
+[ -f "$(dirname "${BASH_SOURCE[0]}")/proxy.sh" ] && . "$(dirname "${BASH_SOURCE[0]}")/proxy.sh"
+
 is_msys2()  { [[ "${ID:-}" == "msys2" ]]; }
 is_wsl()    { grep -qi microsoft /proc/version 2>/dev/null; }
 is_linux()  { [[ "$(uname -s)" == "Linux" ]] && ! is_wsl; }
 is_macos()  { [[ "$(uname -s)" == "Darwin" ]]; }
 is_debian() { [[ "${ID_LIKE:-}" == *debian* ]]; }
 is_rhel()   { [[ "${ID_LIKE:-}" == *rhel* ]] || [[ "${ID_LIKE:-}" == *fedora* ]]; }
+
+# cmd.exe 默认代码页是 936/GBK，UTF-8 中文会显示成乱码；交互式控制台切到 UTF-8
+if is_msys2 && [ -t 1 ] && command -v chcp.com >/dev/null 2>&1; then
+    chcp.com 65001 >/dev/null 2>&1 || true
+fi
 
 # Ensure the user's local bin dir (chezmoi, etc.) is on PATH.
 # Recipes run in fresh shells that haven't sourced ~/.profile yet, so this
@@ -35,13 +43,37 @@ ensure_user_bin() {
     esac
 }
 
+# 解析 GitHub latest release 版本号（去掉 v 前缀）。优先用 release 资产的 302
+# Location（不消耗 API 配额），失败再走 GitHub API（直连 + 代理）。
+# 用法：github_latest_tag <owner/repo> [asset-filename]
+github_latest_tag() {
+    local repo="$1" file="$2" proxy tag u
+    proxy="$(gh_proxy_detect 2>/dev/null)"
+    if [ -n "$file" ]; then
+        for u in "https://github.com/$repo/releases/latest/download/$file" \
+                 "${proxy}https://github.com/$repo/releases/latest/download/$file"; do
+            tag="$(curl -sI --connect-timeout 8 --max-time 20 "$u" 2>/dev/null \
+                | grep -i '^location' | head -1 \
+                | grep -oE '/releases/download/[^/]+' | sed 's|.*/||')"
+            [ -n "$tag" ] && { printf '%s\n' "${tag#v}"; return 0; }
+        done
+    fi
+    for u in "https://api.github.com/repos/$repo/releases/latest" \
+             "${proxy}https://api.github.com/repos/$repo/releases/latest"; do
+        tag="$(curl -fsSL --connect-timeout 5 --max-time 10 "$u" 2>/dev/null \
+            | grep -o '"tag_name": *"[^"]*"' | head -1 | cut -d'"' -f4)"
+        [ -n "$tag" ] && { printf '%s\n' "${tag#v}"; return 0; }
+    done
+    return 1
+}
+
 # Install lua-language-server (LuaLS) into ~/.local/bin/lua-ls/ and expose
 # ~/.local/bin/lua-ls/bin on PATH for the current shell. The upstream release
 # ships a self-contained bundle (launcher + main.lua + meta/locale) that must
 # stay together, hence the dedicated directory instead of a bare symlink.
 # Download URL: assets embed the version, so we resolve the latest tag first.
 install_lua_ls() {
-    local proxy="${GH_PROXY:-https://ghfast.top/}"
+    local proxy; proxy="$(gh_proxy_detect)"
     local os arch asset ext dest
     case "$(uname -s)" in
         Darwin) os=darwin ;;
@@ -89,6 +121,38 @@ install_lua_ls() {
     fi
     rm -rf "$T"
     return 1
+}
+
+# nvim lazy.nvim 插件目录（通过 nvim 自身查询 stdpath，兼容 Windows/MSYS）
+nvim_lazy_dir() {
+    command -v nvim >/dev/null 2>&1 || return 1
+    local data
+    data=$(nvim --headless -u NONE +'lua io.write(vim.fn.stdpath("data"))' +qa 2>/dev/null | tr -d '\r')
+    [ -n "$data" ] || return 1
+    case "$data" in
+        [A-Za-z]:[\\/]*) data=$(cygpath -u "$data" 2>/dev/null || printf '%s' "$data") ;;
+    esac
+    printf '%s/lazy\n' "$data"
+}
+
+# 更新前把有本地改动的插件仓库 stash 掉，避免 lazy.nvim 因脏工作区跳过更新。
+stash_dirty_nvim_plugins() {
+    command -v git >/dev/null 2>&1 || return 0
+    local lazy d name
+    lazy=$(nvim_lazy_dir) || return 0
+    [ -d "$lazy" ] || return 0
+    for d in "$lazy"/*/; do
+        d=${d%/}
+        [ -d "$d/.git" ] || continue
+        if ! git -C "$d" diff --quiet 2>/dev/null || ! git -C "$d" diff --cached --quiet 2>/dev/null; then
+            name=${d##*/}
+            if git -C "$d" stash push -q -m "myworkenv auto-stash $(date +%Y-%m-%d)" 2>/dev/null; then
+                echo "  ! $name 有本地改动，已 stash（git stash list 可恢复）"
+            else
+                echo "  ! $name 有本地改动，stash 失败"
+            fi
+        fi
+    done
 }
 
 # Configure apt to use domestic mirrors (idempotent). Same rationale as

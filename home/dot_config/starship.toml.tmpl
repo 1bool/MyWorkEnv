@@ -1,5 +1,8 @@
 # Starship config — minimal cross-platform
-scan_timeout = 50
+# Windows 下 git.exe 偶发启动很慢（杀软/磁盘抖动），默认 command_timeout=500ms
+# 会让 git_branch 报 timed out 并吞掉分支信息，这里放宽到 2s。
+command_timeout = 2000
+scan_timeout = 100
 add_newline = false
 format = "$directory$git_branch$git_status$character"
 
