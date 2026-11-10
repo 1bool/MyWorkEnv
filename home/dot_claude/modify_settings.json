@@ -1,0 +1,12 @@
+{{/* chezmoi:modify-template */}}
+{{- $msysRoot := trimSuffix "/etc/config.site" (env "CONFIG_SITE") -}}
+{{- $win := and (eq .chezmoi.os "windows") (ne $msysRoot "") -}}
+{{- $in := .chezmoi.stdin -}}
+{{- if not (trim $in) -}}
+{{- $in = "{}" -}}
+{{- end -}}
+{{- $q := ". | .enabledPlugins[\"plannotator@plannotator\"] = true | .enabledPlugins[\"pyright-lsp@claude-plugins-official\"] = true | .extraKnownMarketplaces.plannotator.source = {\"source\":\"github\",\"repo\":\"backnotprop/plannotator\"} | .autoCompactWindow = (.autoCompactWindow // 800000) | .theme = (.theme // \"auto\")" -}}
+{{- if $win -}}
+{{- $q = printf "%s | .env.CLAUDE_CODE_GIT_BASH_PATH = \"%s/usr/bin/bash.exe\" | .env.BASH_ENV = \"~/.claude/bash_env\"" $q $msysRoot -}}
+{{- end -}}
+{{ jq $q (fromJson $in) | first | toPrettyJson }}

@@ -111,6 +111,8 @@ set -g status-right "#{E:@catppuccin_status_gitmux}#{E:@catppuccin_status_cpu}#{
 {{- else }}
 # cpu/内存/负载/uptime 一律由 statusd.sh 驻留进程写入 @catppuccin_*_text（无 #()、无 spawn 抖动）
 run -b '~/.tmux/scripts/statusd.sh'
+# 每次客户端 attach 时兜底拉起 statusd（PID 锁防重复；睡眠/重连后自愈，避免守护进程死掉后状态栏数值消失）
+set-hook -g client-attached 'run-shell -b ~/.tmux/scripts/statusd.sh'
 set -g status-left "#[fg=#{@thm_crust},bg=#{@thm_green}] » #{session_name} #[fg=#{@thm_crust},bg=#{@thm_rosewater}] » #{pane_current_path} #[fg=#{@thm_fg},bg=default]"
 set -g status-right "#[fg=#{@thm_crust},bg=#{@thm_yellow}] »cpu#{E:@catppuccin_cpu_text} #[fg=#{@thm_crust},bg=#{@thm_red}] »ram#{E:@catppuccin_ram_text} #[fg=#{@thm_crust},bg=#{@thm_peach}] »up#{E:@catppuccin_uptime_text} #[fg=#{@thm_crust},bg=#{@thm_blue}] »load#{E:@catppuccin_load_text} #[fg=#{@thm_crust},bg=#{@thm_sapphire}] » %Y-%m-%d %H:%M #[fg=#{@thm_fg},bg=default]"
 {{- end }}
