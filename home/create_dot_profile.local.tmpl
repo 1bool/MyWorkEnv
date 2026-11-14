@@ -5,3 +5,10 @@
 # GitHub 加速镜像候选（启动时自动探测最快可用项，见 scripts/proxy.sh）。
 # 留空 = 仅直连；导出 GH_PROXY_LOCK=1 可锁定此值不做探测。
 export GH_PROXY=https://gh-proxy.com/
+
+# AI 模型（统一入口：登录 shell 均从这里读取）
+export ANTHROPIC_MODEL='deepseek-v4-flash[1m]'
+export ANTHROPIC_DEFAULT_SONNET_MODEL='deepseek-v4-pro[1m]'
+export ANTHROPIC_DEFAULT_HAIKU_MODEL='deepseek-v4-flash[1m]'
+export ANTHROPIC_SMALL_FAST_MODEL='deepseek-v4-flash[1m]'
+export ANTHROPIC_DEFAULT_OPUS_MODEL='deepseek-v4-pro[1m]'
