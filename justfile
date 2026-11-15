@@ -48,9 +48,10 @@ bootstrap:
 	@echo "=== Bootstrap ==="; \
 	source scripts/detect.sh; \
 	if is_msys2; then \
-	    if ! command -v unzip >/dev/null || ! command -v git >/dev/null; then setup_msys2_mirror; fi; \
+	    if ! command -v unzip >/dev/null || ! command -v git >/dev/null || ! command -v curl >/dev/null; then setup_msys2_mirror; fi; \
 	    command -v unzip >/dev/null || pacman -S --noconfirm unzip; \
 	    command -v git   >/dev/null || pacman -S --noconfirm git; \
+	    command -v curl  >/dev/null || pacman -S --noconfirm curl; \
 	elif is_macos; then \
 	    command -v unzip >/dev/null || brew install unzip; \
 	    command -v git   >/dev/null || brew install git; \
@@ -62,52 +63,54 @@ bootstrap:
 	    command -v unzip >/dev/null || sudo dnf -y install unzip; \
 	    command -v git   >/dev/null || sudo dnf -y install git; \
 	fi; \
-	CHEZMOI_BIN=""; \
-	if is_msys2; then CHEZMOI_BIN="$USERPROFILE/.local/bin/chezmoi"; \
-	else CHEZMOI_BIN="$HOME/.local/bin/chezmoi"; fi; \
-	if command -v chezmoi >/dev/null 2>&1 || [ -x "$CHEZMOI_BIN" ]; then echo "  ✓ chezmoi"; \
-	else \
-	    DEST="$HOME/.local/bin"; \
-	    if is_msys2; then DEST="$USERPROFILE/.local/bin"; fi; \
-	    set -o pipefail; \
-	    if curl -fsSL --connect-timeout 30 --retry 3 get.chezmoi.io \
-	          | sed "s|https://github.com/|{{ gh_proxy }}https://github.com/|g; s|curl -w '%{http_code}'|curl --http1.1 --connect-timeout 30 --speed-limit 1024 --speed-time 60 -w '%{http_code}'|g; s|-fsSL|-fL|g" \
-	          | bash -s -- -b "$DEST"; then \
-	        echo "  ✓ chezmoi installed"; \
-	    else \
-	        echo "  ✗ chezmoi install failed (get.chezmoi.io / GH_PROXY unreachable)"; \
+	CHEZMOI_BIN="$HOME/.local/bin/chezmoi"; \
+	if is_msys2; then \
+	    W="$(cygpath -u "$USERPROFILE/.local/bin" 2>/dev/null || echo "$USERPROFILE/.local/bin")"; \
+	    if { [ -x "$W/chezmoi.exe" ] || [ -x "$W/chezmoi" ]; } && [ ! -x "$CHEZMOI_BIN" ] && [ ! -x "$CHEZMOI_BIN.exe" ]; then \
+	        mkdir -p "$HOME/.local/bin"; \
+	        [ -x "$W/chezmoi.exe" ] && cp -f "$W/chezmoi.exe" "$HOME/.local/bin/chezmoi.exe"; \
+	        [ -x "$W/chezmoi" ] && cp -f "$W/chezmoi" "$HOME/.local/bin/chezmoi"; \
+	        chmod +x "$HOME/.local/bin/chezmoi"* 2>/dev/null || true; \
+	        echo "  ✓ chezmoi 迁移到 ~/.local/bin"; \
+	    fi; \
+	    if { [ -e "$W/chezmoi.exe" ] || [ -e "$W/chezmoi" ]; } && \
+	       { [ -x "$HOME/.local/bin/chezmoi.exe" ] || [ -x "$HOME/.local/bin/chezmoi" ]; }; then \
+	        rm -f "$W/chezmoi.exe" "$W/chezmoi" 2>/dev/null || true; \
 	    fi; \
 	fi; \
+	if command -v chezmoi >/dev/null 2>&1 || [ -x "$CHEZMOI_BIN" ] || [ -x "$CHEZMOI_BIN.exe" ]; then echo "  ✓ chezmoi"; \
+	else \
+	    if install_chezmoi; then echo "  ✓ chezmoi installed"; \
+	    else echo "  ✗ chezmoi install failed (get.chezmoi.io / GH_PROXY unreachable)"; fi; \
+	fi; \
 	if is_msys2; then \
-	    C="${USERPROFILE}/.config/chezmoi/chezmoi.toml"; \
+	    CONF="$(cygpath -u "${XDG_CONFIG_HOME:-$HOME/.config}" 2>/dev/null || echo "${XDG_CONFIG_HOME:-$HOME/.config}")"; \
+	    C="$CONF/chezmoi/chezmoi.toml"; \
 	    mkdir -p "$(dirname "$C")"; \
 	    grep -q '\[interpreters' "$C" 2>/dev/null || \
 	        printf '[data]\n  isWSL = false\n[interpreters.sh]\n  command = "bash"\n[interpreters.bash]\n  command = "bash"\n' > "$C"; \
+	    if [ -e "$USERPROFILE/.config/chezmoi" ]; then \
+	        rm -rf "$USERPROFILE/.config/chezmoi" 2>/dev/null; \
+	        echo "  ✓ 移除 USERPROFILE 下的旧 chezmoi 配置"; \
+	    fi; \
 	fi
 
 bootstrap-update:
     @echo "  chezmoi: checking..."; \
-    source scripts/detect.sh; ensure_user_bin; \
+    source scripts/detect.sh; \
     if ! command -v chezmoi >/dev/null 2>&1; then echo "    ✗ chezmoi not found"; exit 0; fi; \
     CHEZMOI_ERR=""; \
     if CHEZMOI_ERR=$(chezmoi upgrade 2>&1); then echo "    ✓ upgraded"; \
     elif printf '%s' "$CHEZMOI_ERR" | grep -q "cannot determine upgrade method"; then \
-        LATEST=$(chezmoi doctor 2>/dev/null | awk '$2=="latest-version"{print $3}'); \
+        LATEST="$(github_latest_tag twpayne/chezmoi)"; \
+        [ -n "$LATEST" ] || LATEST=$(chezmoi doctor 2>/dev/null | awk '$2=="latest-version"{print $3}'); \
         CURRENT=$(chezmoi --version 2>/dev/null | sed -n 's/.*version \(v[0-9.]*\).*/\1/p'); \
-        if [ -n "$LATEST" ] && [ "$LATEST" = "$CURRENT" ]; then \
-            echo "    ✓ up to date ($CURRENT)"; exit 0; \
+        if [ -n "$LATEST" ] && [ "v${LATEST#v}" = "v${CURRENT#v}" ]; then \
+            echo "    ✓ up to date (v${LATEST#v})"; exit 0; \
         fi; \
         echo "    (手动安装的二进制无法自升级，重装 ${LATEST:-最新版})..."; \
-        DEST="$HOME/.local/bin"; \
-        if is_msys2; then DEST="$USERPROFILE/.local/bin"; fi; \
-        set -o pipefail; \
-        if curl -fsSL --connect-timeout 30 --retry 3 get.chezmoi.io \
-              | sed "s|https://github.com/|{{ gh_proxy }}https://github.com/|g; s|curl -w '%{http_code}'|curl --http1.1 --connect-timeout 30 --speed-limit 1024 --speed-time 60 -w '%{http_code}'|g; s|-fsSL|-fL|g" \
-              | bash -s -- -b "$DEST"; then \
-            echo "    ✓ reinstalled latest"; \
-        else \
-            echo "    ✗ chezmoi reinstall failed (get.chezmoi.io / GH_PROXY unreachable)"; \
-        fi; \
+        if install_chezmoi; then echo "    ✓ reinstalled latest"; \
+        else echo "    ✗ chezmoi reinstall failed (get.chezmoi.io / GH_PROXY unreachable)"; fi; \
     else \
         printf '%s\n' "$CHEZMOI_ERR" | sed 's/^/    /'; \
         echo "    ✓ up to date"; \
@@ -187,7 +190,7 @@ msys2:
 # ── Dotfiles ──
 dotfiles:
     @echo "=== Dotfiles ==="; \
-    source scripts/detect.sh; ensure_user_bin; \
+    source scripts/detect.sh; \
     SRC="$(cygpath -m "$(pwd)" 2>/dev/null || echo "$(pwd)")"; \
     CONF="${XDG_CONFIG_HOME:-$(cygpath -m "$HOME/.config" 2>/dev/null || echo "$HOME/.config")}"; \
     mkdir -p "$CONF/chezmoi"; \
@@ -197,7 +200,7 @@ dotfiles:
 
 dotfiles-update:
     @echo "=== Update dotfiles ==="; \
-    source scripts/detect.sh; ensure_user_bin; \
+    source scripts/detect.sh; \
     if [ -n "$(git status --porcelain)" ]; then \
         echo "  (工作区有未提交改动，跳过 git pull)"; \
     else \
@@ -304,7 +307,8 @@ fonts-update:
     fi; \
     FONTS_FORCE="$FORCE" just fonts
 
-# ── Clean（清理遗留包 + 字体/vim/tmux/nvim 孤儿） ──
+# ── Clean（清理遗留包 + 字体/vim/tmux/nvim 孤儿 + opencode 路径迁移） ──
+# 旧版放在 HOME 的仓库副本仅在 detect.sh/base.txt 同时存在时才删除，避免误删用户目录。
 clean:
     @echo "=== Clean ==="; \
     source scripts/detect.sh; \
@@ -321,7 +325,7 @@ clean:
         echo "Cleaning stale dotfiles..."; \
         rm -f ~/.dircolors ~/.fonts_installed 2>/dev/null; \
         echo "Cleaning orphan fonts..."; \
-        powershell -ExecutionPolicy Bypass -Command '$keep=@(Get-Content packages/fonts.txt | Where-Object {$_ -notmatch "^#" -and $_.Trim() -ne ""} | ForEach-Object {$_.Trim()}); $store=Join-Path $env:USERPROFILE "fonts\NerdFonts"; $willInstall=@{}; foreach($f in $keep){$fd=Join-Path $store $f; if(Test-Path $fd){Get-ChildItem $fd -Filter *.ttf -ea 0 | ForEach-Object {$willInstall[$_.Name]=$true}; Get-ChildItem $fd -Filter *.otf -ea 0 | ForEach-Object {$willInstall[$_.Name]=$true}}}; $d=Join-Path $env:LOCALAPPDATA "Microsoft\Windows\Fonts"; Get-ChildItem $d -Filter "*NerdFont*" -ea 0 | Where-Object {-not $willInstall.ContainsKey($_.Name)} | ForEach-Object {Remove-Item $_.FullName -Force; Write-Host "  del file: $($_.Name)"}; $reg="HKCU:\Software\Microsoft Windows NT\CurrentVersion\Fonts"; $item=Get-Item $reg -ea 0; if($item){foreach($pn in $item.Property){$val=$item.GetValue($pn); if($val -like "*NerdFont*"){$fn=Split-Path $val -Leaf; if(-not $willInstall.ContainsKey($fn)){Remove-ItemProperty $reg -Name $pn -Force -ea 0; Write-Host "  del reg: $pn"}}}}; Write-Host "  ✓ orphan fonts + registry"'; \
+        powershell -ExecutionPolicy Bypass -Command '$keep=@(Get-Content packages/fonts.txt | Where-Object {$_ -notmatch "^#" -and $_.Trim() -ne ""} | ForEach-Object {$_.Trim()}); $store=Join-Path $env:USERPROFILE "fonts\NerdFonts"; $willInstall=@{}; foreach($f in $keep){$fd=Join-Path $store $f; if(Test-Path $fd){Get-ChildItem $fd -Filter *.ttf -ea 0 | ForEach-Object {$willInstall[$_.Name]=$true}; Get-ChildItem $fd -Filter *.otf -ea 0 | ForEach-Object {$willInstall[$_.Name]=$true}}}; $d=Join-Path $env:LOCALAPPDATA "Microsoft\Windows\Fonts"; Get-ChildItem $d -Filter "*NerdFont*" -ea 0 | Where-Object {-not $willInstall.ContainsKey($_.Name)} | ForEach-Object {Remove-Item $_.FullName -Force; Write-Host "  del file: $($_.Name)"}; $reg="HKCU:\Software\Microsoft\Windows NT\CurrentVersion\Fonts"; $item=Get-Item $reg -ea 0; if($item){foreach($pn in $item.Property){$val=$item.GetValue($pn); if($val -like "*NerdFont*"){$fn=Split-Path $val -Leaf; if(-not $willInstall.ContainsKey($fn)){Remove-ItemProperty $reg -Name $pn -Force -ea 0; Write-Host "  del reg: $pn"}}}}; Write-Host "  ✓ orphan fonts + registry"'; \
         echo "  ✓ cleaned"; \
         echo "Removing old chezmoi state..."; \
         rm -rf "${USERPROFILE}/.config/chezmoi" 2>/dev/null; \
@@ -362,8 +366,12 @@ clean:
         fc-cache -fv "$FDIR" 2>/dev/null || true; \
     fi; \
     rm -f ~/.config/chezmoi/chezmoi.yaml ~/.config/chezmoi/chezmoi.json 2>/dev/null; \
-    rm -f ~/README.md ~/install.sh ~/justfile 2>/dev/null; \
-    rm -rf ~/packages ~/scripts ~/bin ~/vim ~/.config/chezmoi/chezmoistate.boltdb 2>/dev/null; \
+    if [ -f ~/scripts/detect.sh ] && [ -f ~/packages/base.txt ]; then \
+        rm -f ~/README.md ~/install.sh ~/justfile 2>/dev/null; \
+        rm -rf ~/packages ~/scripts ~/bin ~/vim 2>/dev/null; \
+        echo "  ✓ removed legacy repo copy in HOME"; \
+    fi; \
+    rm -f ~/.config/chezmoi/chezmoistate.boltdb 2>/dev/null; \
     if [ -x ~/.tmux/plugins/tpm/bin/clean_plugins ]; then \
         export TMUX_PLUGIN_MANAGER_PATH="${TMUX_PLUGIN_MANAGER_PATH:-$HOME/.tmux/plugins/}"; \
         tmux start-server 2>/dev/null || true; \
@@ -371,6 +379,41 @@ clean:
         ~/.tmux/plugins/tpm/bin/clean_plugins || true; \
     fi; \
     command -v nvim >/dev/null 2>&1 && nvim --headless "+Lazy! clean" +qa 2>&1 || true; \
+    OC_NEW="$HOME/.opencode/bin"; OC_OLD="$HOME/.local/bin"; \
+    ver_ge() { awk -v a="$1" -v b="$2" 'BEGIN{split(a,x,".");split(b,y,".");for(i=1;i<=3;i++){if((x[i]+0)>(y[i]+0))exit 0;if((x[i]+0)<(y[i]+0))exit 1}exit 0}'; }; \
+    v_new=""; \
+    for f in opencode.exe opencode; do \
+        [ -z "$v_new" ] && [ -x "$OC_NEW/$f" ] && v_new="$("$OC_NEW/$f" --version 2>/dev/null | head -1)"; \
+    done; \
+    v_old=""; \
+    for f in opencode.exe opencode; do \
+        [ -z "$v_old" ] && [ -x "$OC_OLD/$f" ] && v_old="$("$OC_OLD/$f" --version 2>/dev/null | head -1)"; \
+    done; \
+    if [ -n "$v_old" ]; then \
+        if [ -z "$v_new" ] || ver_ge "$v_old" "$v_new"; then \
+            mkdir -p "$OC_NEW"; \
+            for f in opencode opencode.exe; do \
+                [ -f "$OC_OLD/$f" ] && cp -f "$OC_OLD/$f" "$OC_NEW/$f"; \
+            done; \
+            echo "  ✓ opencode $v_old → $OC_NEW"; \
+        fi; \
+        for f in opencode opencode.exe; do rm -f "$OC_OLD/$f" 2>/dev/null || true; done; \
+        if [ -e "$OC_OLD/opencode.exe" ] || [ -e "$OC_OLD/opencode" ]; then \
+            echo "  ! 旧 opencode 仍被占用，退出当前进程后重跑 clean 清理"; \
+        fi; \
+    fi; \
+    if is_msys2; then \
+        W="$(cygpath -u "$USERPROFILE/.local/bin" 2>/dev/null || echo "$USERPROFILE/.local/bin")"; \
+        if [ -e "$W/opencode.exe" ] || [ -e "$W/opencode" ]; then \
+            for f in opencode opencode.exe; do rm -f "$W/$f" 2>/dev/null || true; done; \
+            echo "  ✓ 清理 USERPROFILE 下的旧 opencode"; \
+        fi; \
+        W="$(cygpath -u "$USERPROFILE/.local/bin" 2>/dev/null || echo "$USERPROFILE/.local/bin")"; \
+        if { [ -e "$W/chezmoi.exe" ] || [ -e "$W/chezmoi" ]; } && { [ -x "$HOME/.local/bin/chezmoi.exe" ] || [ -x "$HOME/.local/bin/chezmoi" ]; }; then \
+            rm -f "$W/chezmoi.exe" "$W/chezmoi" 2>/dev/null || true; \
+            echo "  ✓ 清理 USERPROFILE 下的旧 chezmoi"; \
+        fi; \
+    fi; \
     echo "=== Clean complete ==="
 plugins:
     @echo "=== Plugins ==="; \
@@ -477,24 +520,13 @@ ai:
     if command -v opencode >/dev/null 2>&1; then \
         echo "  ✓ opencode (up to date)"; \
     else \
-        echo "  → 安装 opencode via GH_PROXY..."; \
-        oc_os="$(uname -s)"; oc_arch="$(uname -m)"; \
-        case "$oc_os" in Darwin) oc_os=darwin;; Linux) oc_os=linux;; MINGW*|MSYS*|CYGWIN*) oc_os=windows;; *) oc_os="";; esac; \
-        case "$oc_arch" in x86_64|amd64) oc_arch=x64;; arm64|aarch64) oc_arch=arm64;; esac; \
-        oc_ext=".zip"; [ "$oc_os" = linux ] && oc_ext=".tar.gz"; \
-        oc_filename="opencode-${oc_os}-${oc_arch}${oc_ext}"; \
-        oc_base="{{ gh_proxy }}https://github.com/anomalyco/opencode/releases/latest/download"; \
-        T=$(mktemp -d); mkdir -p ~/.local/bin; \
-        if curl -fL --connect-timeout 30 --max-time 600 "$oc_base/$oc_filename" -o "$T/$oc_filename"; then \
-            if [ "$oc_os" = linux ]; then \
-                tar xzf "$T/$oc_filename" -C "$T" && cp -f "$T/opencode" ~/.local/bin/ && chmod +x ~/.local/bin/opencode && echo "  ✓ opencode installed"; \
-            else \
-                unzip -qo "$T/$oc_filename" -d "$T" && cp -f "$T/opencode.exe" ~/.local/bin/ && echo "  ✓ opencode installed"; \
-            fi; \
+        echo "  → 安装 opencode（官方 install.sh，经 GH_PROXY）..."; \
+        if curl -fsSL --connect-timeout 15 --max-time 60 https://opencode.ai/install \
+              | PATH="$(pwd)/scripts/shims:$PATH" GH_PROXY="{{ gh_proxy }}" bash -s -- --no-modify-path; then \
+            echo "  ✓ opencode installed"; \
         else \
-            echo "  ✗ opencode download failed (GH_PROXY unreachable)"; \
+            echo "  ✗ opencode install failed (opencode.ai / GH_PROXY unreachable)"; \
         fi; \
-        rm -rf "$T"; \
     fi; \
     echo "=== Plannotator ==="; \
     if command -v plannotator >/dev/null 2>&1; then \
@@ -574,31 +606,11 @@ ai-update:
     fi; \
     echo "=== OpenCode update ==="; \
     if command -v opencode >/dev/null 2>&1; then \
-        local_ver="$(opencode --version 2>/dev/null | head -1)"; \
-        oc_os="$(uname -s)"; oc_arch="$(uname -m)"; \
-        case "$oc_os" in Darwin) oc_os=darwin;; Linux) oc_os=linux;; MINGW*|MSYS*|CYGWIN*) oc_os=windows;; *) oc_os="";; esac; \
-        case "$oc_arch" in x86_64|amd64) oc_arch=x64;; arm64|aarch64) oc_arch=arm64;; esac; \
-        oc_ext=".zip"; [ "$oc_os" = linux ] && oc_ext=".tar.gz"; \
-        oc_filename="opencode-${oc_os}-${oc_arch}${oc_ext}"; \
-        oc_base="{{ gh_proxy }}https://github.com/anomalyco/opencode/releases/latest/download"; \
-        latest_ver="$(github_latest_tag anomalyco/opencode "$oc_filename")"; \
-        if [ -z "$latest_ver" ]; then \
-            echo "  ✗ 无法检测 opencode 最新版本，跳过更新"; \
-        elif [ "$local_ver" = "$latest_ver" ]; then \
-            echo "  ✓ opencode up to date ($local_ver)"; \
+        echo "  → opencode upgrade（官方逻辑，经 GH_PROXY）..."; \
+        if PATH="$(pwd)/scripts/shims:$PATH" GH_PROXY="{{ gh_proxy }}" timeout -k 10 600 opencode upgrade </dev/null 2>&1; then \
+            echo "  ✓ opencode updated"; \
         else \
-            echo "  → 更新 opencode ($latest_ver) via GH_PROXY..."; \
-            T=$(mktemp -d); mkdir -p ~/.local/bin; \
-            if curl -fL --connect-timeout 30 --max-time 600 "$oc_base/$oc_filename" -o "$T/$oc_filename"; then \
-                if [ "$oc_os" = linux ]; then \
-                    tar xzf "$T/$oc_filename" -C "$T" && cp -f "$T/opencode" ~/.local/bin/ && chmod +x ~/.local/bin/opencode && echo "  ✓ opencode updated ($latest_ver)"; \
-                else \
-                    unzip -qo "$T/$oc_filename" -d "$T" && cp -f "$T/opencode.exe" ~/.local/bin/ && echo "  ✓ opencode updated ($latest_ver)"; \
-                fi; \
-            else \
-                echo "  ✗ opencode download failed (GH_PROXY unreachable)"; \
-            fi; \
-            rm -rf "$T"; \
+            echo "  ✗ opencode update failed"; \
         fi; \
     else \
         echo "  opencode not installed — run 'just ai'"; \

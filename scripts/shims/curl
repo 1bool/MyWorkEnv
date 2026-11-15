@@ -1,0 +1,29 @@
+#!/bin/bash
+# curl 代理垫片：把 GitHub 域名改写到 $GH_PROXY 后再交给真正的 curl。
+# 用途：让程序自带的安装/升级脚本（它们内部调用 curl）走我们选定的代理，
+# 而不需要修改程序本身的升级逻辑。用法：PATH="<repo>/scripts/shims:$PATH" cmd
+
+shim_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+
+real=""
+IFS=':' read -r -a _paths <<< "$PATH"
+for d in "${_paths[@]}"; do
+    [ "$d" = "$shim_dir" ] && continue
+    if [ -x "$d/curl.exe" ]; then real="$d/curl.exe"; break; fi
+    if [ -x "$d/curl" ]; then real="$d/curl"; break; fi
+done
+if [ -z "$real" ]; then
+    echo "gh-curl: real curl not found in PATH" >&2
+    exit 127
+fi
+
+args=()
+for a in "$@"; do
+    case "$a" in
+        https://github.com/*|https://raw.githubusercontent.com/*|https://api.github.com/*|https://objects.githubusercontent.com/*|https://codeload.github.com/*)
+            [ -n "${GH_PROXY:-}" ] && a="${GH_PROXY}${a}" ;;
+    esac
+    args+=("$a")
+done
+
+exec "$real" "${args[@]}"

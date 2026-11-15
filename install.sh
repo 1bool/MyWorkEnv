@@ -13,6 +13,9 @@ export PATH="$HOME/.local/bin:$PATH"
 if is_msys2; then
     # chezmoi config isolation: each MSYS2 has its own config
     export XDG_CONFIG_HOME="$(cygpath -m "$HOME/.config" 2>/dev/null || echo "$HOME/.config")"
+    # 与 dot_zshenv/.bashrc 保持一致：claude 也用 MSYS home 下的 .claude，
+    # 否则首次安装时插件会装到 %USERPROFILE%\.claude，dotfiles 生效后看不到。
+    export CLAUDE_CONFIG_DIR="$(cygpath -w "$HOME/.claude" 2>/dev/null || echo "$HOME/.claude")"
     # native Windows exes (chezmoi, etc.) live in USERPROFILE, needs Unix path
     export PATH="$(cygpath -u "$USERPROFILE/.local/bin" 2>/dev/null || echo "$USERPROFILE/.local/bin"):$PATH"
     # 配置国内镜像，避免下面装 just 时 pacman 走原始 repo.msys2.org
@@ -48,9 +51,6 @@ if ! command -v just &>/dev/null; then
         curl -fsSL https://just.systems/install.sh | bash -s -- --to ~/.local/bin
     fi
 fi
-
-# Migrate from old system (one-time)
-just migrate 2>/dev/null || true
 
 # Run just install (all steps, idempotent)
 exec just install

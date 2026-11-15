@@ -61,6 +61,11 @@ if [ -n "$BASH_VERSION" ]; then
     fi
 fi
 
+# opencode 自带 updater 的安装目录（官方 install.sh: $HOME/.opencode/bin）
+if [ -d "$HOME/.opencode/bin" ] ; then
+    PATH="$HOME/.opencode/bin:$PATH"
+fi
+
 # load local customizations
 if [ -f "$HOME/.profile.local" ]; then
     . "$HOME/.profile.local"

@@ -21,27 +21,17 @@ is_macos()  { [[ "$(uname -s)" == "Darwin" ]]; }
 is_debian() { [[ "${ID_LIKE:-}" == *debian* ]]; }
 is_rhel()   { [[ "${ID_LIKE:-}" == *rhel* ]] || [[ "${ID_LIKE:-}" == *fedora* ]]; }
 
-# cmd.exe 默认代码页是 936/GBK，UTF-8 中文会显示成乱码；交互式控制台切到 UTF-8
-if is_msys2 && [ -t 1 ] && command -v chcp.com >/dev/null 2>&1; then
-    chcp.com 65001 >/dev/null 2>&1 || true
-fi
-
-# Ensure the user's local bin dir (chezmoi, etc.) is on PATH.
-# Recipes run in fresh shells that haven't sourced ~/.profile yet, so this
-# makes `just <recipe>` work on a fresh machine before dotfiles are deployed.
-ensure_user_bin() {
-    local bin
-    if is_msys2; then
-        bin="$(cygpath -u "$USERPROFILE/.local/bin" 2>/dev/null || echo "$USERPROFILE/.local/bin")"
-    else
-        bin="$HOME/.local/bin"
-    fi
-    [ -d "$bin" ] || return 0
-    case ":$PATH:" in
-        *":$bin:"*) ;;
-        *) export PATH="$bin:$PATH" ;;
-    esac
-}
+# 拒绝在 cmd.exe/ConHost 里运行：PATH 不完整、中文乱码、spawn 慢。
+# cmd 下没有 TERM（bash 会补成 dumb）；mintty/tmux/ssh 都会设置真实 TERM。
+case "${TERM:-}" in
+    ""|dumb)
+        if is_msys2; then
+            echo "ERROR: detected cmd.exe/ConHost (TERM is empty/dumb)." >&2
+            echo "       Please run from MSYS2 mintty (or a login shell)." >&2
+            exit 1
+        fi
+        ;;
+esac
 
 # 解析 GitHub latest release 版本号（去掉 v 前缀）。优先用 release 资产的 302
 # Location（不消耗 API 配额），失败再走 GitHub API（直连 + 代理）。
@@ -65,6 +55,22 @@ github_latest_tag() {
         [ -n "$tag" ] && { printf '%s\n' "${tag#v}"; return 0; }
     done
     return 1
+}
+
+# 用官方 get.chezmoi.io 脚本安装 chezmoi 到用户 bin（复用其平台/校验逻辑）。
+# 下载走最快的文件代理；real_tag 用的 /releases/latest 需要能返回 JSON 的代理
+# （gh-proxy 对该端点返回 404，所以单独探测）。
+install_chezmoi() {
+    local dl json dest
+    dl="$(gh_proxy_detect 2>/dev/null)"
+    json="$(gh_json_proxy_detect 2>/dev/null)"
+    dest="$HOME/.local/bin"
+    (
+        set -o pipefail
+        curl -fsSL --connect-timeout 30 --retry 3 get.chezmoi.io \
+            | sed "s|release_url=\"https://github.com/|release_url=\"${json}https://github.com/|g; s|https://github.com/twpayne/chezmoi/releases/download/|${dl}https://github.com/twpayne/chezmoi/releases/download/|g; s|curl -w '%{http_code}'|curl --http1.1 --connect-timeout 30 --speed-limit 1024 --speed-time 60 -w '%{http_code}'|g; s|-fsSL|-fL|g" \
+            | bash -s -- -b "$dest"
+    )
 }
 
 # Install lua-language-server (LuaLS) into ~/.local/bin/lua-ls/ and expose

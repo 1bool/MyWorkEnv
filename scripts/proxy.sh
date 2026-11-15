@@ -2,6 +2,7 @@
 # GitHub 加速代理探测
 #   detect [--force]  输出当前最快可用的代理前缀（空串代表直连）
 #   list   [--force]  输出每个候选的探测结果（耗时 + 状态）
+#   json   [--force]  输出能代理 /releases/latest(JSON) 的最快代理
 #
 # 缓存：默认 30 分钟内复用上次结果，避免每次启动重复探测。
 # 覆盖：GH_PROXY_LOCK=1 时不做探测，直接使用 GH_PROXY。
@@ -11,9 +12,11 @@ GH_PROXY_CANDIDATES_DEFAULT="${GH_PROXY_CANDIDATES:-https://gh-proxy.com/ https:
 GH_PROXY_CACHE_TTL="${GH_PROXY_CACHE_TTL:-1800}"
 # 用一个体积可控的 release 资源探测真实下载链路（原始下载/重定向最易被墙）
 GH_PROXY_PROBE_URL="https://github.com/twpayne/chezmoi/releases/latest/download/chezmoi-windows-amd64.exe"
+# 少数场景（如 get.chezmoi.io 的 real_tag）需要代理返回 releases/latest 的 JSON
+GH_PROXY_JSON_PROBE_URL="https://github.com/twpayne/chezmoi/releases/latest"
 
 gh_proxy_cache_file() {
-    printf '%s/myworkenv/gh_proxy' "${XDG_CACHE_HOME:-$HOME/.cache}"
+    printf '%s/myworkenv/%s' "${XDG_CACHE_HOME:-$HOME/.cache}" "${1:-gh_proxy}"
 }
 
 gh_proxy_candidates() {
@@ -31,16 +34,27 @@ gh_proxy_probe() {
         --connect-timeout 3 --max-time 8 "${1}${GH_PROXY_PROBE_URL}" 2>/dev/null
 }
 
-# 参数：<force|""> <verbose|"">
-gh_proxy_detect() {
-    local force="$1" verbose="$2"
+gh_json_probe() {
+    local prefix="$1" tmp t
+    tmp=$(mktemp 2>/dev/null) || return 1
+    t=$(curl -fsSL -H 'Accept: application/json' -o "$tmp" -w '%{time_total}' \
+        --connect-timeout 3 --max-time 8 "${prefix}${GH_PROXY_JSON_PROBE_URL}" 2>/dev/null) || {
+        rm -f "$tmp"; return 1
+    }
+    grep -q '"tag_name"' "$tmp" 2>/dev/null || { rm -f "$tmp"; return 1; }
+    rm -f "$tmp"
+    printf '%s' "$t"
+}
+
+# 参数：<cache 文件> <探测函数> <force|""> <verbose|"">
+_gh_proxy_detect() {
+    local cache="$1" probe="$2" force="$3" verbose="$4"
     if [ "${GH_PROXY_LOCK:-0}" = "1" ]; then
         printf '%s\n' "${GH_PROXY:-}"
         return 0
     fi
 
-    local cache ts val now
-    cache=$(gh_proxy_cache_file)
+    local ts val now
     now=$(date +%s)
     if [ "$force" != "force" ] && [ -f "$cache" ]; then
         read -r ts val < "$cache"
@@ -56,7 +70,7 @@ gh_proxy_detect() {
     mkdir -p "$tmp"
     while IFS= read -r prefix; do
         (
-            t=$(gh_proxy_probe "$prefix") && \
+            t=$("$probe" "$prefix") && \
                 printf '%s\t%s\n' "$t" "$prefix" > "$tmp/$i"
         ) &
         i=$((i + 1))
@@ -84,14 +98,25 @@ gh_proxy_detect() {
     printf '%s\n' "$val"
 }
 
+gh_proxy_detect() {
+    _gh_proxy_detect "$(gh_proxy_cache_file gh_proxy)" gh_proxy_probe "${1:-}" "${2:-}"
+}
+
+gh_json_proxy_detect() {
+    _gh_proxy_detect "$(gh_proxy_cache_file gh_proxy_json)" gh_json_probe "${1:-}" "${2:-}"
+}
+
 if [ "${BASH_SOURCE[0]}" = "$0" ]; then
     case "${1:-detect}" in
         detect) shift || true
                 force=""; [ "${1:-}" = "--force" ] && force=force
                 gh_proxy_detect "$force" "" ;;
         list)   gh_proxy_detect force verbose ;;
+        json)   shift || true
+                force=""; [ "${1:-}" = "--force" ] && force=force
+                gh_json_proxy_detect "$force" "" ;;
         *)
-            echo "usage: proxy.sh [detect|list] [--force]" >&2
+            echo "usage: proxy.sh [detect|list|json] [--force]" >&2
             exit 2
             ;;
     esac
