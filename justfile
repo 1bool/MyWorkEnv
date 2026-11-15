@@ -59,9 +59,11 @@ bootstrap:
 	    if ! command -v unzip >/dev/null || ! command -v git >/dev/null; then setup_debian_mirror; fi; \
 	    command -v unzip >/dev/null || { sudo apt-get update && sudo apt-get -y install unzip; }; \
 	    command -v git   >/dev/null || { sudo apt-get -y install git; }; \
+	    command -v curl  >/dev/null || { sudo apt-get update && sudo apt-get -y install curl; }; \
 	elif is_rhel; then \
 	    command -v unzip >/dev/null || sudo dnf -y install unzip; \
 	    command -v git   >/dev/null || sudo dnf -y install git; \
+	    command -v curl  >/dev/null || sudo dnf -y install curl; \
 	fi; \
 	CHEZMOI_BIN="$HOME/.local/bin/chezmoi"; \
 	if is_msys2; then \

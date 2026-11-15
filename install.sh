@@ -27,6 +27,15 @@ if is_debian; then
     setup_debian_mirror
 fi
 
+# curl is needed for the proxy probe and the just fallback installer
+if ! command -v curl >/dev/null 2>&1; then
+    if is_debian; then
+        sudo apt-get update -qq && sudo apt-get -y install curl
+    elif is_rhel; then
+        sudo dnf -y install curl
+    fi
+fi
+
 # Pick the fastest working GitHub proxy (cached, see scripts/proxy.sh)
 if command -v curl >/dev/null 2>&1; then
     export GH_PROXY="$(bash scripts/proxy.sh detect)"
