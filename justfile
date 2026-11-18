@@ -523,7 +523,7 @@ ai:
         echo "  ✓ opencode (up to date)"; \
     else \
         echo "  → 安装 opencode（官方 install.sh，经 GH_PROXY）..."; \
-        if curl -fsSL --connect-timeout 15 --max-time 60 https://opencode.ai/install \
+        if curl -fsSL --connect-timeout 15 --max-time 60 https://opencode.ai/v2/install \
               | PATH="$(pwd)/scripts/shims:$PATH" GH_PROXY="{{ gh_proxy }}" bash -s -- --no-modify-path; then \
             echo "  ✓ opencode installed"; \
         else \

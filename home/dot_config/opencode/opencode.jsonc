@@ -4,35 +4,38 @@
   "shell": "bash",
   // 双后端（token.molchip.com 网关 / DeepSeek 直连）统一走 Anthropic 协议，
   // 由 ~/.zshrc.local 的 ANTHROPIC_BASE_URL / ANTHROPIC_API_KEY 环境变量驱动。
-  // 模型均在本文件指定（不依赖 .zshrc 的 OP_MODEL）：默认/轻量(small_model)=flash，
-  // plan agent=pro，build agent=flash；kimi-k3 最强档，/models 手动切换（仅后端 A）。
-  "lsp": true,
-  "permission": {
-    "lsp": "allow"
+  // 模型单一来源：~/.profile.local 的 OP_*（由 AI_MODEL_FLASH/PRO 派生），此处只引用 env，
+  // 与 Claude Code 的 ANTHROPIC_* 同源。默认/轻量(title)=flash，plan=pro，build=flash。
+  "model": "{env:OP_MODEL}",
+  "agents": {
+    "plan": { "model": "{env:OP_PLAN}" },
+    "build": { "model": "{env:OP_BUILD}" },
+    "title": { "model": "{env:OP_TITLE}" }
   },
-  "model": "anthropic/deepseek-v4-flash",
-  "small_model": "anthropic/deepseek-v4-flash",
-  // plan（只读规划）用 Pro（强推理），build（执行）用 Flash（快/省）。
-  "agent": {
-    "plan":  { "model": "anthropic/deepseek-v4-pro" },
-    "build": { "model": "anthropic/deepseek-v4-flash" }
-  },
-  "plugin": [
-    ["@plannotator/opencode@latest", {
-      "workflow": "plan-agent",
-      "planningAgents": ["plan"]
-    }],
-    "opencode-nvim-editor-context"
-  ],
-  "provider": {
-    "anthropic": {
+  "plugins": [
+    {
+      "package": "@plannotator/opencode@0.28.67",
       "options": {
+        "workflow": "plan-agent",
+        "planningAgents": ["plan"]
+      }
+    }
+  ],
+  "providers": {
+    "anthropic": {
+      "settings": {
         "baseURL": "{env:ANTHROPIC_BASE_URL}/v1",
         "apiKey": "{env:ANTHROPIC_API_KEY}"
       },
       "models": {
-        "deepseek-v4-pro": { "name": "DeepSeek V4 Pro", "limit": { "context": 1000000, "output": 64000 } },
-        "deepseek-v4-flash": { "name": "DeepSeek V4 Flash", "limit": { "context": 1000000, "output": 64000 } },
+        "deepseek-v4-pro": {
+          "name": "DeepSeek V4 Pro",
+          "limit": { "context": 1000000, "output": 64000 }
+        },
+        "deepseek-v4-flash": {
+          "name": "DeepSeek V4 Flash",
+          "limit": { "context": 1000000, "output": 64000 }
+        },
         "kimi-k3": { "name": "Kimi K3" }
       }
     }
