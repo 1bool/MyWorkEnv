@@ -608,8 +608,10 @@ ai-update:
     fi; \
     echo "=== OpenCode update ==="; \
     if command -v opencode >/dev/null 2>&1; then \
-        echo "  → opencode upgrade（官方逻辑，经 GH_PROXY）..."; \
-        if PATH="$(pwd)/scripts/shims:$PATH" GH_PROXY="{{ gh_proxy }}" timeout -k 10 600 opencode upgrade </dev/null 2>&1; then \
+        echo "  → opencode upgrade（官方 curl 安装方式，经 GH_PROXY）..."; \
+        if PATH="$(pwd)/scripts/shims:$PATH" GH_PROXY="{{ gh_proxy }}" \
+              OPENCODE_GIT_BASH_PATH="${CONFIG_SITE%/etc/config.site}/usr/bin/bash.exe" \
+              timeout -k 10 600 opencode upgrade --method curl </dev/null 2>&1; then \
             echo "  ✓ opencode updated"; \
         else \
             echo "  ✗ opencode update failed"; \

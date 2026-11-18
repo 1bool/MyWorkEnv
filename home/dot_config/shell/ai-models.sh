@@ -14,6 +14,14 @@ AI_MODEL_PRO='deepseek-v4-pro'
 # OpenCode 侧 provider id，必须与 ~/.config/opencode/opencode.jsonc 中 providers 的键一致
 OP_PROVIDER='anthropic'
 
+# ── AI 工具运行环境 ──
+# opencode 的官方升级脚本（opencode upgrade --method curl）要求 Git Bash；
+# MSYS2 的 bash 即可，用 CONFIG_SITE 推出安装根目录。
+if [ -n "${CONFIG_SITE:-}" ] && [ -z "${OPENCODE_GIT_BASH_PATH:-}" ]; then
+    OPENCODE_GIT_BASH_PATH="${CONFIG_SITE%/etc/config.site}/usr/bin/bash.exe"
+    export OPENCODE_GIT_BASH_PATH
+fi
+
 # ── 应用后端档案（档案来自 ai-backend.sh）─────────────────────────────────
 # 只清掉「本文件自己设过」的代理，不碰机器原有的全局代理配置。
 _ai_backend_apply() {
