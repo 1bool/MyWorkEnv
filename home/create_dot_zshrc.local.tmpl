@@ -1,15 +1,6 @@
 # ~/.zshrc.local — 本机敏感/机器相关配置（不入库；chezmoi create_ 首次生成，不覆盖本地修改）
-# 在 ~/.zshrc 末尾被 source，可覆盖前面的模型等配置；本文件只放后端 baseURL/key 与必要覆盖。
-# 切换后端：只改 AI_BACKEND（A 或 B）。把 sk-你的xxx-key 换成真实 key。
+# 在 ~/.zshrc 末尾被 source。
+# AI 后端档案在 ~/.config/shell/ai-backend.sh（baseURL/key/proxy，按机器与网络自动选），
+# AI 模型名在 ~/.config/shell/ai-models.sh。此处只放其余私有配置。
 
-AI_BACKEND=A  # A = token.molchip.com 网关；B = DeepSeek 直连
-
-if [[ "$AI_BACKEND" == "A" ]]; then
-  export ANTHROPIC_BASE_URL="https://token.molchip.com"
-  export ANTHROPIC_API_KEY="sk-你的molchip-key"
-  export ANTHROPIC_DEFAULT_OPUS_MODEL="kimi-k3"   # A 网关三档，opus 用 kimi
-elif [[ "$AI_BACKEND" == "B" ]]; then
-  export ANTHROPIC_BASE_URL="https://api.deepseek.com/anthropic"
-  export ANTHROPIC_API_KEY="sk-你的deepseek-key"
-  # B 直连无 kimi，opus 沿用 ~/.zshrc 的默认 pro[1m]
-fi
+export TESTLINK_KEY=f01a2bcb7b4699a23a3b566a0f8a2142

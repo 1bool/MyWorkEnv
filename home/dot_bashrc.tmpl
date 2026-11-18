@@ -9,11 +9,19 @@ alias vi='vim'
 {{- if eq .chezmoi.os "windows" }}
 alias vi='vim'
 export XDG_CONFIG_HOME="$(cygpath -m "$HOME/.config" 2>/dev/null || echo "$HOME/.config")"
+# 缓存也放 MSYS home（默认会落到 %USERPROFILE%\.cache）：
+# opencode 在 C:\Users 下做插件安装的目录 rename 会 EPERM，指到 MSYS home 才正常。
+export XDG_CACHE_HOME="$(cygpath -m "$HOME/.cache" 2>/dev/null || echo "$HOME/.cache")"
 {{- if env "MSYSTEM" }}
 # MSYS 启动的 bash：claude 用 MSYS home 下的 .claude（Windows cmd 启动不读本文件，仍用 %USERPROFILE%）
 export CLAUDE_CONFIG_DIR="$(cygpath -w "$HOME/.claude" 2>/dev/null || echo "$HOME/.claude")"
 {{- end }}
 {{- end }}
+
+# ── AI 模型/后端唯一入口（放交互检查之前：非交互 bash 也要有，脚本/工具会直接用）──
+if [ -f "${XDG_CONFIG_HOME:-$HOME/.config}/shell/ai-models.sh" ]; then
+  . "${XDG_CONFIG_HOME:-$HOME/.config}/shell/ai-models.sh"
+fi
 
 # If not running interactively, don't do anything
 case $- in
@@ -148,8 +156,6 @@ nvim() {
   [ -S "$NVIM_SOCKET" ] && rm -f "$NVIM_SOCKET"
   command nvim --listen "$NVIM_SOCKET" "$@"
 }
-
-# ── AI 模型配置统一在 ~/.profile.local；密钥/后端在 ~/.bashrc.local ──
 
 # ── 本机敏感/覆盖配置（最后 source，可覆盖上面的模型等）──
 if [ -f ~/.bashrc.local ]; then

@@ -85,7 +85,7 @@ nvim() {
   command nvim --listen "$NVIM_SOCKET" "$@"
 }
 
-# ── AI 模型配置统一在 ~/.profile.local；密钥/后端在 ~/.zshrc.local ──
+# ── AI 模型单一来源：~/.config/shell/ai-models.sh（由 ~/.zshenv 加载）；密钥/后端在 ~/.zshrc.local ──
 
 # ── 本机敏感/覆盖配置（最后 source，可覆盖上面的模型等）──
 if [ -f ~/.zshrc.local ]; then

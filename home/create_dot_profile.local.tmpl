@@ -6,9 +6,5 @@
 # 留空 = 仅直连；导出 GH_PROXY_LOCK=1 可锁定此值不做探测。
 export GH_PROXY=https://gh-proxy.com/
 
-# AI 模型（统一入口：登录 shell 均从这里读取）
-export ANTHROPIC_MODEL='deepseek-v4-flash[1m]'
-export ANTHROPIC_DEFAULT_SONNET_MODEL='deepseek-v4-pro[1m]'
-export ANTHROPIC_DEFAULT_HAIKU_MODEL='deepseek-v4-flash[1m]'
-export ANTHROPIC_SMALL_FAST_MODEL='deepseek-v4-flash[1m]'
-export ANTHROPIC_DEFAULT_OPUS_MODEL='deepseek-v4-pro[1m]'
+# AI 模型统一在 ~/.config/shell/ai-models.sh（zsh/bash 全场景加载），此文件不再放模型。
+# 本机若要临时改模型，可在下面覆盖对应 ANTHROPIC_* / OP_* 变量。

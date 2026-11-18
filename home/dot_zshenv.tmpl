@@ -5,8 +5,15 @@
 # 先补上，保证下面的 cygpath 可用。
 case ":$PATH:" in *":/usr/bin:"*) ;; *) PATH="/usr/bin:$PATH" ;; esac
 export XDG_CONFIG_HOME="$(cygpath -m "$HOME/.config" 2>/dev/null || echo "$HOME/.config")"
+# 缓存也放 MSYS home（默认会落到 %USERPROFILE%\.cache）：
+# opencode 在 C:\Users 下做插件安装的目录 rename 会 EPERM，指到 MSYS home 才正常。
+export XDG_CACHE_HOME="$(cygpath -m "$HOME/.cache" 2>/dev/null || echo "$HOME/.cache")"
 {{- if env "MSYSTEM" }}
 # Claude Code 用 MSYS2 home 下的 .claude（而非 %USERPROFILE%\.claude）
 export CLAUDE_CONFIG_DIR="$(cygpath -w "$HOME/.claude" 2>/dev/null || echo "$HOME/.claude")"
 {{- end }}
 {{- end }}
+# AI 模型单一来源（zsh 任何启动方式都会加载本文件）
+if [ -f "${XDG_CONFIG_HOME:-$HOME/.config}/shell/ai-models.sh" ]; then
+    . "${XDG_CONFIG_HOME:-$HOME/.config}/shell/ai-models.sh"
+fi
