@@ -5,26 +5,10 @@ emulate sh
 emulate zsh
 {{- end }}
 
-{{- if eq .chezmoi.os "windows" }}
 # XDG_CONFIG_HOME / CLAUDE_CONFIG_DIR 由 .zshenv 统一设置（zsh 全场景加载）
-# add Windows user bin for native exes (chezmoi etc.)
-export PATH="$(cygpath -u "$USERPROFILE/.local/bin" 2>/dev/null || echo "$USERPROFILE/.local/bin"):$PATH"
-	{{- if env "MSYSTEM" }}
-	# add MSYS2 sbin for system daemons (e.g. unfsd)
-	if [ -d "${MSYSTEM_PREFIX}/sbin" ]; then
-		export PATH="${MSYSTEM_PREFIX}/sbin:$PATH"
-	fi
-	{{- end }}
-{{- end }}
-
-# set PATH to include user's private bin
-if [ -d "$HOME/bin" ] ; then
-    PATH="$HOME/bin:$PATH"
-fi
-
-# set PATH so it includes user's private bin if it exists
-if [ -d "$HOME/.local/bin" ] ; then
-    PATH="$HOME/.local/bin:$PATH"
+# PATH 的增量统一在 ~/.config/shell/path.sh；这里 /etc/profile 会重置 PATH，所以再补一次
+if [ -f "${XDG_CONFIG_HOME:-$HOME/.config}/shell/path.sh" ]; then
+    . "${XDG_CONFIG_HOME:-$HOME/.config}/shell/path.sh"
 fi
 
 EDITOR='nvim'
@@ -33,11 +17,6 @@ EDITOR='nvim'
 LANG=zh_CN.UTF-8
 export DISPLAY=:0
 {{- end }}
-
-# opencode 自带 updater 的安装目录（官方 install.sh: $HOME/.opencode/bin）
-if [ -d "$HOME/.opencode/bin" ] ; then
-    PATH="$HOME/.opencode/bin:$PATH"
-fi
 
 # load machine-specific env (bash/zsh 登录共用 ~/.profile.local)
 if [ -f "$HOME/.profile.local" ]; then

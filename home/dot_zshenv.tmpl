@@ -2,7 +2,7 @@
 # 只放基础 env，保证从任意方式启动的 claude / opencode 都指向 MSYS2 home。
 {{- if eq .chezmoi.os "windows" }}
 # zsh 启动早期 PATH 可能尚未包含 MSYS2 的 /usr/bin（如从 Windows 直接拉起），
-# 先补上，保证下面的 cygpath 可用。
+# 先补上，保证下面的 cygpath 可用；用户 PATH 增量在登录文件里做（.zprofile/.profile）
 case ":$PATH:" in *":/usr/bin:"*) ;; *) PATH="/usr/bin:$PATH" ;; esac
 export XDG_CONFIG_HOME="$(cygpath -m "$HOME/.config" 2>/dev/null || echo "$HOME/.config")"
 # 缓存也放 MSYS home（默认会落到 %USERPROFILE%\.cache）：

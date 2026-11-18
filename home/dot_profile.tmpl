@@ -8,34 +8,12 @@
 # for ssh logins, install and configure the libpam-umask package.
 #umask 022
 
-# set PATH so it includes user's private bin if it exists
-if [ -d "$HOME/bin" ] ; then
-    PATH="$HOME/bin:$PATH"
+# PATH 增量统一在 ~/.config/shell/path.sh（登录 bash；此时 /etc/profile 已执行完）
+if [ -f "${XDG_CONFIG_HOME:-$HOME/.config}/shell/path.sh" ]; then
+    . "${XDG_CONFIG_HOME:-$HOME/.config}/shell/path.sh"
 fi
-
-# set PATH so it includes user's private bin if it exists
-if [ -d "$HOME/.local/bin" ] ; then
-    PATH="$HOME/.local/bin:$PATH"
-fi
-
-# lua-language-server (LuaLS)：启动器在 lua-ls/bin，与 main.lua/meta 同目录部署
-if [ -d "$HOME/.local/bin/lua-ls/bin" ] ; then
-    PATH="$HOME/.local/bin/lua-ls/bin:$PATH"
-fi
-
 {{- if eq .chezmoi.os "windows" }}
 # XDG_CONFIG_HOME / CLAUDE_CONFIG_DIR 由 .bashrc 统一设置（bash 登录会 source 它）
-# add Windows user bin for native exes (chezmoi etc.)
-BIN="$(cygpath -u "$USERPROFILE/.local/bin" 2>/dev/null || echo "$USERPROFILE/.local/bin")"
-if [ -d "$BIN" ]; then
-    PATH="$BIN:$PATH"
-fi
-	{{- if env "MSYSTEM" }}
-	# add MSYS2 sbin for system daemons (e.g. unfsd)
-	if [ -d "${MSYSTEM_PREFIX}/sbin" ]; then
-		PATH="${MSYSTEM_PREFIX}/sbin:$PATH"
-	fi
-	{{- end }}
 {{- end }}
 
 {{- if eq .chezmoi.os "darwin" }}
@@ -59,11 +37,6 @@ if [ -n "$BASH_VERSION" ]; then
     if [ -f "$HOME/.bashrc" ]; then
         . "$HOME/.bashrc"
     fi
-fi
-
-# opencode 自带 updater 的安装目录（官方 install.sh: $HOME/.opencode/bin）
-if [ -d "$HOME/.opencode/bin" ] ; then
-    PATH="$HOME/.opencode/bin:$PATH"
 fi
 
 # load local customizations
