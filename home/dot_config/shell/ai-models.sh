@@ -15,6 +15,9 @@ AI_MODEL_PRO='deepseek-v4-pro'
 OP_PROVIDER='anthropic'
 
 # ── AI 工具运行环境 ──
+# claude 原生版的内置自动更新器走官方通道（claude.ai/GitHub 直连），本机被地区封锁 +
+# GFW 阻断，每次都 install_failed 且版本卡住；关闭它，更新统一交给 `just ai-update`（走 GH_PROXY）。
+export DISABLE_AUTOUPDATER=1
 # opencode / claude 在 Windows 上需要 bash 时，要求的是 Windows 形式路径。
 # MSYS2 的 bash 即可，但 CONFIG_SITE 恒为 /etc/config.site，截断后得到的是
 # /usr/bin/bash.exe 这种 POSIX 路径，原生 exe 解析不了 —— 必须用 cygpath 转成原生路径。
