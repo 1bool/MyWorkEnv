@@ -440,13 +440,15 @@ plugins:
     @echo "=== Plugins ==="; \
     source scripts/detect.sh; \
     if [ -n "{{ gh_proxy }}" ]; then \
-        export GIT_CONFIG_COUNT=3; \
+        export GIT_CONFIG_COUNT=4; \
         export GIT_CONFIG_KEY_0="url.{{ gh_proxy }}https://github.com/.insteadOf"; \
         export GIT_CONFIG_VALUE_0="https://github.com/"; \
         export GIT_CONFIG_KEY_1="url.{{ gh_proxy }}https://github.com/.insteadOf"; \
         export GIT_CONFIG_VALUE_1="git@github.com:"; \
         export GIT_CONFIG_KEY_2="url.{{ gh_proxy }}https://github.com/.insteadOf"; \
         export GIT_CONFIG_VALUE_2="ssh://git@github.com/"; \
+        export GIT_CONFIG_KEY_3="url.{{ gh_proxy }}https://github.com/.insteadOf"; \
+        export GIT_CONFIG_VALUE_3="https://git::@github.com/"; \
     fi; \
     if [ -f ~/.vim/autoload/plug.vim ]; then echo "  ✓ vim-plug"; \
     else ok=0; for u in "{{ gh_proxy }}https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim" "https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim"; do \
@@ -482,13 +484,15 @@ plugins-update:
     @echo "=== Update plugins ==="; \
     source scripts/detect.sh; \
     if [ -n "{{ gh_proxy }}" ]; then \
-        export GIT_CONFIG_COUNT=3; \
+        export GIT_CONFIG_COUNT=4; \
         export GIT_CONFIG_KEY_0="url.{{ gh_proxy }}https://github.com/.insteadOf"; \
         export GIT_CONFIG_VALUE_0="https://github.com/"; \
         export GIT_CONFIG_KEY_1="url.{{ gh_proxy }}https://github.com/.insteadOf"; \
         export GIT_CONFIG_VALUE_1="git@github.com:"; \
         export GIT_CONFIG_KEY_2="url.{{ gh_proxy }}https://github.com/.insteadOf"; \
         export GIT_CONFIG_VALUE_2="ssh://git@github.com/"; \
+        export GIT_CONFIG_KEY_3="url.{{ gh_proxy }}https://github.com/.insteadOf"; \
+        export GIT_CONFIG_VALUE_3="https://git::@github.com/"; \
     fi; \
     command -v vim >/dev/null 2>&1 && { if vim +PlugUpdate +qall 2>&1; then echo "  ✓ vim plugins updated"; else echo "  ✗ vim plugins update failed"; fi; }; \
     stash_dirty_nvim_plugins; \
