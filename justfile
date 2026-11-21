@@ -520,7 +520,25 @@ ai:
     fi; \
     echo "=== OpenCode ==="; \
     if command -v opencode >/dev/null 2>&1; then \
-        echo "  ✓ opencode (up to date)"; \
+        oc_major="$(opencode --version 2>/dev/null | sed -E 's/^v//' | cut -d. -f1)"; \
+        if [ "${oc_major:-0}" -ge 2 ]; then \
+            echo "  ✓ opencode (up to date)"; \
+        else \
+            echo "  → opencode ${oc_major:-1}.x 已安装，升级到 2.x..."; \
+            if is_msys2; then oc_gitbash="${CONFIG_SITE%/etc/config.site}/usr/bin/bash.exe"; else oc_gitbash=""; fi; \
+            if PATH="$(pwd)/scripts/shims:$PATH" GH_PROXY="{{ gh_proxy }}" \
+                  OPENCODE_GIT_BASH_PATH="$oc_gitbash" \
+                  timeout -k 10 600 opencode upgrade --major --method curl </dev/null 2>&1; then \
+                oc_new="$(opencode --version 2>/dev/null | sed -E 's/^v//' | cut -d. -f1)"; \
+                if [ "${oc_new:-0}" -ge 2 ]; then \
+                    echo "  ✓ opencode upgraded to 2.x"; \
+                else \
+                    echo "  ✗ opencode upgrade failed (still ${oc_new:-1}.x，退出 opencode 后重跑)"; \
+                fi; \
+            else \
+                echo "  ✗ opencode upgrade failed"; \
+            fi; \
+        fi; \
     else \
         echo "  → 安装 opencode（官方 install.sh，经 GH_PROXY）..."; \
         if curl -fsSL --connect-timeout 15 --max-time 60 https://opencode.ai/v2/install \
@@ -608,11 +626,24 @@ ai-update:
     fi; \
     echo "=== OpenCode update ==="; \
     if command -v opencode >/dev/null 2>&1; then \
-        echo "  → opencode upgrade（官方 curl 安装方式，经 GH_PROXY）..."; \
+        oc_major="$(opencode --version 2>/dev/null | sed -E 's/^v//' | cut -d. -f1)"; \
+        oc_args="--method curl"; \
+        if [ "${oc_major:-0}" -lt 2 ]; then \
+            oc_args="--major --method curl"; \
+            echo "  → opencode ${oc_major}.x → 2.x（--major，经 GH_PROXY）..."; \
+        else \
+            echo "  → opencode upgrade（官方 curl 安装方式，经 GH_PROXY）..."; \
+        fi; \
+        if is_msys2; then oc_gitbash="${CONFIG_SITE%/etc/config.site}/usr/bin/bash.exe"; else oc_gitbash=""; fi; \
         if PATH="$(pwd)/scripts/shims:$PATH" GH_PROXY="{{ gh_proxy }}" \
-              OPENCODE_GIT_BASH_PATH="${CONFIG_SITE%/etc/config.site}/usr/bin/bash.exe" \
-              timeout -k 10 600 opencode upgrade --method curl </dev/null 2>&1; then \
-            echo "  ✓ opencode updated"; \
+              OPENCODE_GIT_BASH_PATH="$oc_gitbash" \
+              timeout -k 10 600 opencode upgrade $oc_args </dev/null 2>&1; then \
+            oc_new="$(opencode --version 2>/dev/null | sed -E 's/^v//' | cut -d. -f1)"; \
+            if [ "${oc_new:-0}" -ge 2 ]; then \
+                echo "  ✓ opencode updated"; \
+            else \
+                echo "  ✗ opencode update failed (still ${oc_new:-1}.x，退出 opencode 后重跑)"; \
+            fi; \
         else \
             echo "  ✗ opencode update failed"; \
         fi; \
