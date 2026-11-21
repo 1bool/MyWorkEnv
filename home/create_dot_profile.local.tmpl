@@ -2,9 +2,9 @@
 # This file is sourced by ~/.profile (chezmoi-managed)
 # Add your own PATH additions, environment variables, etc. here
 
-# GitHub 加速镜像候选（启动时自动探测最快可用项，见 scripts/proxy.sh）。
-# 留空 = 仅直连；导出 GH_PROXY_LOCK=1 可锁定此值不做探测。
-export GH_PROXY=https://gh-proxy.com/
+# GitHub 加速代理：scripts/proxy.sh 自动探测最快可用项。
+# 默认候选已含 gh-proxy.com / ghproxy.net / ghfast.top；此处 GH_PROXY 仅作额外候选。
+# 要锁定不探测：export GH_PROXY=https://... 且 export GH_PROXY_LOCK=1
 
 # AI 模型统一在 ~/.config/shell/ai-models.sh（zsh/bash 全场景加载），此文件不再放模型。
 # 本机若要临时改模型，可在下面覆盖对应 ANTHROPIC_* / OP_* 变量。
