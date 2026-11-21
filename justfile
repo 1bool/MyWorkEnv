@@ -415,6 +415,25 @@ clean:
             rm -f "$W/chezmoi.exe" "$W/chezmoi" 2>/dev/null || true; \
             echo "  ✓ 清理 USERPROFILE 下的旧 chezmoi"; \
         fi; \
+        if { [ -e "$W/claude.exe" ] || [ -e "$W/claude" ]; } && { [ -x "$HOME/.local/bin/claude.exe" ] || [ -x "$HOME/.local/bin/claude" ]; }; then \
+            rm -f "$W/claude.exe" "$W/claude" 2>/dev/null || true; \
+            if [ -e "$W/claude.exe" ] || [ -e "$W/claude" ]; then \
+                echo "  ! 旧 claude 仍被占用，退出 claude 后重跑 clean"; \
+            else \
+                echo "  ✓ 清理 USERPROFILE 下的旧 claude"; \
+            fi; \
+        fi; \
+        if [ -e "$W/win32yank.exe" ]; then \
+            mkdir -p "$HOME/.local/bin"; \
+            if [ -x "$HOME/.local/bin/win32yank.exe" ]; then \
+                rm -f "$W/win32yank.exe" 2>/dev/null || true; \
+                echo "  ✓ 清理 USERPROFILE 下的旧 win32yank"; \
+            else \
+                cp -f "$W/win32yank.exe" "$HOME/.local/bin/" && rm -f "$W/win32yank.exe" 2>/dev/null || true; \
+                chmod +x "$HOME/.local/bin/win32yank.exe" 2>/dev/null || true; \
+                echo "  ✓ win32yank 迁移到 ~/.local/bin"; \
+            fi; \
+        fi; \
     fi; \
     echo "=== Clean complete ==="
 plugins:
@@ -449,9 +468,9 @@ plugins:
     command -v win32yank >/dev/null 2>&1 || { \
         uname -s | grep -qiE 'mingw|msys|cygwin' && { \
             echo "  installing win32yank (nvim clipboard)..."; \
-            mkdir -p "$USERPROFILE/.local/bin"; T=$(mktemp -d); \
+            mkdir -p "$HOME/.local/bin"; T=$(mktemp -d); \
             curl -fL --connect-timeout 30 "{{ gh_proxy }}https://github.com/equalsraf/win32yank/releases/latest/download/win32yank-x64.zip" -o "$T/w.zip" && \
-            unzip -qo "$T/w.zip" -d "$T" && cp -f "$T/win32yank.exe" "$USERPROFILE/.local/bin/" && chmod +x "$USERPROFILE/.local/bin/win32yank.exe" && echo "  ✓ win32yank" || echo "  ✗ win32yank download failed"; \
+            unzip -qo "$T/w.zip" -d "$T" && cp -f "$T/win32yank.exe" "$HOME/.local/bin/" && chmod +x "$HOME/.local/bin/win32yank.exe" && echo "  ✓ win32yank" || echo "  ✗ win32yank download failed"; \
             rm -rf "$T"; \
         }; }; \
     stash_dirty_nvim_plugins; \

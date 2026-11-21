@@ -16,8 +16,7 @@ if is_msys2; then
     # 与 dot_zshenv/.bashrc 保持一致：claude 也用 MSYS home 下的 .claude，
     # 否则首次安装时插件会装到 %USERPROFILE%\.claude，dotfiles 生效后看不到。
     export CLAUDE_CONFIG_DIR="$(cygpath -w "$HOME/.claude" 2>/dev/null || echo "$HOME/.claude")"
-    # native Windows exes (chezmoi, etc.) live in USERPROFILE, needs Unix path
-    export PATH="$(cygpath -u "$USERPROFILE/.local/bin" 2>/dev/null || echo "$USERPROFILE/.local/bin"):$PATH"
+    # 不把 %USERPROFILE%\.local\bin 加入 PATH；工具统一装到 MSYS $HOME。
     # 配置国内镜像，避免下面装 just 时 pacman 走原始 repo.msys2.org
     setup_msys2_mirror
 fi

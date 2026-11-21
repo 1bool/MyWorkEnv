@@ -16,6 +16,9 @@ _path_add() {
     esac
 }
 
+# 注意：不把 %USERPROFILE%\.local\bin 加入 PATH。
+# claude/chezmoi/opencode/win32yank 等统一装到 MSYS $HOME，避免旧副本抢先。
+
 # MSYS2 自带命令（zsh 从 Windows 直接拉起时 PATH 可能没有 /usr/bin）
 _path_add /usr/bin
 
@@ -32,21 +35,6 @@ _path_add "$HOME/mc-studio/bin"
 # MSYS2 系统守护进程（unfsd 等）
 if [ -n "${MSYSTEM_PREFIX:-}" ] && [ -d "${MSYSTEM_PREFIX}/sbin" ]; then
     _path_add "${MSYSTEM_PREFIX}/sbin"
-fi
-
-# 原生 Windows 可执行文件（chezmoi 等）
-# 纯 shell 转换 C:\Users\x → /C/Users/x：不 spawn 进程（cygpath/tr 各约 0.2s），
-# MSYS 对盘符大小写不敏感，故无需转小写。
-if [ -n "${USERPROFILE:-}" ]; then
-    case "$USERPROFILE" in
-        [A-Za-z]:[\\/]*)
-            _wrest=${USERPROFILE#?:}
-            _wrest=${_wrest//\\//}
-            _winuser="/${USERPROFILE%%:*}${_wrest}/.local/bin"
-            [ -d "$_winuser" ] && _path_add "$_winuser"
-            unset _wrest _winuser
-            ;;
-    esac
 fi
 
 export PATH
