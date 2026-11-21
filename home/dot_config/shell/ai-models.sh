@@ -15,11 +15,16 @@ AI_MODEL_PRO='deepseek-v4-pro'
 OP_PROVIDER='anthropic'
 
 # ── AI 工具运行环境 ──
-# opencode 的官方升级脚本（opencode upgrade --method curl）要求 Git Bash；
-# MSYS2 的 bash 即可，用 CONFIG_SITE 推出安装根目录。
-if [ -n "${CONFIG_SITE:-}" ] && [ -z "${OPENCODE_GIT_BASH_PATH:-}" ]; then
-    OPENCODE_GIT_BASH_PATH="${CONFIG_SITE%/etc/config.site}/usr/bin/bash.exe"
-    export OPENCODE_GIT_BASH_PATH
+# opencode / claude 在 Windows 上需要 bash 时，要求的是 Windows 形式路径。
+# MSYS2 的 bash 即可，但 CONFIG_SITE 恒为 /etc/config.site，截断后得到的是
+# /usr/bin/bash.exe 这种 POSIX 路径，原生 exe 解析不了 —— 必须用 cygpath 转成原生路径。
+if [ -z "${OPENCODE_GIT_BASH_PATH:-}" ] && command -v cygpath >/dev/null 2>&1; then
+    _oc_bash="$(cygpath -m /usr/bin/bash.exe 2>/dev/null || true)"
+    if [ -n "$_oc_bash" ]; then
+        OPENCODE_GIT_BASH_PATH="$_oc_bash"
+        export OPENCODE_GIT_BASH_PATH
+    fi
+    unset _oc_bash
 fi
 
 # ── 应用后端档案（档案来自 ai-backend.sh）─────────────────────────────────

@@ -538,31 +538,19 @@ ai:
         fi; \
     fi; \
     echo "=== OpenCode ==="; \
+    oc_latest="$(curl -fsSL --connect-timeout 10 --max-time 20 https://opencode.ai/update/api/latest/cli/npm 2>/dev/null | sed -n 's/.*"version":"\([^"]*\)".*/\1/p')"; \
+    oc_have=""; \
     if command -v opencode >/dev/null 2>&1; then \
-        oc_major="$(opencode --version 2>/dev/null | sed -E 's/^v//' | cut -d. -f1)"; \
-        if [ "${oc_major:-0}" -ge 2 ]; then \
-            echo "  ✓ opencode (up to date)"; \
-        else \
-            echo "  → opencode ${oc_major:-1}.x 已安装，升级到 2.x..."; \
-            if is_msys2; then oc_gitbash="${CONFIG_SITE%/etc/config.site}/usr/bin/bash.exe"; else oc_gitbash=""; fi; \
-            if PATH="$(pwd)/scripts/shims:$PATH" GH_PROXY="{{ gh_proxy }}" \
-                  OPENCODE_GIT_BASH_PATH="$oc_gitbash" \
-                  timeout -k 10 600 opencode upgrade --major --method curl </dev/null 2>&1; then \
-                oc_new="$(opencode --version 2>/dev/null | sed -E 's/^v//' | cut -d. -f1)"; \
-                if [ "${oc_new:-0}" -ge 2 ]; then \
-                    echo "  ✓ opencode upgraded to 2.x"; \
-                else \
-                    echo "  ✗ opencode upgrade failed (still ${oc_new:-1}.x，退出 opencode 后重跑)"; \
-                fi; \
-            else \
-                echo "  ✗ opencode upgrade failed"; \
-            fi; \
-        fi; \
+        oc_have="$(opencode --version 2>/dev/null | sed -E 's/^[^0-9]*//')"; \
+    fi; \
+    if [ -n "$oc_have" ] && { [ -z "$oc_latest" ] || [ "$oc_have" = "$oc_latest" ]; }; then \
+        echo "  ✓ opencode ${oc_have} (up to date)"; \
     else \
-        echo "  → 安装 opencode（官方 install.sh，经 GH_PROXY）..."; \
+        echo "  → opencode ${oc_have:-未安装} → ${oc_latest:-latest}（官方 install.sh，经 GH_PROXY）..."; \
         if curl -fsSL --connect-timeout 15 --max-time 60 https://opencode.ai/v2/install \
               | PATH="$(pwd)/scripts/shims:$PATH" GH_PROXY="{{ gh_proxy }}" bash -s -- --no-modify-path; then \
-            echo "  ✓ opencode installed"; \
+            oc_new="$(opencode --version 2>/dev/null | sed -E 's/^[^0-9]*//')"; \
+            echo "  ✓ opencode ${oc_new:-installed}"; \
         else \
             echo "  ✗ opencode install failed (opencode.ai / GH_PROXY unreachable)"; \
         fi; \
@@ -644,30 +632,24 @@ ai-update:
         echo "  claude not installed — run 'just ai'"; \
     fi; \
     echo "=== OpenCode update ==="; \
+    oc_latest="$(curl -fsSL --connect-timeout 10 --max-time 20 https://opencode.ai/update/api/latest/cli/npm 2>/dev/null | sed -n 's/.*"version":"\([^"]*\)".*/\1/p')"; \
+    oc_have=""; \
     if command -v opencode >/dev/null 2>&1; then \
-        oc_major="$(opencode --version 2>/dev/null | sed -E 's/^v//' | cut -d. -f1)"; \
-        oc_args="--method curl"; \
-        if [ "${oc_major:-0}" -lt 2 ]; then \
-            oc_args="--major --method curl"; \
-            echo "  → opencode ${oc_major}.x → 2.x（--major，经 GH_PROXY）..."; \
-        else \
-            echo "  → opencode upgrade（官方 curl 安装方式，经 GH_PROXY）..."; \
-        fi; \
-        if is_msys2; then oc_gitbash="${CONFIG_SITE%/etc/config.site}/usr/bin/bash.exe"; else oc_gitbash=""; fi; \
-        if PATH="$(pwd)/scripts/shims:$PATH" GH_PROXY="{{ gh_proxy }}" \
-              OPENCODE_GIT_BASH_PATH="$oc_gitbash" \
-              timeout -k 10 600 opencode upgrade $oc_args </dev/null 2>&1; then \
-            oc_new="$(opencode --version 2>/dev/null | sed -E 's/^v//' | cut -d. -f1)"; \
-            if [ "${oc_new:-0}" -ge 2 ]; then \
-                echo "  ✓ opencode updated"; \
-            else \
-                echo "  ✗ opencode update failed (still ${oc_new:-1}.x，退出 opencode 后重跑)"; \
-            fi; \
-        else \
-            echo "  ✗ opencode update failed"; \
-        fi; \
-    else \
+        oc_have="$(opencode --version 2>/dev/null | sed -E 's/^[^0-9]*//')"; \
+    fi; \
+    if [ -n "$oc_have" ] && { [ -z "$oc_latest" ] || [ "$oc_have" = "$oc_latest" ]; }; then \
+        echo "  ✓ opencode ${oc_have} (up to date)"; \
+    elif [ -z "$oc_have" ]; then \
         echo "  opencode not installed — run 'just ai'"; \
+    else \
+        echo "  → opencode ${oc_have} → ${oc_latest:-latest}（官方 install.sh，经 GH_PROXY）..."; \
+        if curl -fsSL --connect-timeout 15 --max-time 60 https://opencode.ai/v2/install \
+              | PATH="$(pwd)/scripts/shims:$PATH" GH_PROXY="{{ gh_proxy }}" bash -s -- --no-modify-path; then \
+            oc_new="$(opencode --version 2>/dev/null | sed -E 's/^[^0-9]*//')"; \
+            echo "  ✓ opencode ${oc_new:-updated}"; \
+        else \
+            echo "  ✗ opencode update failed (opencode.ai / GH_PROXY unreachable)"; \
+        fi; \
     fi; \
     echo "=== Plannotator update ==="; \
     if command -v plannotator >/dev/null 2>&1; then \
