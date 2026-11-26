@@ -198,7 +198,8 @@ dotfiles:
     mkdir -p "$CONF/chezmoi"; \
     if is_wsl; then WSL=true; else WSL=false; fi; \
     printf 'sourceDir = "%s/home"\n[data]\n  isWSL = %s\n[interpreters.sh]\n  command = "bash"\n[interpreters.bash]\n  command = "bash"\n' "$SRC" "$WSL" > "$CONF/chezmoi/chezmoi.toml"; \
-    chezmoi apply --interactive=false
+    chezmoi apply --interactive=false; \
+    if is_msys2; then bash scripts/win-env.sh; fi
 
 dotfiles-update:
     @echo "=== Update dotfiles ==="; \
